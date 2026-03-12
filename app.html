@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriftWatch — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--bg:#0a0f1a;--bg2:#111827;--bg3:#1f2937;--text:#f1f5f9;--muted:#6b7280;--accent:#6366f1;--green:#22c55e;--yellow:#f59e0b;--red:#ef4444;--orange:#f97316}
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+        /* Auth */
+        #auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+        .auth-card{background:var(--bg2);border:1px solid rgba(255,255,255,.08);border-radius:.75rem;padding:2.5rem;width:100%;max-width:400px}
+        .auth-logo{font-weight:700;font-size:1.3rem;color:var(--accent);margin-bottom:.5rem}
+        .auth-sub{color:var(--muted);font-size:.9rem;margin-bottom:2rem}
+        .form-group{margin-bottom:1.25rem}
+        label{display:block;font-size:.875rem;font-weight:500;color:#d1d5db;margin-bottom:.4rem}
+        input{width:100%;background:var(--bg3);border:1px solid rgba(255,255,255,.1);border-radius:.375rem;padding:.75rem 1rem;color:var(--text);font-size:.95rem;outline:none;transition:border-color .2s}
+        input:focus{border-color:var(--accent)}
+        .btn{padding:.8rem 1.5rem;border:none;border-radius:.5rem;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;width:100%;margin-top:.5rem}
+        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white}
+        .btn-primary:hover{opacity:.9}
+        .btn-sm{width:auto;padding:.5rem 1rem;font-size:.875rem}
+        .btn-outline{background:transparent;border:1px solid rgba(255,255,255,.15);color:#d1d5db}
+        .btn-outline:hover{background:rgba(255,255,255,.05)}
+        .btn-danger{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+        .toggle-auth{text-align:center;margin-top:1.25rem;color:var(--muted);font-size:.875rem}
+        .toggle-auth a{color:var(--accent);cursor:pointer}
+        /* App */
+        #app-screen{display:none}
+        header{background:var(--bg2);border-bottom:1px solid rgba(255,255,255,.07);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+        .logo{font-weight:700;font-size:1.1rem;color:var(--accent)}
+        .user-info{display:flex;align-items:center;gap:1rem;font-size:.875rem}
+        .plan-badge{padding:.2rem .6rem;background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;border-radius:9999px;font-size:.75rem;font-weight:600;text-transform:uppercase}
+        .main{padding:1.5rem;max-width:1200px;margin:0 auto}
+        /* Upgrade banner */
+        #upgrade-banner{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(79,70,229,.1));border:1px solid rgba(99,102,241,.3);border-radius:.75rem;padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+        #upgrade-banner h3{font-size:1rem;margin-bottom:.25rem}
+        #upgrade-banner p{color:var(--muted);font-size:.875rem}
+        /* Stats */
+        .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+        .stat{background:var(--bg2);border:1px solid rgba(255,255,255,.07);border-radius:.5rem;padding:1.25rem}
+        .stat-val{font-size:1.75rem;font-weight:700}
+        .stat-label{color:var(--muted);font-size:.8rem;margin-top:.2rem}
+        .green{color:var(--green)}.yellow{color:var(--yellow)}.red{color:var(--red)}.accent{color:var(--accent)}
+        /* Sections */
+        .section{background:var(--bg2);border:1px solid rgba(255,255,255,.07);border-radius:.5rem;margin-bottom:1.5rem}
+        .section-header{padding:1rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center}
+        .section-title{font-weight:600;font-size:.95rem}
+        .section-body{padding:1.25rem}
+        /* Prompts */
+        .prompt-row{display:grid;grid-template-columns:80px 1fr auto auto;gap:1rem;padding:.75rem;border-bottom:1px solid rgba(255,255,255,.05);align-items:center;font-size:.875rem}
+        .prompt-row:last-child{border-bottom:none}
+        .cat-badge{padding:.15rem .5rem;border-radius:9999px;font-size:.7rem;background:rgba(99,102,241,.15);color:#a5b4fc}
+        .prompt-form{display:grid;gap:.75rem;max-width:600px}
+        .prompt-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+        textarea{width:100%;background:var(--bg3);border:1px solid rgba(255,255,255,.1);border-radius:.375rem;padding:.75rem;color:var(--text);font-size:.875rem;resize:vertical;min-height:80px;font-family:'Inter',sans-serif;outline:none}
+        textarea:focus{border-color:var(--accent)}
+        select{width:100%;background:var(--bg3);border:1px solid rgba(255,255,255,.1);border-radius:.375rem;padding:.75rem;color:var(--text);font-size:.875rem;outline:none}
+        /* Results */
+        .result-row{display:grid;grid-template-columns:130px 1fr 90px 90px 80px;gap:1rem;padding:.75rem;border-bottom:1px solid rgba(255,255,255,.05);align-items:center;font-size:.875rem}
+        .result-row:last-child{border-bottom:none}
+        .level-badge{padding:.2rem .5rem;border-radius:9999px;font-size:.7rem;font-weight:600}
+        .level-none{background:rgba(34,197,94,.15);color:#86efac}
+        .level-low{background:rgba(99,102,241,.15);color:#a5b4fc}
+        .level-medium{background:rgba(245,158,11,.2);color:#fcd34d}
+        .level-high{background:rgba(249,115,22,.2);color:#fdba74}
+        .level-critical{background:rgba(239,68,68,.2);color:#fca5a5}
+        .mono{font-family:'JetBrains Mono',monospace}
+        .drift-bar{height:6px;background:var(--bg3);border-radius:9999px;overflow:hidden;margin-top:3px;width:80px}
+        .drift-fill{height:100%;border-radius:9999px}
+        /* Empty states */
+        .empty{text-align:center;padding:2.5rem;color:var(--muted)}
+        .empty-icon{font-size:2rem;margin-bottom:.75rem}
+        /* Loading */
+        .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(99,102,241,.3);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        /* Alerts */
+        .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg3);border:1px solid rgba(255,255,255,.1);border-radius:.5rem;padding:.75rem 1.25rem;font-size:.875rem;z-index:999;animation:slideIn .2s;max-width:300px}
+        .toast.success{border-color:rgba(34,197,94,.3);color:#86efac}
+        .toast.error{border-color:rgba(239,68,68,.3);color:#fca5a5}
+        @keyframes slideIn{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+        @media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr)}.result-row{grid-template-columns:1fr auto}}
+    </style>
+</head>
+<body>
+
+<!-- Auth screen -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">⬡ DriftWatch</div>
+    <div class="auth-sub" id="auth-subtitle">Sign in to your monitoring dashboard</div>
+
+    <div id="auth-form">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="auth-email" placeholder="you@company.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary" onclick="handleAuth()">
+        <span id="auth-btn-text">Sign In</span>
+      </button>
+      <p class="toggle-auth" id="auth-toggle">
+        No account? <a onclick="toggleAuthMode()">Create one free</a>
+      </p>
+    </div>
+
+    <div id="auth-error" style="color:#fca5a5;font-size:.8rem;margin-top:1rem;display:none"></div>
+  </div>
+</div>
+
+<!-- App screen -->
+<div id="app-screen">
+  <header>
+    <div class="logo">⬡ DriftWatch</div>
+    <div class="user-info">
+      <span id="user-email-display" style="color:var(--muted)"></span>
+      <span class="plan-badge" id="plan-badge-display">free</span>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Sign out</button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- Upgrade banner (shown when free plan) -->
+    <div id="upgrade-banner" style="display:none">
+      <div>
+        <h3>Activate monitoring — £99/month</h3>
+        <p>Subscribe to add prompts and start hourly drift detection.</p>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="startCheckout('starter')" style="width:auto">
+        Subscribe now →
+      </button>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-val accent" id="stat-prompts">—</div>
+        <div class="stat-label">Active prompts</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="stat-avg-drift">—</div>
+        <div class="stat-label">Avg drift (last run)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="stat-max-drift">—</div>
+        <div class="stat-label">Peak drift</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="stat-alerts">—</div>
+        <div class="stat-label">Open alerts</div>
+      </div>
+    </div>
+
+    <!-- Prompts section -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Test Prompts</div>
+        <button class="btn btn-outline btn-sm" onclick="toggleAddPrompt()" id="add-prompt-btn">+ Add prompt</button>
+      </div>
+      <div class="section-body">
+        <!-- Add form (hidden by default) -->
+        <div id="add-prompt-form" style="display:none;margin-bottom:1.5rem">
+          <div class="prompt-form">
+            <div class="prompt-form-grid">
+              <div>
+                <label>Prompt ID</label>
+                <input id="new-prompt-id" placeholder="json-01" style="width:100%">
+              </div>
+              <div>
+                <label>Name</label>
+                <input id="new-prompt-name" placeholder="JSON extraction test" style="width:100%">
+              </div>
+            </div>
+            <div class="prompt-form-grid">
+              <div>
+                <label>Category</label>
+                <select id="new-prompt-cat" style="width:100%">
+                  <option value="format">JSON / Format</option>
+                  <option value="instruction">Instruction Following</option>
+                  <option value="code">Code Generation</option>
+                  <option value="classification">Classification</option>
+                  <option value="safety">Safety / Refusal</option>
+                  <option value="verbosity">Verbosity / Tone</option>
+                  <option value="extraction">Data Extraction</option>
+                </select>
+              </div>
+              <div>
+                <label>Validators (comma-separated)</label>
+                <input id="new-prompt-validators" placeholder="is_valid_json,has_keys:name,email" style="width:100%">
+              </div>
+            </div>
+            <div>
+              <label>Prompt text</label>
+              <textarea id="new-prompt-text" placeholder="Extract the following fields and return ONLY valid JSON..."></textarea>
+            </div>
+            <div style="display:flex;gap:.75rem">
+              <button class="btn btn-primary btn-sm" onclick="addPrompt()">Save prompt</button>
+              <button class="btn btn-outline btn-sm" onclick="toggleAddPrompt()">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prompt list -->
+        <div id="prompts-list"><div class="empty"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- Monitoring section -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Drift Results</div>
+        <div style="display:flex;gap:.5rem">
+          <button class="btn btn-outline btn-sm" onclick="runBaseline()">Set baseline</button>
+          <button class="btn btn-primary btn-sm" onclick="runCheck()">Run check now</button>
+        </div>
+      </div>
+      <div class="section-body">
+        <div id="results-list"><div class="empty"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- API access -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">API Access</div>
+      </div>
+      <div class="section-body">
+        <p style="color:var(--muted);font-size:.875rem;margin-bottom:1rem">Your API key for programmatic access:</p>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.85rem;background:var(--bg3);padding:1rem;border-radius:.375rem;display:flex;justify-content:space-between;align-items:center">
+          <span id="api-key-display" style="color:#a5b4fc">—</span>
+          <button class="btn btn-outline btn-sm" onclick="copyApiKey()">Copy</button>
+        </div>
+        <p style="color:var(--muted);font-size:.8rem;margin-top:.75rem">
+          Use: <code style="background:var(--bg3);padding:.1rem .4rem;border-radius:.25rem">Authorization: Bearer &lt;token&gt;</code>
+          or <code style="background:var(--bg3);padding:.1rem .4rem;border-radius:.25rem">X-API-Key: &lt;api_key&gt;</code>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+const API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:8000'
+    : (window._DRIFTWATCH_API_URL || 'https://driftwatch-api.up.railway.app');
+
+let authToken = localStorage.getItem('dw_token');
+let isRegisterMode = false;
+let currentUser = null;
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+window.onload = async () => {
+    if (authToken) {
+        try {
+            await loadApp();
+        } catch {
+            logout();
+        }
+    }
+};
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+function toggleAuthMode() {
+    isRegisterMode = !isRegisterMode;
+    document.getElementById('auth-btn-text').textContent = isRegisterMode ? 'Create Account' : 'Sign In';
+    document.getElementById('auth-subtitle').textContent = isRegisterMode
+        ? 'Create your DriftWatch account (free)'
+        : 'Sign in to your monitoring dashboard';
+    document.getElementById('auth-toggle').innerHTML = isRegisterMode
+        ? 'Already have an account? <a onclick="toggleAuthMode()">Sign in</a>'
+        : 'No account? <a onclick="toggleAuthMode()">Create one free</a>';
+    document.getElementById('auth-error').style.display = 'none';
+}
+
+async function handleAuth() {
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
+    const errEl = document.getElementById('auth-error');
+    errEl.style.display = 'none';
+
+    if (!email || !password) { showAuthError('Email and password required'); return; }
+
+    const endpoint = isRegisterMode ? '/auth/register' : '/auth/login';
+    const btn = document.getElementById('auth-btn-text');
+    btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite"></span>';
+
+    try {
+        const res = await fetch(API_URL + endpoint, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email, password})
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Auth failed');
+        authToken = data.access_token;
+        localStorage.setItem('dw_token', authToken);
+        await loadApp();
+    } catch(e) {
+        showAuthError(e.message);
+    } finally {
+        btn.textContent = isRegisterMode ? 'Create Account' : 'Sign In';
+    }
+}
+
+function showAuthError(msg) {
+    const el = document.getElementById('auth-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+
+function logout() {
+    localStorage.removeItem('dw_token');
+    authToken = null;
+    currentUser = null;
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('app-screen').style.display = 'none';
+}
+
+// ── App Load ──────────────────────────────────────────────────────────────────
+async function loadApp() {
+    const status = await api('/status');
+    currentUser = status;
+
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
+    document.getElementById('user-email-display').textContent = status.email;
+    document.getElementById('plan-badge-display').textContent = status.plan;
+    document.getElementById('api-key-display').textContent = status.api_key || '—';
+
+    // Show upgrade banner if free plan
+    if (status.plan === 'free') {
+        document.getElementById('upgrade-banner').style.display = 'flex';
+    }
+
+    // Load data
+    await Promise.all([loadPrompts(), loadResults()]);
+}
+
+// ── API Helper ────────────────────────────────────────────────────────────────
+async function api(path, options = {}) {
+    const res = await fetch(API_URL + path, {
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`,
+            ...(options.headers || {})
+        }
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({detail: res.statusText}));
+        throw new Error(err.detail || `HTTP ${res.status}`);
+    }
+    return res.json();
+}
+
+// ── Prompts ───────────────────────────────────────────────────────────────────
+async function loadPrompts() {
+    const el = document.getElementById('prompts-list');
+    try {
+        const prompts = await api('/prompts');
+        document.getElementById('stat-prompts').textContent = prompts.length;
+
+        if (!prompts.length) {
+            el.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div>No test prompts yet. Add your first prompt above.</div>`;
+            return;
+        }
+        el.innerHTML = prompts.map(p => `
+            <div class="prompt-row">
+                <span class="cat-badge">${p.category}</span>
+                <div>
+                    <div style="font-weight:500">${p.name}</div>
+                    <div style="color:var(--muted);font-size:.8rem;margin-top:.2rem">${p.prompt_id}</div>
+                </div>
+                <div style="color:var(--muted);font-size:.8rem">${(p.validators||[]).length} validators</div>
+                <button class="btn btn-danger btn-sm" onclick="deletePrompt('${p.id}')">Remove</button>
+            </div>
+        `).join('');
+    } catch(e) {
+        el.innerHTML = `<div class="empty" style="color:var(--red)">${e.message}</div>`;
+    }
+}
+
+function toggleAddPrompt() {
+    const form = document.getElementById('add-prompt-form');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function addPrompt() {
+    const body = {
+        prompt_id: document.getElementById('new-prompt-id').value.trim(),
+        name: document.getElementById('new-prompt-name').value.trim(),
+        category: document.getElementById('new-prompt-cat').value,
+        prompt_text: document.getElementById('new-prompt-text').value.trim(),
+        validators: document.getElementById('new-prompt-validators').value.split(',').map(s => s.trim()).filter(Boolean)
+    };
+    if (!body.prompt_id || !body.name || !body.prompt_text) {
+        toast('Fill in prompt ID, name, and text', 'error'); return;
+    }
+    try {
+        await api('/prompts', {method:'POST', body: JSON.stringify(body)});
+        toast('Prompt added!', 'success');
+        toggleAddPrompt();
+        await loadPrompts();
+    } catch(e) {
+        toast(e.message, 'error');
+    }
+}
+
+async function deletePrompt(id) {
+    if (!confirm('Remove this prompt?')) return;
+    try {
+        await api(`/prompts/${id}`, {method:'DELETE'});
+        toast('Prompt removed', 'success');
+        await loadPrompts();
+    } catch(e) {
+        toast(e.message, 'error');
+    }
+}
+
+// ── Results ───────────────────────────────────────────────────────────────────
+async function loadResults() {
+    const el = document.getElementById('results-list');
+    try {
+        const runs = await api('/results');
+
+        if (!runs.length) {
+            el.innerHTML = `<div class="empty"><div class="empty-icon">📊</div>No drift checks yet. Set a baseline then run a check.</div>`;
+            document.getElementById('stat-avg-drift').textContent = '—';
+            document.getElementById('stat-max-drift').textContent = '—';
+            document.getElementById('stat-alerts').textContent = '0';
+            return;
+        }
+
+        const last = runs[0];
+        const avgDrift = last.avg_drift || 0;
+        const maxDrift = last.max_drift || 0;
+        const totalAlerts = runs.slice(0,5).reduce((s, r) => s + (r.alert_count||0), 0);
+
+        const avgEl = document.getElementById('stat-avg-drift');
+        avgEl.textContent = avgDrift.toFixed(3);
+        avgEl.className = 'stat-val ' + (avgDrift >= 0.3 ? 'red' : avgDrift >= 0.1 ? 'yellow' : 'green');
+        const maxEl = document.getElementById('stat-max-drift');
+        maxEl.textContent = maxDrift.toFixed(3);
+        maxEl.className = 'stat-val ' + (maxDrift >= 0.6 ? 'red' : maxDrift >= 0.3 ? 'yellow' : 'green');
+        const alertEl = document.getElementById('stat-alerts');
+        alertEl.textContent = totalAlerts;
+        alertEl.className = 'stat-val ' + (totalAlerts > 0 ? 'red' : 'green');
+
+        el.innerHTML = runs.slice(0,10).map(run => `
+            <div style="margin-bottom:1rem">
+                <div style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">
+                    ${new Date(run.run_at).toLocaleString()} — avg: ${(run.avg_drift||0).toFixed(3)} | max: ${(run.max_drift||0).toFixed(3)} | alerts: ${run.alert_count||0}
+                </div>
+                ${(run.results||[]).map(r => `
+                    <div class="result-row">
+                        <span class="level-badge level-${r.alert_level}">${(r.alert_level||'none').toUpperCase()}</span>
+                        <div>
+                            <div style="font-weight:500;font-size:.875rem">${r.prompt_id}</div>
+                            ${r.regressions&&r.regressions.length ? `<div style="color:var(--red);font-size:.75rem">⚠ ${r.regressions.join(', ')}</div>` : ''}
+                        </div>
+                        <div>
+                            <div class="mono" style="font-size:.875rem;color:${r.drift_score>=0.6?'var(--red)':r.drift_score>=0.3?'var(--yellow)':'var(--green)'}">${(r.drift_score||0).toFixed(3)}</div>
+                            <div class="drift-bar"><div class="drift-fill" style="width:${Math.round((r.drift_score||0)*100)}%;background:${r.drift_score>=0.6?'var(--red)':r.drift_score>=0.3?'var(--yellow)':'var(--green)'}"></div></div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `).join('<hr style="border-color:rgba(255,255,255,.05);margin:1rem 0">');
+
+    } catch(e) {
+        el.innerHTML = `<div class="empty" style="color:var(--red)">${e.message}</div>`;
+    }
+}
+
+// ── Monitoring Actions ────────────────────────────────────────────────────────
+async function runBaseline() {
+    try {
+        const result = await api('/baselines/run', {method:'POST'});
+        toast(`Baseline set for ${result.baselines_created} prompts`, 'success');
+    } catch(e) {
+        toast(e.message, 'error');
+    }
+}
+
+async function runCheck() {
+    const btn = event.target;
+    btn.textContent = 'Running...';
+    btn.disabled = true;
+    try {
+        const result = await api('/monitor/run', {method:'POST'});
+        toast(`Check complete. Avg drift: ${(result.avg_drift||0).toFixed(3)}`, 'success');
+        await loadResults();
+    } catch(e) {
+        toast(e.message, 'error');
+    } finally {
+        btn.textContent = 'Run check now';
+        btn.disabled = false;
+    }
+}
+
+// ── Billing ───────────────────────────────────────────────────────────────────
+async function startCheckout(plan) {
+    try {
+        const result = await api('/billing/checkout', {
+            method: 'POST',
+            body: JSON.stringify({plan})
+        });
+        window.location.href = result.checkout_url;
+    } catch(e) {
+        toast(e.message, 'error');
+    }
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function copyApiKey() {
+    const key = document.getElementById('api-key-display').textContent;
+    navigator.clipboard.writeText(key).then(() => toast('API key copied!', 'success'));
+}
+
+let toastTimer;
+function toast(msg, type = 'success') {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    clearTimeout(toastTimer);
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.textContent = msg;
+    document.body.appendChild(el);
+    toastTimer = setTimeout(() => el.remove(), 3500);
+}
+</script>
+</body>
+</html>

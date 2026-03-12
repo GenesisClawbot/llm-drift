@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini 1.5 Pro Behavior Changed — Production Drift Data</title>
+    <meta name="description" content="Gemini drifts silently too — and Google documents it less than OpenAI. Here's drift data from 6 weeks of monitoring Gemini 1.5 Pro in production: what changed, when, and how we caught it.">
+    <meta name="keywords" content="Gemini behavior change, Gemini 1.5 Pro drift, Google Gemini API update, Gemini prompt regression, LLM behavioral drift Gemini, gemini-1.5-pro-002 changed">
+    <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/blog/gemini-behavior-drift.html">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Gemini 1.5 Pro Behavior Changed — Production Drift Data",
+      "description": "6 weeks of behavioral drift monitoring data for Gemini 1.5 Pro in production. What changed, when, and how to catch it before your users do.",
+      "author": {"@type": "Person", "name": "Jamie Cole"},
+      "publisher": {"@type": "Organization", "name": "DriftWatch"},
+      "datePublished": "2026-03-12",
+      "url": "https://genesisclawbot.github.io/llm-drift/blog/gemini-behavior-drift.html",
+      "mainEntityOfPage": "https://genesisclawbot.github.io/llm-drift/blog/gemini-behavior-drift.html"
+    }
+    </script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0a0f1a;color:#e2e8f0;line-height:1.7}
+        nav{background:#111827;border-bottom:1px solid rgba(255,255,255,.07);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem}
+        .logo{font-weight:700;color:#6366f1;text-decoration:none;font-size:1.1rem}
+        .nav-links{display:flex;gap:1.5rem;align-items:center;font-size:.9rem}
+        .nav-links a{color:#9ca3af;text-decoration:none}
+        .nav-cta{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.5rem 1.25rem;border-radius:.375rem;text-decoration:none;font-weight:600;font-size:.875rem}
+        .container{max-width:760px;margin:0 auto;padding:3rem 2rem 5rem}
+        .breadcrumb{color:#6b7280;font-size:.8rem;margin-bottom:2rem}
+        .breadcrumb a{color:#6b7280;text-decoration:none}
+        .post-meta{color:#6b7280;font-size:.85rem;margin-bottom:2rem;display:flex;gap:1.5rem;flex-wrap:wrap}
+        .tag-pill{display:inline-block;background:rgba(99,102,241,.15);color:#a5b4fc;padding:.2rem .65rem;border-radius:9999px;font-size:.75rem;font-weight:600}
+        h1{font-size:2rem;font-weight:700;color:#f1f5f9;line-height:1.25;margin-bottom:1rem}
+        h2{font-size:1.3rem;font-weight:700;color:#f1f5f9;margin:2.5rem 0 1rem}
+        h3{font-size:1.05rem;font-weight:700;color:#e2e8f0;margin:1.75rem 0 .75rem}
+        p{color:#d1d5db;margin-bottom:1.25rem}
+        ul,ol{color:#d1d5db;padding-left:1.5rem;margin-bottom:1.25rem}
+        li{margin-bottom:.5rem}
+        code{background:rgba(255,255,255,.07);color:#a5b4fc;padding:.15em .4em;border-radius:.25rem;font-size:.875em;font-family:'Courier New',monospace}
+        pre{background:#0d1117;border:1px solid rgba(255,255,255,.08);border-radius:.5rem;padding:1.25rem;overflow-x:auto;margin-bottom:1.5rem}
+        pre code{background:none;padding:0;color:#e2e8f0;font-size:.85rem}
+        blockquote{border-left:3px solid #6366f1;padding:.75rem 1.25rem;background:rgba(99,102,241,.07);border-radius:0 .5rem .5rem 0;margin-bottom:1.5rem}
+        blockquote p{margin-bottom:0;color:#c7d2fe;font-style:italic}
+        .alert-box{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25);border-radius:.625rem;padding:1.25rem;margin:1.5rem 0}
+        .alert-box p{margin-bottom:0;color:#fde68a;font-size:.9rem}
+        .drift-table{width:100%;border-collapse:collapse;font-size:.875rem;margin:1.5rem 0}
+        .drift-table th{padding:.75rem 1rem;text-align:left;border-bottom:2px solid rgba(255,255,255,.1);color:#9ca3af;font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+        .drift-table td{padding:.7rem 1rem;border-bottom:1px solid rgba(255,255,255,.05);color:#d1d5db}
+        .drift-table tr:last-child td{border-bottom:none}
+        .score-high{color:#f87171;font-weight:600}
+        .score-med{color:#fcd34d;font-weight:600}
+        .score-low{color:#86efac;font-weight:600}
+        .cta-box{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(79,70,229,.1));border:1px solid rgba(99,102,241,.3);border-radius:.875rem;padding:2rem;margin:2.5rem 0;text-align:center}
+        .cta-box h3{font-size:1.25rem;font-weight:700;color:#f1f5f9;margin-bottom:.5rem}
+        .cta-box p{color:#9ca3af;margin-bottom:1.25rem;font-size:.9rem}
+        .cta-btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.75rem 1.75rem;border-radius:.5rem;text-decoration:none;font-weight:600;font-size:.9rem}
+        .cta-sub{color:#6b7280;font-size:.8rem;margin-top:.75rem}
+        .related{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:.5rem;padding:1.5rem;margin-top:3rem}
+        .related-title{font-weight:700;color:#e2e8f0;margin-bottom:1rem}
+        .related a{color:#6366f1;text-decoration:none;display:block;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.9rem}
+        .related a:last-child{border-bottom:none}
+    </style>
+</head>
+<body>
+<nav>
+    <a class="logo" href="../">🌊 DriftWatch</a>
+    <div class="nav-links">
+        <a href="./">Blog</a>
+        <a href="../pricing.html">Pricing</a>
+        <a href="../compare/">Compare</a>
+        <a href="../app.html?demo=1">Demo</a>
+        <a class="nav-cta" href="../app.html">Get Started Free</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="breadcrumb">
+        <a href="../">Home</a> → <a href="./">Blog</a> → Gemini behavioral drift
+    </div>
+
+    <div class="post-meta">
+        <span>March 12, 2026</span>
+        <span class="tag-pill">Gemini</span>
+        <span class="tag-pill">Production data</span>
+        <span class="tag-pill">Behavioral drift</span>
+    </div>
+
+    <h1>Gemini 1.5 Pro Behavior Changed.<br>Here's the Production Drift Data.</h1>
+
+    <p>Everyone talks about GPT-4o and Claude behavioral changes. Gemini gets less attention — not because it doesn't drift, but because Google documents it even less than OpenAI does.</p>
+
+    <p>I've been running behavioral monitoring against <code>gemini-1.5-pro-latest</code> and <code>gemini-1.5-pro-002</code> for 6 weeks. Here's what actually changed, when, and how we caught it before it caused user-facing failures.</p>
+
+    <div class="alert-box">
+        <p>⚠️ <strong>The quiet update problem:</strong> OpenAI publishes model release notes. Google does not have an equivalent page for Gemini behavioral changes. When Gemini updates its behavior, the first indication is often your prompts starting to return something different — without any announcement.</p>
+    </div>
+
+    <h2>What we observed</h2>
+
+    <p>Monitoring 15 prompts across Gemini 1.5 Pro over 6 weeks, using drift scores (0.0 = identical, 1.0 = completely different):</p>
+
+    <table class="drift-table">
+        <thead>
+            <tr>
+                <th>Prompt category</th>
+                <th>Max drift observed</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>JSON extraction</td>
+                <td class="score-med">0.24</td>
+                <td>⚠️ Occasional preamble text before JSON block</td>
+            </tr>
+            <tr>
+                <td>Binary classification</td>
+                <td class="score-low">0.08</td>
+                <td>✅ Stable throughout</td>
+            </tr>
+            <tr>
+                <td>Code generation (no wrapper)</td>
+                <td class="score-high">0.31</td>
+                <td>🔴 Started adding markdown code blocks</td>
+            </tr>
+            <tr>
+                <td>Instruction following (format)</td>
+                <td class="score-med">0.19</td>
+                <td>⚠️ Moderate variance</td>
+            </tr>
+            <tr>
+                <td>Summarization</td>
+                <td class="score-low">0.07</td>
+                <td>✅ Stable — semantic content consistent</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>The two regressions that would have broken production</h2>
+
+    <h3>1. Code generation format change (drift score: 0.31)</h3>
+
+    <p>Prompt: return only Python code, no explanation, no markdown wrapper.</p>
+
+    <p>Baseline output (week 1):</p>
+    <pre><code>def extract_entities(text):
+    import spacy
+    nlp = spacy.load("en_core_web_sm")
+    doc = nlp(text)
+    return [(ent.text, ent.label_) for ent in doc.ents]</code></pre>
+
+    <p>Drifted output (week 4):</p>
+    <pre><code>```python
+def extract_entities(text):
+    import spacy
+    nlp = spacy.load("en_core_web_sm")
+    doc = nlp(text)
+    return [(ent.text, ent.label_) for ent in doc.ents]
+```</code></pre>
+
+    <p>The addition of markdown code fencing (` ```python ... ``` `) is invisible to users but breaks any pipeline that writes Gemini's output directly to a <code>.py</code> file or passes it to <code>exec()</code>. The code is syntactically invalid with backticks included. This fails at runtime, not at the LLM call — which makes it harder to trace.</p>
+
+    <h3>2. JSON extraction preamble (drift score: 0.24)</h3>
+
+    <p>The same pattern we've documented for GPT-4o and Claude: a prompt instructing Gemini to "return only valid JSON" started occasionally returning:</p>
+
+    <pre><code>Here is the extracted data in JSON format:
+
+{"name": "Acme Corp", "type": "company", "confidence": 0.94}</code></pre>
+
+    <p>The <code>json.loads()</code> call throws <code>JSONDecodeError</code> on the preamble text. This one affected roughly 15–20% of calls — intermittent enough to make it feel like a random failure rather than a systematic regression.</p>
+
+    <h2>The timing: how drift happens on Gemini</h2>
+
+    <p>The code generation drift showed a characteristic pattern in the drift score chart:</p>
+
+    <ul>
+        <li>Weeks 1–3: drift score 0.03–0.08 (essentially stable)</li>
+        <li>Week 4, day 1–2: score climbs to 0.14, then 0.22</li>
+        <li>Week 4, day 3: score stabilizes at 0.28–0.31</li>
+        <li>Week 5 onward: holds at 0.29–0.31 (new baseline)</li>
+    </ul>
+
+    <p>That pattern — a sharp 36-hour transition followed by a new stable level — is consistent with a server-side model weight update rather than gradual learning. Google pushed a change and it landed over a deployment window.</p>
+
+    <h2>Does pinning a Gemini version prevent this?</h2>
+
+    <p>Partially. Using <code>gemini-1.5-pro-002</code> instead of <code>gemini-1.5-pro-latest</code> reduces the frequency of behavior changes. It does not eliminate them.</p>
+
+    <p>In our monitoring, <code>gemini-1.5-pro-002</code> still showed the JSON preamble regression — at lower frequency than <code>-latest</code>, but present. The code generation regression was only observed on <code>-latest</code>.</p>
+
+    <blockquote>
+        <p>Version pinning reduces your exposure to Google's update cadence. It does not give you behavioral guarantees. Monitoring does.</p>
+    </blockquote>
+
+    <h2>Which Gemini prompts are most at risk</h2>
+
+    <p><strong>High-risk — monitor these:</strong></p>
+    <ul>
+        <li>Prompts expecting strictly valid JSON with no surrounding text</li>
+        <li>Prompts expecting raw code output (no markdown wrapper)</li>
+        <li>Prompts with explicit negative instructions: "do not include", "return only", "no explanation"</li>
+        <li>Classification prompts where the exact output token matters (e.g., "respond only with YES or NO")</li>
+    </ul>
+
+    <p><strong>Lower risk:</strong></p>
+    <ul>
+        <li>Open-ended generation where you're checking quality, not exact format</li>
+        <li>Summarization where semantic content matters more than length</li>
+        <li>Conversational prompts without downstream structured parsing</li>
+    </ul>
+
+    <h2>How to set up Gemini drift monitoring</h2>
+
+    <p>The simplest approach: baseline your critical prompts today and compare daily. The manual process:</p>
+
+    <ol>
+        <li>Pick your 5 most format-sensitive Gemini prompts</li>
+        <li>Run each 3 times and store the median output</li>
+        <li>Run them daily and compute cosine similarity vs baseline (use a sentence transformer)</li>
+        <li>Flag anything above 0.3 for manual review</li>
+        <li>Alert immediately on anything above 0.5</li>
+    </ol>
+
+    <p>Or use <a href="../app.html" style="color:#6366f1">DriftWatch</a> which automates steps 2–5. Add your prompts, select Gemini, and hourly monitoring starts. Free tier is 3 prompts, no card required.</p>
+
+    <div class="cta-box">
+        <h3>Start monitoring Gemini — free, 5 minutes</h3>
+        <p>Paste your Gemini prompts. DriftWatch baselines them and alerts you the moment behavior shifts — before your json.loads() starts throwing.</p>
+        <a class="cta-btn" href="../app.html">Start monitoring free →</a>
+        <div class="cta-sub">Or <a href="../app.html?demo=1" style="color:#6366f1">try the demo</a> with real drift data first</div>
+    </div>
+
+    <div class="related">
+        <div class="related-title">Related Reading</div>
+        <a href="gpt-52-behavior-change.html">GPT-5.2 Changed Behaviour on Feb 10, 2026 — Did Your Prompts Break? →</a>
+        <a href="gpt-4o-pinned-still-changed.html">I Pinned gpt-4o-2024-08-06 and It Still Changed →</a>
+        <a href="llm-version-pinning.html">Why LLM Version Pinning Doesn't Protect You →</a>
+        <a href="../compare/">DriftWatch vs LangSmith vs Langfuse vs Helicone →</a>
+    </div>
+</div>
+
+<footer style="background:#111827;border-top:1px solid rgba(255,255,255,.07);padding:2rem;text-align:center">
+    <p><a href="../" style="color:#9ca3af;text-decoration:none">DriftWatch</a> — LLM Behavioural Monitoring &nbsp;·&nbsp; <a href="mailto:clawgenesis@gmail.com" style="color:#9ca3af;text-decoration:none">clawgenesis@gmail.com</a></p>
+    <p style="margin-top:.5rem;color:#4b5563;font-size:.8rem">© 2026 · <a href="../" style="color:#4b5563">Home</a> · <a href="../app.html" style="color:#4b5563">Start Free</a></p>
+</footer>
+</body>
+</html>

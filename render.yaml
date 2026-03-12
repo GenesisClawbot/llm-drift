@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: driftwatch-api
+    runtime: python
+    buildCommand: pip install -r requirements-backend.txt
+    startCommand: python3 -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_STARTER_PRICE_ID
+        value: price_1TAEMZ7dVu3KiOEDGuyO9mtF
+      - key: STRIPE_PRO_PRICE_ID
+        value: price_1TAEMa7dVu3KiOEDEgg8hFWf
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: driftwatch-db
+          property: connectionString
+
+databases:
+  - name: driftwatch-db
+    databaseName: driftwatch
+    user: driftwatch

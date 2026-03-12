@@ -405,7 +405,35 @@ async function loadPrompts() {
         document.getElementById('stat-prompts').textContent = prompts.length;
 
         if (!prompts.length) {
-            el.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div>No test prompts yet. Add your first prompt above.</div>`;
+            el.innerHTML = `
+<div style="padding:2rem">
+  <h3 style="color:var(--text);margin-bottom:.5rem;font-size:1rem">👋 Welcome — set up your first drift check in 3 steps</h3>
+  <p style="color:var(--muted);font-size:.875rem;margin-bottom:1.5rem">GPT-5.2 changed behaviour on Feb 10, 2026. These steps take under 5 minutes.</p>
+  <div style="display:grid;gap:1rem;margin-bottom:1.5rem">
+    <div style="display:flex;gap:1rem;align-items:flex-start;padding:1rem;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:.5rem">
+      <div style="background:#6366f1;color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;font-size:.85rem">1</div>
+      <div>
+        <div style="font-weight:600;margin-bottom:.25rem">Add a prompt you use in production</div>
+        <div style="color:var(--muted);font-size:.8rem">Paste any prompt that returns structured data or follows specific instructions. JSON extraction prompts catch drift most reliably.</div>
+        <button class="btn btn-primary btn-sm" style="margin-top:.75rem" onclick="prefillExample()">Use example prompt →</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:1rem;align-items:flex-start;padding:1rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:.5rem">
+      <div style="background:var(--bg3);color:var(--muted);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;font-size:.85rem">2</div>
+      <div>
+        <div style="font-weight:600;margin-bottom:.25rem;color:var(--muted)">Run baseline</div>
+        <div style="color:var(--muted);font-size:.8rem">We run your prompt once and store the result. This is the "before" snapshot.</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:1rem;align-items:flex-start;padding:1rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:.5rem">
+      <div style="background:var(--bg3);color:var(--muted);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;font-size:.85rem">3</div>
+      <div>
+        <div style="font-weight:600;margin-bottom:.25rem;color:var(--muted)">Run check → see drift score</div>
+        <div style="color:var(--muted);font-size:.8rem">We run it again and compare. Any score above 0.3 means the model changed. You'll get an email alert.</div>
+      </div>
+    </div>
+  </div>
+</div>`;
             return;
         }
         el.innerHTML = prompts.map(p => `
@@ -427,6 +455,22 @@ async function loadPrompts() {
 function toggleAddPrompt() {
     const form = document.getElementById('add-prompt-form');
     form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+function prefillExample() {
+    // Scroll to and open the add-prompt form with a ready-made example
+    const form = document.getElementById('add-prompt-form');
+    form.style.display = 'block';
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('new-prompt-id').value = 'json-extract-01';
+    document.getElementById('new-prompt-name').value = 'JSON extraction test';
+    document.getElementById('new-prompt-text').value =
+        'Extract the person\'s name, age, and email from the following text and return ONLY valid JSON with keys "name", "age", "email". No extra text.\n\nText: "Hi, I\'m Alex Chen, 32 years old. Reach me at alex.chen@example.com."';
+    document.getElementById('new-prompt-validators').value = 'is_valid_json,has_keys:name,age,email';
+    // Select the right category
+    const catSelect = document.getElementById('new-prompt-category');
+    if (catSelect) catSelect.value = 'extraction';
+    toast('Example prompt loaded — click "Save prompt" to continue', 'success');
 }
 
 async function addPrompt() {

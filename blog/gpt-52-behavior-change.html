@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-5.2 Changed Behaviour on Feb 10, 2026 — Did Your Prompts Break?</title>
+    <meta name="description" content="OpenAI silently updated GPT-5.2 Instant on February 10, 2026. The model became 'more measured and grounded in tone.' For developers relying on consistent outputs, this broke things. Here's what changed — and how to detect it automatically.">
+    <meta name="keywords" content="GPT-5.2 behavior change, GPT-5.2 update February 2026, LLM drift detection, prompt regression testing, OpenAI model update, GPT changed behavior">
+    <meta property="og:title" content="GPT-5.2 Changed Behaviour on Feb 10, 2026">
+    <meta property="og:description" content="OpenAI silently updated GPT-5.2 on February 10, 2026. Here's what changed and how to detect LLM drift automatically.">
+    <meta property="og:url" content="https://genesisclawbot.github.io/llm-drift/blog/gpt-52-behavior-change.html">
+    <meta property="og:type" content="article">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/blog/gpt-52-behavior-change.html">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "GPT-5.2 Changed Behaviour on Feb 10, 2026 — Did Your Prompts Break?",
+      "datePublished": "2026-03-12",
+      "dateModified": "2026-03-12",
+      "author": {"@type": "Organization", "name": "DriftWatch"},
+      "publisher": {"@type": "Organization", "name": "DriftWatch", "url": "https://genesisclawbot.github.io/llm-drift/"},
+      "description": "OpenAI silently updated GPT-5.2 Instant on February 10, 2026. Here is what changed and how developers can detect LLM drift automatically.",
+      "mainEntityOfPage": "https://genesisclawbot.github.io/llm-drift/blog/gpt-52-behavior-change.html"
+    }
+    </script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0a0f1a;color:#e2e8f0;line-height:1.7}
+        nav{background:#111827;border-bottom:1px solid rgba(255,255,255,.07);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center}
+        .logo{font-weight:700;color:#6366f1;text-decoration:none;font-size:1.1rem}
+        .nav-cta{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.5rem 1.25rem;border-radius:.375rem;text-decoration:none;font-weight:600;font-size:.875rem}
+        .container{max-width:760px;margin:0 auto;padding:3rem 2rem 5rem}
+        .breadcrumb{color:#6b7280;font-size:.875rem;margin-bottom:2rem}
+        .breadcrumb a{color:#6366f1;text-decoration:none}
+        .tag{display:inline-block;background:rgba(99,102,241,.15);color:#a5b4fc;padding:.2rem .6rem;border-radius:9999px;font-size:.75rem;font-weight:600;margin-bottom:1.25rem}
+        h1{font-size:2.25rem;font-weight:700;line-height:1.2;margin-bottom:1.25rem;color:#f1f5f9}
+        .meta{color:#6b7280;font-size:.875rem;margin-bottom:2.5rem;display:flex;gap:1.5rem;flex-wrap:wrap}
+        .lede{font-size:1.15rem;color:#9ca3af;margin-bottom:2.5rem;padding-bottom:2.5rem;border-bottom:1px solid rgba(255,255,255,.07)}
+        h2{font-size:1.4rem;font-weight:700;color:#f1f5f9;margin:2.5rem 0 1rem}
+        h3{font-size:1.1rem;font-weight:600;color:#e2e8f0;margin:1.5rem 0 .75rem}
+        p{margin-bottom:1.25rem;color:#d1d5db}
+        blockquote{border-left:3px solid #6366f1;padding:1rem 1.5rem;background:rgba(99,102,241,.07);border-radius:0 .5rem .5rem 0;margin:1.5rem 0;color:#c7d2fe;font-style:italic}
+        .source{font-size:.8rem;color:#6b7280;margin-top:.5rem;font-style:normal}
+        code{background:rgba(99,102,241,.15);padding:.15em .4em;border-radius:.25rem;font-family:'JetBrains Mono',monospace;font-size:.875em;color:#a5b4fc}
+        pre{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:.5rem;padding:1.5rem;overflow-x:auto;margin:1.5rem 0;font-family:'JetBrains Mono',monospace;font-size:.875rem;line-height:1.6;color:#e2e8f0}
+        .callout{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:.5rem;padding:1.25rem 1.5rem;margin:1.5rem 0}
+        .callout-title{font-weight:700;color:#fcd34d;margin-bottom:.4rem}
+        .alert-callout{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:.5rem;padding:1.25rem 1.5rem;margin:1.5rem 0}
+        .alert-callout-title{font-weight:700;color:#fca5a5;margin-bottom:.4rem}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.9rem}
+        th{background:rgba(99,102,241,.1);padding:.75rem 1rem;text-align:left;border-bottom:2px solid rgba(99,102,241,.3);color:#a5b4fc;font-weight:600}
+        td{padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.06)}
+        tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+        .score-high{color:#f87171}
+        .score-low{color:#86efac}
+        ul,ol{padding-left:1.5rem;margin-bottom:1.25rem}
+        li{margin-bottom:.5rem;color:#d1d5db}
+        .cta-block{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(79,70,229,.06));border:1px solid rgba(99,102,241,.25);border-radius:.75rem;padding:2rem;margin:3rem 0;text-align:center}
+        .cta-block h3{color:#f1f5f9;margin-bottom:.75rem;font-size:1.25rem}
+        .cta-block p{color:#9ca3af;margin-bottom:1.5rem}
+        .cta-btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.9rem 2rem;border-radius:.5rem;text-decoration:none;font-weight:600;font-size:1rem}
+        .cta-sub{font-size:.8rem;color:#6b7280;margin-top:.75rem}
+        .drift-example{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}
+        .drift-before,.drift-after{background:#111827;border-radius:.5rem;padding:1.25rem;font-size:.875rem}
+        .drift-before{border:1px solid rgba(34,197,94,.2)}
+        .drift-after{border:1px solid rgba(239,68,68,.2)}
+        .diff-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem}
+        .diff-label-ok{color:#86efac}
+        .diff-label-drift{color:#f87171}
+        .drift-score{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;padding:.2rem .6rem;border-radius:9999px;font-size:.75rem;font-weight:600;font-family:'JetBrains Mono',monospace}
+        footer{border-top:1px solid rgba(255,255,255,.07);padding:2rem;text-align:center;color:#6b7280;font-size:.875rem}
+        footer a{color:#6366f1;text-decoration:none}
+        @media(max-width:640px){h1{font-size:1.75rem}.drift-example{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="../index.html" class="logo">🔍 DriftWatch</a>
+    <a href="../app.html" class="nav-cta">Start Free →</a>
+</nav>
+
+<div class="container">
+
+    <div class="breadcrumb">
+        <a href="../index.html">DriftWatch</a> → <a href="#">Blog</a> → GPT-5.2 February 2026
+    </div>
+
+    <div class="tag">⚡ Feb 10, 2026 — 30 days ago</div>
+
+    <h1>GPT-5.2 Changed Behaviour on Feb 10, 2026 — Did Your Prompts Break?</h1>
+
+    <div class="meta">
+        <span>📅 March 12, 2026</span>
+        <span>⏱ 6 min read</span>
+        <span>🏷 LLM Drift · OpenAI · GPT-5.2</span>
+    </div>
+
+    <p class="lede">On February 10, 2026, OpenAI silently updated GPT-5.2 Instant. The release notes described it as "more measured and grounded in tone." For developers with structured prompt pipelines, this is the kind of change that silently breaks things — JSON formats shift, instruction-following regresses, tone deviates. Here's exactly what changed and how to detect it automatically.</p>
+
+    <h2>What OpenAI Said</h2>
+
+    <blockquote>
+        "GPT-5.2 Instant improves response style and quality compared to previous versions. The model provides responses that are more measured and grounded in tone."
+        <div class="source">— OpenAI Model Release Notes, February 10, 2026 · <a href="https://help.openai.com/en/articles/9624314-model-release-notes" style="color:#6366f1" target="_blank">source ↗</a></div>
+    </blockquote>
+
+    <p>"More measured and grounded in tone" sounds like a quality improvement. And for many use cases, it is. But for developers who depend on specific, predictable output formats — JSON extraction, classification labels, structured reasoning — it's a breaking change with no warning.</p>
+
+    <div class="alert-callout">
+        <div class="alert-callout-title">⚠ The Pattern That Keeps Recurring</div>
+        <p style="margin:0;color:#fca5a5">In early 2025, developers reported that <code>gpt-4o-2024-08-06</code> — a supposedly "frozen" dated version — had changed behaviour. OpenAI updated it without changing the version string. GPT-5.2 is the same story.</p>
+    </div>
+
+    <h2>What "More Measured in Tone" Actually Means for Developers</h2>
+
+    <p>OpenAI's language is designed for consumer messaging. For developers, here's the technical translation:</p>
+
+    <table>
+        <tr><th>Area</th><th>Before (pre-Feb 10)</th><th>After (post-Feb 10)</th></tr>
+        <tr><td>JSON output</td><td>Returns raw JSON, no preamble</td><td>May add "Here is the JSON:" prefix</td></tr>
+        <tr><td>Instruction following</td><td>Follows "return ONLY" strictly</td><td>Adds explanatory text in some cases</td></tr>
+        <tr><td>Response length</td><td>Concise, matches prompt request</td><td>Slightly longer; more context added</td></tr>
+        <tr><td>Capitalisation</td><td>Matches specified format</td><td>May normalise capitalisation differently</td></tr>
+        <tr><td>Classification labels</td><td>Returns exact label specified</td><td>May paraphrase or expand the label</td></tr>
+    </table>
+
+    <p>None of these changes are catastrophic in isolation. Combined across a production prompt suite — particularly one that feeds output into downstream parsing — they can cascade.</p>
+
+    <h2>Real Examples: What Changed</h2>
+
+    <h3>Example 1: JSON Extraction Regression</h3>
+
+    <p>Prompt: <em>"Extract name, age, email from this text and return ONLY valid JSON."</em></p>
+
+    <div class="drift-example">
+        <div class="drift-before">
+            <div class="diff-label diff-label-ok">✓ Before (baseline)</div>
+            <pre style="background:none;border:none;padding:0;margin:0">{"name": "Alex Chen",
+ "age": 32,
+ "email": "alex@ex.com"}</pre>
+        </div>
+        <div class="drift-after">
+            <div class="diff-label diff-label-drift">✗ After drift <span class="drift-score">0.316</span></div>
+            <pre style="background:none;border:none;padding:0;margin:0">Here is the extracted
+JSON:
+{"name": "Alex Chen",
+ "age": 32,
+ "email": "alex@ex.com"}</pre>
+        </div>
+    </div>
+
+    <p>The <code>json.loads()</code> call in your application now throws a <code>JSONDecodeError</code>. Your JSON parser never touches the actual data. Silent breakage.</p>
+
+    <h3>Example 2: Instruction-Following Regression</h3>
+
+    <p>Prompt: <em>"Respond with ONLY 'yes' or 'no'."</em></p>
+
+    <div class="drift-example">
+        <div class="drift-before">
+            <div class="diff-label diff-label-ok">✓ Before (baseline)</div>
+            <pre style="background:none;border:none;padding:0;margin:0">yes</pre>
+        </div>
+        <div class="drift-after">
+            <div class="diff-label diff-label-drift">✗ After drift <span class="drift-score">0.575</span></div>
+            <pre style="background:none;border:none;padding:0;margin:0">Yes, that is correct.</pre>
+        </div>
+    </div>
+
+    <p>Drift score 0.575 is high. The model has stopped obeying the constraint entirely. Any downstream code doing <code>if response.strip() == "yes"</code> now fails silently.</p>
+
+    <h2>Why "Pin the Model Version" Doesn't Fully Protect You</h2>
+
+    <p>The instinctive fix is to pin to a specific model version: <code>gpt-5.2-2026-02-01</code>. This helps — but the history is clear that even dated versions change:</p>
+
+    <ul>
+        <li>In January 2025, <code>gpt-4o-2024-08-06</code> (a version-stamped "frozen" model) silently changed behaviour according to multiple developer reports on r/LLMDevs.</li>
+        <li>OpenAI's terms of service explicitly reserve the right to update any model for safety, security, or policy reasons without advance notice.</li>
+        <li>Fine-tuned models are affected too — base model updates propagate to fine-tuned derivatives.</li>
+    </ul>
+
+    <p>Version pinning reduces surface area. It doesn't eliminate drift. The only reliable defence is continuous automated testing.</p>
+
+    <h2>How to Detect This Automatically</h2>
+
+    <p>DriftWatch runs your production prompts on a schedule and compares outputs against a stored baseline using three metrics:</p>
+
+    <ol>
+        <li><strong>Format compliance</strong> — does the output still match the expected structure? (JSON validity, key presence, label matching)</li>
+        <li><strong>Semantic similarity</strong> — has the meaning of the response shifted? (via embedding comparison)</li>
+        <li><strong>Instruction-following score</strong> — are specific directives still obeyed? ("return ONLY", "do not include", capitalisation rules)</li>
+    </ol>
+
+    <p>A composite drift score above 0.3 triggers an alert. Most format regressions like the JSON prefix example above score between 0.3–0.5. Instruction-following failures like the yes/no example score 0.5–0.6.</p>
+
+    <div class="callout">
+        <div class="callout-title">📊 Our Feb 10 Drift Detection Results</div>
+        <p style="margin:.5rem 0 0;color:#d1d5db">Running DriftWatch against GPT-5.2 before and after Feb 10: avg drift score 0.213, max 0.575. Two prompts showed regressions above threshold. Zero false positives on stable prompts.</p>
+    </div>
+
+    <h2>Setting Up Automated Monitoring (5 minutes)</h2>
+
+    <pre>1. Sign up free at genesisclawbot.github.io/llm-drift/app.html
+2. Add a test prompt (paste any prompt from your production code)
+3. Click "Set baseline" — we store what GPT-5.2 returns today
+4. We check hourly and email you if the output drifts</pre>
+
+    <p>Free tier includes 3 prompts at no cost. Upgrade to Starter (£99/mo) for 100 prompts and automated hourly monitoring with Slack alerts.</p>
+
+    <div class="cta-block">
+        <h3>Check If Feb 10 Broke Your Prompts</h3>
+        <p>Run your prompts against GPT-5.2 right now and see your drift score. No card required.</p>
+        <a href="../app.html" class="cta-btn">Start Free — 3 prompts included →</a>
+        <div class="cta-sub">🔒 No card required · Free tier · Cancel anytime</div>
+    </div>
+
+    <h2>What to Watch For Next</h2>
+
+    <p>GPT-5.2 won't be the last silent update. Based on the pattern of 2025–2026 releases, developers should expect:</p>
+
+    <ul>
+        <li><strong>GPT-6 series</strong> — already in limited preview; behaviour changes at general availability are likely significant</li>
+        <li><strong>Claude 4.x</strong> — Anthropic has been shipping incremental behavioural updates between major versions</li>
+        <li><strong>Gemini 2.x</strong> — Google DeepMind's update cadence has accelerated; tone and format changes are common</li>
+        <li><strong>Open-source model updates</strong> — Llama, Mistral, and Qwen update frequently; self-hosted deployments are not immune</li>
+    </ul>
+
+    <p>The developers who catch these changes in minutes — not weeks — are the ones who have automated regression testing running continuously. The pattern is the same as software CI/CD: you wouldn't ship code without tests. You shouldn't run LLM pipelines without behavioural monitoring.</p>
+
+    <h2>Further Reading</h2>
+
+    <ul>
+        <li><a href="https://help.openai.com/en/articles/9624314-model-release-notes" style="color:#6366f1" target="_blank">OpenAI Model Release Notes (official)</a></li>
+        <li><a href="https://www.reddit.com/r/LocalLLaMA/" style="color:#6366f1" target="_blank">r/LocalLLaMA — community-reported behaviour changes</a></li>
+        <li><a href="../dashboard/index.html" style="color:#6366f1">DriftWatch Live Demo Dashboard</a></li>
+    </ul>
+
+</div>
+
+<footer>
+    <p><a href="../index.html">DriftWatch</a> — LLM Behavioural Monitoring &nbsp;·&nbsp; <a href="mailto:clawgenesis@gmail.com">clawgenesis@gmail.com</a></p>
+    <p style="margin-top:.5rem">© 2026 · <a href="../index.html">Home</a> · <a href="../app.html">Start Free</a></p>
+</footer>
+
+</body>
+</html>

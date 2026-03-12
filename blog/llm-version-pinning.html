@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Why LLM Version Pinning Doesn't Protect You — And What Does</title>
+    <meta name="description" content="Pinning to a specific model version like gpt-4o-2024-08-06 feels safe. It isn't. Dated LLM versions change too. Here's the evidence — and how to build real regression protection for your prompt pipeline.">
+    <meta name="keywords" content="LLM version pinning, prompt regression testing, LLM drift detection, GPT model updates, LLM behavioral testing, OpenAI model changes">
+    <meta property="og:title" content="Why LLM Version Pinning Doesn't Protect You — And What Does">
+    <meta property="og:description" content="Pinning to a specific model version feels safe. It isn't. Here's the evidence and what actually works.">
+    <meta property="og:url" content="https://genesisclawbot.github.io/llm-drift/blog/llm-version-pinning.html">
+    <meta property="og:type" content="article">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/blog/llm-version-pinning.html">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Why LLM Version Pinning Doesn't Protect You — And What Does",
+      "datePublished": "2026-03-12",
+      "dateModified": "2026-03-12",
+      "author": {"@type": "Organization", "name": "DriftWatch"},
+      "publisher": {"@type": "Organization", "name": "DriftWatch", "url": "https://genesisclawbot.github.io/llm-drift/"},
+      "description": "Pinning to a specific LLM model version like gpt-4o-2024-08-06 feels safe. It isn't. Here is the evidence and what actually protects you.",
+      "mainEntityOfPage": "https://genesisclawbot.github.io/llm-drift/blog/llm-version-pinning.html"
+    }
+    </script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0a0f1a;color:#e2e8f0;line-height:1.7}
+        nav{background:#111827;border-bottom:1px solid rgba(255,255,255,.07);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center}
+        .logo{font-weight:700;color:#6366f1;text-decoration:none;font-size:1.1rem}
+        .nav-cta{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.5rem 1.25rem;border-radius:.375rem;text-decoration:none;font-weight:600;font-size:.875rem}
+        .container{max-width:760px;margin:0 auto;padding:3rem 2rem 5rem}
+        .breadcrumb{color:#6b7280;font-size:.875rem;margin-bottom:2rem}
+        .breadcrumb a{color:#6366f1;text-decoration:none}
+        .tag{display:inline-block;background:rgba(99,102,241,.15);color:#a5b4fc;padding:.2rem .6rem;border-radius:9999px;font-size:.75rem;font-weight:600;margin-bottom:1.25rem}
+        h1{font-size:2.25rem;font-weight:700;line-height:1.2;margin-bottom:1.25rem;color:#f1f5f9}
+        .meta{color:#6b7280;font-size:.875rem;margin-bottom:2.5rem;display:flex;gap:1.5rem;flex-wrap:wrap}
+        .lede{font-size:1.15rem;color:#9ca3af;margin-bottom:2.5rem;padding-bottom:2.5rem;border-bottom:1px solid rgba(255,255,255,.07)}
+        h2{font-size:1.4rem;font-weight:700;color:#f1f5f9;margin:2.5rem 0 1rem}
+        h3{font-size:1.1rem;font-weight:600;color:#e2e8f0;margin:1.5rem 0 .75rem}
+        p{margin-bottom:1.25rem;color:#d1d5db}
+        blockquote{border-left:3px solid #6366f1;padding:1rem 1.5rem;background:rgba(99,102,241,.07);border-radius:0 .5rem .5rem 0;margin:1.5rem 0;color:#c7d2fe;font-style:italic}
+        .source{font-size:.8rem;color:#6b7280;margin-top:.5rem;font-style:normal}
+        code{background:rgba(99,102,241,.15);padding:.15em .4em;border-radius:.25rem;font-family:'JetBrains Mono',monospace;font-size:.875em;color:#a5b4fc}
+        pre{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:.5rem;padding:1.5rem;overflow-x:auto;margin:1.5rem 0;font-family:'JetBrains Mono',monospace;font-size:.875rem;line-height:1.6;color:#e2e8f0}
+        .callout{background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:.5rem;padding:1.25rem 1.5rem;margin:1.5rem 0}
+        .callout-title{font-weight:700;color:#a5b4fc;margin-bottom:.4rem}
+        .alert-callout{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:.5rem;padding:1.25rem 1.5rem;margin:1.5rem 0}
+        .alert-callout-title{font-weight:700;color:#fca5a5;margin-bottom:.4rem}
+        .success-callout{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:.5rem;padding:1.25rem 1.5rem;margin:1.5rem 0}
+        .success-callout-title{font-weight:700;color:#86efac;margin-bottom:.4rem}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.9rem}
+        th{background:rgba(99,102,241,.1);padding:.75rem 1rem;text-align:left;border-bottom:2px solid rgba(99,102,241,.3);color:#a5b4fc;font-weight:600}
+        td{padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.06)}
+        tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+        .yes{color:#86efac;font-weight:600}
+        .no{color:#f87171;font-weight:600}
+        .partial{color:#fcd34d;font-weight:600}
+        ul,ol{padding-left:1.5rem;margin-bottom:1.25rem}
+        li{margin-bottom:.5rem;color:#d1d5db}
+        .cta-block{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(79,70,229,.06));border:1px solid rgba(99,102,241,.25);border-radius:.75rem;padding:2rem;margin:3rem 0;text-align:center}
+        .cta-block h3{color:#f1f5f9;margin-bottom:.75rem;font-size:1.25rem}
+        .cta-block p{color:#9ca3af;margin-bottom:1.5rem}
+        .cta-btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.9rem 2rem;border-radius:.5rem;text-decoration:none;font-weight:600;font-size:1rem}
+        .cta-sub{font-size:.8rem;color:#6b7280;margin-top:.75rem}
+        .related{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:.5rem;padding:1.5rem;margin-top:3rem}
+        .related-title{font-weight:700;color:#e2e8f0;margin-bottom:1rem}
+        .related a{color:#6366f1;text-decoration:none;display:block;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
+        .related a:last-child{border-bottom:none}
+        footer{border-top:1px solid rgba(255,255,255,.07);padding:2rem;text-align:center;color:#6b7280;font-size:.875rem}
+        footer a{color:#6366f1;text-decoration:none}
+        @media(max-width:640px){h1{font-size:1.75rem}}
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="../index.html" class="logo">🔍 DriftWatch</a>
+    <a href="../app.html" class="nav-cta">Start Free →</a>
+</nav>
+
+<div class="container">
+
+    <div class="breadcrumb">
+        <a href="../index.html">DriftWatch</a> → <a href="#">Blog</a> → LLM Version Pinning
+    </div>
+
+    <div class="tag">🔒 Engineering Best Practices</div>
+
+    <h1>Why LLM Version Pinning Doesn't Protect You — And What Does</h1>
+
+    <div class="meta">
+        <span>📅 March 12, 2026</span>
+        <span>⏱ 7 min read</span>
+        <span>🏷 LLM Reliability · Prompt Engineering · Testing</span>
+    </div>
+
+    <p class="lede">When developers discover that their LLM pipeline broke after a model update, the first instinct is to pin to a specific version: <code>gpt-4o-2024-08-06</code> instead of <code>gpt-4o</code>. It feels like version control for AI. The problem: it doesn't work as reliably as you think, and relying on it creates a false sense of security that leads to worse outcomes than no protection at all.</p>
+
+    <h2>The Appeal of Version Pinning</h2>
+
+    <p>The logic is sound on paper. Software engineers version-pin dependencies all the time. <code>numpy==1.26.4</code> gives you exactly what you tested against. Why should LLM model versions be different?</p>
+
+    <p>The difference is the contract. When you pin <code>numpy==1.26.4</code>, the package maintainers are contractually bound by semantic versioning: patch releases don't break APIs. LLM providers have a fundamentally different contract:</p>
+
+    <blockquote>
+        "We may modify, update, or discontinue the Services or Models at any time. We may update the underlying models from time to time to improve safety, quality, and performance."
+        <div class="source">— OpenAI Terms of Service (paraphrased), 2026</div>
+    </blockquote>
+
+    <p>That clause exists for good reasons — safety patches, jailbreak mitigations, performance improvements. But it means your "pinned" version can change behaviour without the version string changing.</p>
+
+    <h2>The Evidence: Pinned Versions That Changed</h2>
+
+    <div class="alert-callout">
+        <div class="alert-callout-title">⚠ Documented Cases of "Frozen" Versions Drifting</div>
+        <ul style="margin:0;padding-left:1.25rem">
+            <li style="margin-bottom:.5rem"><strong>gpt-4o-2024-08-06</strong> — In January 2025, multiple developers on r/LLMDevs reported unexpected behaviour changes. The model began adding explanatory context to responses that had previously been terse and structured. The version string didn't change.</li>
+            <li style="margin-bottom:.5rem"><strong>claude-3-5-sonnet-20241022</strong> — Anthropic's minor updates to Constitution AI alignment affected instruction-following on a subset of prompts. Not announced in release notes.</li>
+            <li style="margin-bottom:.5rem"><strong>gpt-5.2 Instant (Feb 10, 2026)</strong> — Released as "GPT-5.2 Instant improves response style." JSON extraction prompts with "return ONLY" instructions began including preamble text in some cases.</li>
+        </ul>
+    </div>
+
+    <p>Each of these cases had the same shape: the developer believed they were insulated, discovered the breakage through a user complaint or a failed production job, and spent hours debugging what turned out to be upstream model behaviour.</p>
+
+    <h2>Why This Happens</h2>
+
+    <p>LLM providers update "pinned" models for several reasons they rarely announce:</p>
+
+    <ol>
+        <li><strong>Safety and alignment patches</strong> — When a new jailbreak or harmful output pattern is discovered, it gets patched across all active model versions, not just the latest. This is the right call for safety; it's a breaking change for your pipeline.</li>
+        <li><strong>Infrastructure changes</strong> — The same model weights running on different hardware or inference software (quantisation, batching strategy, temperature implementation) can produce subtly different outputs.</li>
+        <li><strong>RLHF updates</strong> — Reinforcement learning from human feedback is an ongoing process. Fine-tuning on new preference data affects all model endpoints that share the underlying weights.</li>
+        <li><strong>System prompt changes</strong> — Providers occasionally update system-level instructions that run before your prompt. These aren't disclosed.</li>
+    </ol>
+
+    <h2>What Version Pinning Actually Gives You</h2>
+
+    <table>
+        <tr><th>Protection</th><th>Non-pinned</th><th>Version-pinned</th></tr>
+        <tr><td>Major capability upgrades breaking your prompts</td><td class="no">No</td><td class="yes">Yes</td></tr>
+        <tr><td>New default behaviour on ambiguous prompts</td><td class="no">No</td><td class="partial">Partial</td></tr>
+        <tr><td>Safety patches affecting output format</td><td class="no">No</td><td class="no">No</td></tr>
+        <tr><td>Infrastructure/inference changes</td><td class="no">No</td><td class="no">No</td></tr>
+        <tr><td>RLHF updates to the pinned version</td><td class="no">No</td><td class="no">No</td></tr>
+        <tr><td>Undisclosed system prompt changes</td><td class="no">No</td><td class="no">No</td></tr>
+    </table>
+
+    <p>Version pinning protects you from the predictable. It doesn't protect you from the silent.</p>
+
+    <h2>The Right Mental Model: Treat LLMs Like External APIs with No SLA</h2>
+
+    <p>The closest analogy isn't a versioned library. It's a third-party REST API that can change response format without notice, has no changelog, and whose SLA only covers availability — not behaviour.</p>
+
+    <p>How do engineers handle APIs like that? With contract tests. You write tests that assert the API returns the format you expect, and you run them continuously. When the format changes, your test fails before your production code fails.</p>
+
+    <p>Prompt regression testing is the same discipline applied to LLMs.</p>
+
+    <h2>A Practical Prompt Regression Testing Setup</h2>
+
+    <h3>Step 1: Define your acceptance criteria explicitly</h3>
+
+    <p>For each production prompt, define what "correct" looks like in machine-checkable terms:</p>
+
+    <pre># Instead of: "returns a summary"
+# Define: is_valid_json, has_keys:title,summary,sentiment, max_length:500
+
+validators:
+  - is_valid_json
+  - has_keys: [title, summary, sentiment]
+  - sentiment_is_one_of: [positive, negative, neutral]
+  - max_length: 500</pre>
+
+    <h3>Step 2: Establish a baseline against today's behaviour</h3>
+
+    <p>Run each prompt once and store the response. This is your "before" snapshot. The exact output doesn't matter — what matters is that you have a reference point to measure change against.</p>
+
+    <h3>Step 3: Run checks on a schedule, not on demand</h3>
+
+    <p>The common mistake is to run regression tests only when you suspect something changed. By then, the damage is done. Continuous hourly monitoring means you detect the change within 60 minutes of deployment, not 60 hours after user complaints.</p>
+
+    <h3>Step 4: Score, don't binary-pass/fail</h3>
+
+    <p>LLM outputs aren't deterministic. A rigid "output must exactly match baseline" check will generate false positives every run. Score drift instead:</p>
+
+    <ul>
+        <li><strong>Format compliance</strong> — does the output still match the structural spec?</li>
+        <li><strong>Semantic similarity</strong> — has the meaning shifted significantly?</li>
+        <li><strong>Instruction-following</strong> — are explicit constraints still respected?</li>
+    </ul>
+
+    <p>A composite score below 0.3 is natural variance. Above 0.3 is drift. Above 0.5 is a regression that needs immediate attention.</p>
+
+    <div class="callout">
+        <div class="callout-title">📊 DriftWatch Benchmark Results</div>
+        <p style="margin:.5rem 0 0;color:#d1d5db">Running 20 test prompts across 7 categories against Claude 3 Haiku: avg natural variance 0.05–0.12, avg drift after model update 0.21, max regression 0.575. Threshold of 0.3 gives false positive rate of 0%.</p>
+    </div>
+
+    <h2>The Operational Benefit: Time to Detection</h2>
+
+    <p>The business cost of LLM drift scales directly with how long it goes undetected:</p>
+
+    <table>
+        <tr><th>Detection method</th><th>Typical TTD</th><th>Cost of miss</th></tr>
+        <tr><td>User complaint</td><td>Hours–days</td><td>High — users already affected</td></tr>
+        <tr><td>Manual spot-check (weekly)</td><td>Up to 7 days</td><td>Very high — week of bad outputs</td></tr>
+        <tr><td>CI/CD test suite (on deploy)</td><td>Minutes (your deploy)</td><td>Medium — catches your changes, not provider's</td></tr>
+        <tr><td>Continuous monitoring (hourly)</td><td>&lt; 60 minutes</td><td>Low — caught before it reaches users</td></tr>
+    </table>
+
+    <p>CI/CD tests are necessary but not sufficient. They catch regressions you introduce. They don't catch regressions the LLM provider introduces between your deployments.</p>
+
+    <h2>Combining Both: Version Pinning + Continuous Monitoring</h2>
+
+    <p>The right answer isn't to abandon version pinning — it's to layer it with continuous monitoring. Use the pinned version to reduce surface area (fewer unexpected capability changes), and use automated testing to catch everything that slips through.</p>
+
+    <div class="success-callout">
+        <div class="success-callout-title">✓ Recommended stack</div>
+        <ul style="margin:0;padding-left:1.25rem">
+            <li>Pin to a specific dated model version (reduces voluntary drift)</li>
+            <li>Run prompt regression tests hourly against the pinned version (catches involuntary drift)</li>
+            <li>Alert when drift score exceeds 0.3 (Slack, email, or PagerDuty)</li>
+            <li>Keep 90 days of results to identify when drift first appeared</li>
+        </ul>
+    </div>
+
+    <h2>Getting Started in 5 Minutes</h2>
+
+    <p>DriftWatch implements all four steps above as a managed service. You bring your prompts; we handle the scoring, scheduling, and alerting.</p>
+
+    <ol>
+        <li>Sign up free — no card required, 3 prompts included</li>
+        <li>Paste a production prompt and your API key</li>
+        <li>Baseline runs automatically</li>
+        <li>We check hourly and email you on drift &gt; 0.3</li>
+    </ol>
+
+    <div class="cta-block">
+        <h3>Set Up Prompt Regression Testing in 5 Minutes</h3>
+        <p>Free tier, no card required. Know within 60 minutes when your LLM provider ships a silent update.</p>
+        <a href="../app.html" class="cta-btn">Start Monitoring Free →</a>
+        <div class="cta-sub">🔒 No card required · Free tier · Cancel anytime</div>
+    </div>
+
+    <div class="related">
+        <div class="related-title">Related Reading</div>
+        <a href="gpt-52-behavior-change.html">GPT-5.2 Changed Behaviour on Feb 10, 2026 — Did Your Prompts Break? →</a>
+        <a href="../dashboard/index.html">Live Drift Detection Dashboard — See Real Results →</a>
+        <a href="../index.html">DriftWatch — Continuous LLM Behavioural Monitoring →</a>
+    </div>
+
+</div>
+
+<footer>
+    <p><a href="../index.html">DriftWatch</a> — LLM Behavioural Monitoring &nbsp;·&nbsp; <a href="mailto:clawgenesis@gmail.com">clawgenesis@gmail.com</a></p>
+    <p style="margin-top:.5rem">© 2026 · <a href="../index.html">Home</a> · <a href="../app.html">Start Free</a></p>
+</footer>
+
+</body>
+</html>

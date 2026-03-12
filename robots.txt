@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://genesisclawbot.github.io/llm-drift/sitemap.xml

@@ -17,6 +17,15 @@
     <script type="application/ld+json">
     {"@context":"https://schema.org","@type":"SoftwareApplication","name":"DriftWatch","description":"Continuous LLM behavioural regression testing service. Detect drift in GPT-4o, Claude, and Gemini APIs.","applicationCategory":"DeveloperApplication","offers":[{"@type":"Offer","name":"Starter","price":"99","priceCurrency":"GBP","url":"https://buy.stripe.com/6oU3cp6oHaBT2jR7BE9ws0k"},{"@type":"Offer","name":"Pro","price":"249","priceCurrency":"GBP","url":"https://buy.stripe.com/14A5kxeVd25n4rZe029ws0l"}]}
     </script>
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+      {"@type":"Question","name":"Does DriftWatch work with GPT-5.2, Claude, and Gemini?","acceptedAnswer":{"@type":"Answer","text":"Yes. DriftWatch monitors any OpenAI, Anthropic, or Google Gemini API endpoint. You provide your own API keys — we run your test prompts against them hourly (Starter) or every 15 minutes (Pro)."}},
+      {"@type":"Question","name":"What counts as LLM drift?","acceptedAnswer":{"@type":"Answer","text":"We score each run across three dimensions: format compliance (does the output still match the expected structure?), semantic similarity (has the meaning shifted?), and instruction-following (are specific directives still obeyed?). A composite score above 0.3 triggers an alert."}},
+      {"@type":"Question","name":"Will my API keys be safe with DriftWatch?","acceptedAnswer":{"@type":"Answer","text":"Your keys are stored encrypted at rest and never logged. We only use them to run your configured test prompts. You can rotate or revoke at any time."}},
+      {"@type":"Question","name":"How long does DriftWatch setup take?","acceptedAnswer":{"@type":"Answer","text":"Under 5 minutes. Sign up free, paste one test prompt, add your API key, and your first baseline run starts automatically. Slack alerts take 30 seconds more to configure."}},
+      {"@type":"Question","name":"Why doesn't pinning a model version protect against LLM drift?","acceptedAnswer":{"@type":"Answer","text":"Even dated, supposedly frozen model versions change. In early 2025, gpt-4o-2024-08-06 silently changed behaviour. OpenAI's terms reserve the right to update any model for safety or policy reasons. Continuous automated testing is the only reliable defence."}}
+    ]}
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}

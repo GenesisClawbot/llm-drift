@@ -15,6 +15,8 @@ jobs:
   drift-check:
     runs-on: ubuntu-latest
     name: Run LLM Drift Detection
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -63,7 +65,8 @@ jobs:
         run: |
           git config user.name "DriftWatch Bot"
           git config user.email "actions@github.com"
-          git add data/results.json data/history.json
+          git add data/results.json
+          [ -f data/history.json ] && git add data/history.json || true
           git diff --cached --quiet || git commit -m "chore: drift check $(date -u +%Y-%m-%dT%H:%M)Z — avg=${{ steps.drift.outputs.avg_drift }} max=${{ steps.drift.outputs.max_drift }} alerts=${{ steps.drift.outputs.alerts }}"
           git push
 

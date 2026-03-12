@@ -9,7 +9,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 
 from .models import SessionLocal, User, Prompt, Baseline, RunResult, AlertLog
 from .drift_runner import run_check_for_prompt
-from .alerts import send_slack_alert, build_alert_message
+from .alerts import send_slack_alert, send_email_alert, build_alert_message
 
 logger = logging.getLogger(__name__)
 
@@ -100,10 +100,14 @@ def run_drift_check_for_user(user_id: str):
                 "results": results,
             }
             # Slack alert
+            slack_delivered = False
             if user.slack_webhook_url:
-                delivered = send_slack_alert(user.slack_webhook_url, user.email, run_data)
-            else:
-                delivered = False
+                slack_delivered = send_slack_alert(user.slack_webhook_url, user.email, run_data)
+
+            # Email alert (fires if SMTP_PASSWORD env var is set)
+            email_delivered = send_email_alert(user.email, run_data)
+
+            delivered = slack_delivered or email_delivered
 
             alert_log = AlertLog(
                 user_id=user_id,

@@ -26,6 +26,8 @@ ENV STRIPE_STARTER_PRICE_ID="price_1TAEMZ7dVu3KiOEDGuyO9mtF"
 ENV STRIPE_PRO_PRICE_ID="price_1TAEMa7dVu3KiOEDEgg8hFWf"
 ENV SECRET_KEY="change-me-in-production"
 ENV PORT=8000
+ENV SMTP_FROM="clawgenesis@gmail.com"
+ENV SMTP_PASSWORD=""
 
 # Use shell form so $PORT is expanded at runtime
 CMD python3 -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT

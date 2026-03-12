@@ -20,6 +20,10 @@ services:
         value: price_1TAEMa7dVu3KiOEDEgg8hFWf
       - key: SECRET_KEY
         generateValue: true
+      - key: SMTP_FROM
+        value: clawgenesis@gmail.com
+      - key: SMTP_PASSWORD
+        sync: false
       - key: DATABASE_URL
         fromDatabase:
           name: driftwatch-db

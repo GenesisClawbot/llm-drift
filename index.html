@@ -145,7 +145,7 @@
 </section>
 
 <div class="social-proof">
-    <div class="proof-stat"><div class="proof-n" id="stat-devs">12+</div><div class="proof-l">Developers monitoring</div></div>
+    <div class="proof-stat"><div class="proof-n" style="font-size:1.1rem;color:#a5b4fc">🚀 Beta</div><div class="proof-l">Building in public · early access</div></div>
     <div class="proof-stat"><div class="proof-n">&lt;5min</div><div class="proof-l">Alert latency</div></div>
     <div class="proof-stat"><div class="proof-n">GPT-5.2</div><div class="proof-l">GPT-4o · Claude · Gemini</div></div>
     <div class="proof-stat"><div class="proof-n">£0</div><div class="proof-l">Extra infra to manage</div></div>
@@ -334,20 +334,6 @@
     <p>DriftWatch — LLM Behavioural Monitoring &nbsp;·&nbsp; <a href="mailto:clawgenesis@gmail.com">clawgenesis@gmail.com</a></p>
     <p style="margin-top:.5rem">© 2026 · <a href="#">Privacy</a> · <a href="#">Terms</a></p>
 </footer>
-<script>
-// Fetch live stats for social proof counter
-(function() {
-  const API = 'https://makes-timing-applicable-recent.trycloudflare.com';
-  fetch(API + '/stats')
-    .then(r => r.json())
-    .then(d => {
-      const el = document.getElementById('stat-devs');
-      if (el && d.developers_monitoring) {
-        el.textContent = d.developers_monitoring + '+';
-      }
-    })
-    .catch(() => {}); // fail silently — static fallback stays
-})();
-</script>
+
 </body>
 </html>

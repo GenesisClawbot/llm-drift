@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriftWatch vs Langfuse — Observability vs Drift Detection</title>
+    <meta name="description" content="Langfuse is great for open-source LLM observability. It doesn't proactively monitor for behavioral drift. DriftWatch fills that gap — automated baseline comparison with Slack alerts.">
+    <meta name="keywords" content="DriftWatch vs Langfuse, Langfuse alternative, LLM behavioral drift, LLM monitoring service, open source LLM observability, LLM drift detection">
+    <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/compare/langfuse.html">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebPage","name":"DriftWatch vs Langfuse","description":"Comparison of DriftWatch and Langfuse for LLM monitoring and behavioral drift detection.","url":"https://genesisclawbot.github.io/llm-drift/compare/langfuse.html"}
+    </script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0a0f1a;color:#e2e8f0;line-height:1.6}
+        nav{background:#111827;border-bottom:1px solid rgba(255,255,255,.07);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem}
+        .logo{font-weight:700;color:#6366f1;text-decoration:none;font-size:1.1rem}
+        .nav-links{display:flex;gap:1.5rem;align-items:center;font-size:.9rem}
+        .nav-links a{color:#9ca3af;text-decoration:none}
+        .nav-cta{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.5rem 1.25rem;border-radius:.375rem;text-decoration:none;font-weight:600;font-size:.875rem}
+        .container{max-width:880px;margin:0 auto;padding:3rem 2rem 5rem}
+        .breadcrumb{color:#6b7280;font-size:.8rem;margin-bottom:2rem}
+        .breadcrumb a{color:#6b7280;text-decoration:none}
+        .breadcrumb a:hover{color:#9ca3af}
+        .hero{margin-bottom:3rem}
+        .tag{display:inline-block;background:rgba(99,102,241,.15);color:#a5b4fc;padding:.25rem .7rem;border-radius:9999px;font-size:.75rem;font-weight:600;margin-bottom:1rem}
+        h1{font-size:2.1rem;font-weight:700;color:#f1f5f9;line-height:1.2;margin-bottom:1rem}
+        .hero-sub{color:#9ca3af;font-size:1.05rem}
+        h2{font-size:1.35rem;font-weight:700;color:#f1f5f9;margin:2.5rem 0 1rem}
+        p{color:#d1d5db;margin-bottom:1.25rem}
+        ul{color:#d1d5db;padding-left:1.5rem;margin-bottom:1.25rem}
+        ul li{margin-bottom:.5rem}
+        .tldr{background:#111827;border:1px solid rgba(99,102,241,.3);border-left:4px solid #6366f1;border-radius:.625rem;padding:1.5rem;margin:2rem 0}
+        .tldr-label{font-weight:700;color:#a5b4fc;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem}
+        .tldr ul{margin-bottom:0}
+        .table-wrap{overflow-x:auto;margin:1.5rem 0}
+        table{width:100%;border-collapse:collapse;font-size:.9rem}
+        th{padding:.9rem 1rem;text-align:left;border-bottom:2px solid rgba(255,255,255,.1);color:#9ca3af;font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}
+        th.hl{color:#a5b4fc;border-bottom-color:rgba(99,102,241,.5)}
+        td{padding:.85rem 1rem;border-bottom:1px solid rgba(255,255,255,.05);color:#d1d5db}
+        td.hl{background:rgba(99,102,241,.05);border-left:2px solid rgba(99,102,241,.25);border-right:2px solid rgba(99,102,241,.25)}
+        tr:last-child td{border-bottom:none}
+        .tick{color:#86efac;font-weight:700}
+        .cross{color:#f87171;font-weight:700}
+        .partial{color:#fcd34d;font-size:.85rem;font-weight:500}
+        .scenario{background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:.625rem;padding:1.5rem;margin-bottom:1rem}
+        .scenario-title{font-weight:700;color:#f1f5f9;margin-bottom:.5rem;font-size:.95rem}
+        .scenario p{margin-bottom:0;font-size:.9rem}
+        .callout{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25);border-radius:.625rem;padding:1.25rem;margin:1.5rem 0}
+        .callout p{margin-bottom:0;color:#fcd34d;font-size:.9rem}
+        .cta-box{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(79,70,229,.1));border:1px solid rgba(99,102,241,.3);border-radius:.875rem;padding:2.5rem;text-align:center;margin-top:3rem}
+        .cta-box h3{font-size:1.5rem;font-weight:700;color:#f1f5f9;margin-bottom:.75rem}
+        .cta-box p{color:#9ca3af;margin-bottom:1.5rem}
+        .cta-btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.85rem 2rem;border-radius:.5rem;text-decoration:none;font-weight:600}
+        .cta-sub{color:#6b7280;font-size:.8rem;margin-top:.75rem}
+    </style>
+</head>
+<body>
+<nav>
+    <a class="logo" href="../">🌊 DriftWatch</a>
+    <div class="nav-links">
+        <a href="../blog/">Blog</a>
+        <a href="../compare/">Compare</a>
+        <a href="../app.html?demo=1">Demo</a>
+        <a class="nav-cta" href="../app.html">Get Started Free</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="breadcrumb">
+        <a href="../">Home</a> → <a href="./">Compare</a> → DriftWatch vs Langfuse
+    </div>
+
+    <div class="hero">
+        <span class="tag">Tool Comparison</span>
+        <h1>DriftWatch vs Langfuse<br>— Two Different Problems</h1>
+        <p class="hero-sub">Langfuse is a solid open-source LLM observability platform. It captures what your model returns. DriftWatch monitors whether your model is returning the same kind of thing it did before — and alerts you when it isn't.</p>
+    </div>
+
+    <div class="tldr">
+        <div class="tldr-label">TL;DR</div>
+        <ul>
+            <li><strong>Langfuse</strong> = open-source observability. Logs traces, evaluations, user feedback. Reactive — you look at it after something happens.</li>
+            <li><strong>DriftWatch</strong> = proactive behavioral monitoring. Runs your prompts on a schedule, compares to baseline, alerts when behavior shifts. You know before your users do.</li>
+            <li>If your LLM app is production-critical, you probably want both. Langfuse for debugging; DriftWatch so you're never debugging in the dark again.</li>
+        </ul>
+    </div>
+
+    <h2>What Langfuse does well</h2>
+    <p>Langfuse is genuinely excellent for what it's built for:</p>
+    <ul>
+        <li><strong>Tracing:</strong> Full request/response logging, latency, token counts — all searchable.</li>
+        <li><strong>Evaluations:</strong> Annotate and score LLM outputs; run LLM-as-judge evaluations.</li>
+        <li><strong>Open source:</strong> Self-host on your own infrastructure. No data leaves your network.</li>
+        <li><strong>SDK breadth:</strong> Python, TypeScript, and integrations with OpenAI, Anthropic, LangChain.</li>
+        <li><strong>Free tier:</strong> Cloud-hosted free tier is generous for individuals and small teams.</li>
+    </ul>
+    <p>The gap: Langfuse is reactive. It answers "what happened?" not "is something silently changing?"</p>
+
+    <div class="callout">
+        <p>⚠️ <strong>The silent drift problem:</strong> When OpenAI updated <code>gpt-4o-2024-08-06</code> behavior in early 2026, Langfuse users saw the logs — after their users reported broken outputs. DriftWatch users got Slack alerts within the hour, before any user noticed.</p>
+    </div>
+
+    <h2>Side-by-side comparison</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Capability</th>
+                    <th class="hl">DriftWatch</th>
+                    <th>Langfuse</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Request/response tracing</td>
+                    <td class="hl"><span class="cross">✗</span> Not built-in</td>
+                    <td><span class="tick">✓</span> Core feature</td>
+                </tr>
+                <tr>
+                    <td>LLM-as-judge evaluations</td>
+                    <td class="hl"><span class="cross">✗</span> Not available</td>
+                    <td><span class="tick">✓</span> Supported</td>
+                </tr>
+                <tr>
+                    <td>Self-hostable / open source</td>
+                    <td class="hl"><span class="cross">✗</span> SaaS only (currently)</td>
+                    <td><span class="tick">✓</span> MIT license</td>
+                </tr>
+                <tr>
+                    <td>Proactive behavioral drift alerts</td>
+                    <td class="hl"><span class="tick">✓</span> Hourly monitoring</td>
+                    <td><span class="cross">✗</span> Not available</td>
+                </tr>
+                <tr>
+                    <td>Baseline-vs-now comparison</td>
+                    <td class="hl"><span class="tick">✓</span> Automatic</td>
+                    <td><span class="cross">✗</span> Manual evals only</td>
+                </tr>
+                <tr>
+                    <td>Drift score (0.0–1.0)</td>
+                    <td class="hl"><span class="tick">✓</span> Per-prompt metric</td>
+                    <td><span class="cross">✗</span> Not available</td>
+                </tr>
+                <tr>
+                    <td>Slack / email alert on drift</td>
+                    <td class="hl"><span class="tick">✓</span> Built-in</td>
+                    <td><span class="partial">Partial</span> Score alerts (custom)</td>
+                </tr>
+                <tr>
+                    <td>JSON format compliance check</td>
+                    <td class="hl"><span class="tick">✓</span> Automatic validator</td>
+                    <td><span class="cross">✗</span> Manual eval required</td>
+                </tr>
+                <tr>
+                    <td>Works without SDK integration</td>
+                    <td class="hl"><span class="tick">✓</span> Bring your prompts</td>
+                    <td><span class="cross">✗</span> SDK required</td>
+                </tr>
+                <tr>
+                    <td>Setup time</td>
+                    <td class="hl">~5 minutes</td>
+                    <td>~20–30 minutes (SDK)</td>
+                </tr>
+                <tr>
+                    <td>Free tier</td>
+                    <td class="hl"><span class="tick">✓</span> 3 prompts, no card</td>
+                    <td><span class="tick">✓</span> Generous cloud tier</td>
+                </tr>
+                <tr>
+                    <td>Paid from</td>
+                    <td class="hl">£99/month</td>
+                    <td>$59/month (Langfuse Cloud)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>When Langfuse is the right choice</h2>
+    <div class="scenario">
+        <div class="scenario-title">✓ You need full request/response audit logging</div>
+        <p>Langfuse is the right tool when you need to query your full LLM call history, debug specific failed requests, or run structured human evaluations on model outputs.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ Data must stay on your infrastructure</div>
+        <p>Langfuse is MIT-licensed and self-hostable. If your data sovereignty requirements prevent sending prompts to a third-party SaaS, Langfuse is the answer.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ You're building an evaluation pipeline</div>
+        <p>For structured eval workflows with annotators, LLM-as-judge scoring, and datasets, Langfuse's evaluation framework is purpose-built for this.</p>
+    </div>
+
+    <h2>When DriftWatch fills the gap</h2>
+    <div class="scenario">
+        <div class="scenario-title">✓ You want to know before your users know</div>
+        <p>DriftWatch runs your test prompts on a schedule, compares each result to the baseline run, and sends a Slack or email alert the moment drift exceeds your threshold — before any user-facing request is affected.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ Your prompts are critical but you changed nothing</div>
+        <p>The most dangerous class of LLM failure: your code didn't change, your prompts didn't change, but your model's behavior did. DriftWatch is specifically built to catch this. Langfuse doesn't monitor for it.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ You need zero-SDK setup monitoring</div>
+        <p>DriftWatch doesn't require SDK instrumentation. Add your prompts in the dashboard, pick your model, and monitoring starts immediately. No code changes required in your application.</p>
+    </div>
+
+    <h2>The honest answer</h2>
+    <p>Langfuse and DriftWatch are not the same category of tool. Langfuse is observability — a powerful passive system that records everything your LLM does. DriftWatch is behavioral monitoring — an active system that regularly tests your LLM and tells you when it's behaving differently than before.</p>
+    <p>A production LLM application ideally has both: observability for when things go wrong (Langfuse), and proactive drift monitoring so you know before things go wrong (DriftWatch).</p>
+    <p>If you currently have neither: start with DriftWatch. It's a 5-minute setup, no SDK required, and gives you the most actionable signal immediately — a drift alert before your users file a ticket.</p>
+
+    <div class="cta-box">
+        <h3>Start monitoring for free — no SDK required</h3>
+        <p>Paste your prompts. DriftWatch baselines your model's behavior today and alerts you the moment it changes. No instrumentation. No code changes.</p>
+        <a class="cta-btn" href="../app.html">Get started free →</a>
+        <div class="cta-sub">Or <a href="../app.html?demo=1" style="color:#6366f1">see a live demo</a> with real drift data (JSON extraction regression example)</div>
+    </div>
+</div>
+</body>
+</html>

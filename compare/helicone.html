@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriftWatch vs Helicone — Proxy Logging vs Drift Detection</title>
+    <meta name="description" content="Helicone logs every LLM request via a proxy. DriftWatch proactively tests your model on a schedule and alerts you when behavior shifts. Different tools for different problems.">
+    <meta name="keywords" content="DriftWatch vs Helicone, Helicone alternative, LLM proxy monitoring, LLM behavioral drift, LLM drift detection service, Helicone vs DriftWatch">
+    <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/compare/helicone.html">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebPage","name":"DriftWatch vs Helicone","description":"Comparison of DriftWatch and Helicone for LLM monitoring and behavioral drift detection.","url":"https://genesisclawbot.github.io/llm-drift/compare/helicone.html"}
+    </script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0a0f1a;color:#e2e8f0;line-height:1.6}
+        nav{background:#111827;border-bottom:1px solid rgba(255,255,255,.07);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem}
+        .logo{font-weight:700;color:#6366f1;text-decoration:none;font-size:1.1rem}
+        .nav-links{display:flex;gap:1.5rem;align-items:center;font-size:.9rem}
+        .nav-links a{color:#9ca3af;text-decoration:none}
+        .nav-cta{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.5rem 1.25rem;border-radius:.375rem;text-decoration:none;font-weight:600;font-size:.875rem}
+        .container{max-width:880px;margin:0 auto;padding:3rem 2rem 5rem}
+        .breadcrumb{color:#6b7280;font-size:.8rem;margin-bottom:2rem}
+        .breadcrumb a{color:#6b7280;text-decoration:none}
+        .hero{margin-bottom:3rem}
+        .tag{display:inline-block;background:rgba(99,102,241,.15);color:#a5b4fc;padding:.25rem .7rem;border-radius:9999px;font-size:.75rem;font-weight:600;margin-bottom:1rem}
+        h1{font-size:2.1rem;font-weight:700;color:#f1f5f9;line-height:1.2;margin-bottom:1rem}
+        .hero-sub{color:#9ca3af;font-size:1.05rem}
+        h2{font-size:1.35rem;font-weight:700;color:#f1f5f9;margin:2.5rem 0 1rem}
+        p{color:#d1d5db;margin-bottom:1.25rem}
+        ul{color:#d1d5db;padding-left:1.5rem;margin-bottom:1.25rem}
+        ul li{margin-bottom:.5rem}
+        .tldr{background:#111827;border:1px solid rgba(99,102,241,.3);border-left:4px solid #6366f1;border-radius:.625rem;padding:1.5rem;margin:2rem 0}
+        .tldr-label{font-weight:700;color:#a5b4fc;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem}
+        .tldr ul{margin-bottom:0}
+        .table-wrap{overflow-x:auto;margin:1.5rem 0}
+        table{width:100%;border-collapse:collapse;font-size:.9rem}
+        th{padding:.9rem 1rem;text-align:left;border-bottom:2px solid rgba(255,255,255,.1);color:#9ca3af;font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}
+        th.hl{color:#a5b4fc;border-bottom-color:rgba(99,102,241,.5)}
+        td{padding:.85rem 1rem;border-bottom:1px solid rgba(255,255,255,.05);color:#d1d5db}
+        td.hl{background:rgba(99,102,241,.05);border-left:2px solid rgba(99,102,241,.25);border-right:2px solid rgba(99,102,241,.25)}
+        tr:last-child td{border-bottom:none}
+        .tick{color:#86efac;font-weight:700}
+        .cross{color:#f87171;font-weight:700}
+        .partial{color:#fcd34d;font-size:.85rem;font-weight:500}
+        .scenario{background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:.625rem;padding:1.5rem;margin-bottom:1rem}
+        .scenario-title{font-weight:700;color:#f1f5f9;margin-bottom:.5rem;font-size:.95rem}
+        .scenario p{margin-bottom:0;font-size:.9rem}
+        .cta-box{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(79,70,229,.1));border:1px solid rgba(99,102,241,.3);border-radius:.875rem;padding:2.5rem;text-align:center;margin-top:3rem}
+        .cta-box h3{font-size:1.5rem;font-weight:700;color:#f1f5f9;margin-bottom:.75rem}
+        .cta-box p{color:#9ca3af;margin-bottom:1.5rem}
+        .cta-btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.85rem 2rem;border-radius:.5rem;text-decoration:none;font-weight:600}
+        .cta-sub{color:#6b7280;font-size:.8rem;margin-top:.75rem}
+    </style>
+</head>
+<body>
+<nav>
+    <a class="logo" href="../">🌊 DriftWatch</a>
+    <div class="nav-links">
+        <a href="../blog/">Blog</a>
+        <a href="../compare/">Compare</a>
+        <a href="../app.html?demo=1">Demo</a>
+        <a class="nav-cta" href="../app.html">Get Started Free</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="breadcrumb">
+        <a href="../">Home</a> → <a href="./">Compare</a> → DriftWatch vs Helicone
+    </div>
+
+    <div class="hero">
+        <span class="tag">Tool Comparison</span>
+        <h1>DriftWatch vs Helicone<br>— Logging vs Monitoring</h1>
+        <p class="hero-sub">Helicone routes your LLM traffic through a proxy to log everything. DriftWatch proactively tests your model's behavior on a schedule and sends an alert when the output signature changes. These are fundamentally different tools.</p>
+    </div>
+
+    <div class="tldr">
+        <div class="tldr-label">TL;DR</div>
+        <ul>
+            <li><strong>Helicone</strong> = LLM proxy that logs all requests, tracks cost/latency/usage, provides a dashboard. Requires routing traffic through their proxy.</li>
+            <li><strong>DriftWatch</strong> = standalone drift monitor. No proxy, no SDK, no traffic routing change. Add prompts → monitoring starts → get alerted when behavior shifts.</li>
+            <li>Helicone answers "what are my LLM calls doing?" DriftWatch answers "has my model started behaving differently?"</li>
+        </ul>
+    </div>
+
+    <h2>How Helicone works (and where it stops)</h2>
+    <p>Helicone works as an API proxy: instead of calling <code>api.openai.com</code>, you call <code>oai.helicone.ai</code>. Every request passes through Helicone's infrastructure, which logs it and then forwards it to OpenAI (or Anthropic, etc.). This gives you:</p>
+    <ul>
+        <li>Full request/response logging</li>
+        <li>Cost tracking and usage analytics</li>
+        <li>Rate limiting and caching</li>
+        <li>A searchable dashboard of all your LLM calls</li>
+    </ul>
+    <p>Helicone is excellent at this. The limitation: it's entirely reactive. It records what your model does in response to your production traffic. It cannot tell you if your model's behavior has silently shifted between requests — because it has no baseline to compare against.</p>
+
+    <h2>The proxy architecture problem for drift detection</h2>
+    <p>Even with complete Helicone logs, detecting behavioral drift manually requires:</p>
+    <ul>
+        <li>Identifying the right control prompts to compare across time windows</li>
+        <li>Normalizing for variation in production request payloads</li>
+        <li>Writing custom scoring logic to compare outputs semantically (not just string matching)</li>
+        <li>Building alerting logic to notify you when drift exceeds a threshold</li>
+        <li>Running this analysis continuously, not just on-demand</li>
+    </ul>
+    <p>That's a significant custom engineering effort. DriftWatch is that system, built and running for you.</p>
+
+    <h2>Side-by-side comparison</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Capability</th>
+                    <th class="hl">DriftWatch</th>
+                    <th>Helicone</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Full LLM request logging</td>
+                    <td class="hl"><span class="cross">✗</span> Not a proxy</td>
+                    <td><span class="tick">✓</span> Core feature (proxy)</td>
+                </tr>
+                <tr>
+                    <td>Cost / token usage analytics</td>
+                    <td class="hl"><span class="cross">✗</span> Out of scope</td>
+                    <td><span class="tick">✓</span> Real-time dashboard</td>
+                </tr>
+                <tr>
+                    <td>Request caching</td>
+                    <td class="hl"><span class="cross">✗</span> Not available</td>
+                    <td><span class="tick">✓</span> Response caching</td>
+                </tr>
+                <tr>
+                    <td>Proactive behavioral drift detection</td>
+                    <td class="hl"><span class="tick">✓</span> Hourly automated</td>
+                    <td><span class="cross">✗</span> Not available</td>
+                </tr>
+                <tr>
+                    <td>Baseline-vs-now comparison</td>
+                    <td class="hl"><span class="tick">✓</span> Automatic</td>
+                    <td><span class="cross">✗</span> Not available</td>
+                </tr>
+                <tr>
+                    <td>Drift score metric (0.0–1.0)</td>
+                    <td class="hl"><span class="tick">✓</span> Per prompt</td>
+                    <td><span class="cross">✗</span> Not available</td>
+                </tr>
+                <tr>
+                    <td>Slack/email alert on drift</td>
+                    <td class="hl"><span class="tick">✓</span> Built-in</td>
+                    <td><span class="cross">✗</span> Not for drift</td>
+                </tr>
+                <tr>
+                    <td>Requires traffic routing change</td>
+                    <td class="hl"><span class="tick">✓</span> No proxy needed</td>
+                    <td><span class="cross">✗</span> Must route via Helicone</td>
+                </tr>
+                <tr>
+                    <td>Works without touching app code</td>
+                    <td class="hl"><span class="tick">✓</span> Just add prompts</td>
+                    <td><span class="cross">✗</span> Must change API base URL</td>
+                </tr>
+                <tr>
+                    <td>Free tier</td>
+                    <td class="hl"><span class="tick">✓</span> 3 prompts, no card</td>
+                    <td><span class="tick">✓</span> 10k requests/month free</td>
+                </tr>
+                <tr>
+                    <td>Setup time</td>
+                    <td class="hl">~5 minutes</td>
+                    <td>~10 minutes (base URL change)</td>
+                </tr>
+                <tr>
+                    <td>Paid from</td>
+                    <td class="hl">£99/month</td>
+                    <td>$80/month (Pro)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>When Helicone is the right choice</h2>
+    <div class="scenario">
+        <div class="scenario-title">✓ You need full LLM cost visibility</div>
+        <p>Helicone's cost analytics are genuinely useful. If you're spending thousands on OpenAI and want to track cost-per-feature, cost-per-user, or identify waste — Helicone is built for this.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ You want request caching to reduce costs</div>
+        <p>Helicone can cache identical requests, which meaningfully cuts costs for use cases with repeated queries. This is not something DriftWatch does.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ You're fine routing production traffic through a third party</div>
+        <p>Some teams can't route production traffic through a proxy — compliance, latency, or legal constraints. If those don't apply, Helicone's proxy architecture is transparent and low-friction.</p>
+    </div>
+
+    <h2>When DriftWatch fills the gap</h2>
+    <div class="scenario">
+        <div class="scenario-title">✓ You want to know if your model silently changed — before users notice</div>
+        <p>DriftWatch runs your critical prompts on a schedule against a stable baseline. When GPT-4o or Claude changes behavior — which they do, without announcement — you get a Slack alert within the hour. Helicone doesn't do this.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ You can't or won't change your API base URL</div>
+        <p>DriftWatch requires zero changes to your application code. No proxy. No SDK. You paste prompts into DriftWatch and it runs them independently, completely separate from your production traffic.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ You want a structured drift score, not just raw logs</div>
+        <p>DriftWatch computes a 0.0–1.0 drift score per prompt (semantic similarity, format compliance, length delta, instruction-following) and alerts you when it crosses a threshold. Helicone gives you raw logs — the drift analysis is left to you.</p>
+    </div>
+
+    <h2>Bottom line</h2>
+    <p>Helicone is a cost/usage monitoring layer. It's valuable for teams managing LLM spend. DriftWatch is a behavioral quality monitoring layer. It's valuable for teams that need to know when their model's outputs are no longer what they were.</p>
+    <p>These are complementary tools. If you're currently using Helicone, DriftWatch adds the layer Helicone is missing: proactive behavioral alerting that catches silent model updates before they become user-facing incidents.</p>
+
+    <div class="cta-box">
+        <h3>Add drift monitoring in 5 minutes — no proxy needed</h3>
+        <p>Paste your prompts. DriftWatch baselines them today and alerts you when behavior changes. Nothing routes through DriftWatch in production — it monitors independently.</p>
+        <a class="cta-btn" href="../app.html">Get started free →</a>
+        <div class="cta-sub">Or <a href="../app.html?demo=1" style="color:#6366f1">try the live demo</a> — no signup required</div>
+    </div>
+</div>
+</body>
+</html>

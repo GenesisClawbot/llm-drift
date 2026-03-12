@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriftWatch vs LangSmith — What LangSmith Misses About LLM Drift</title>
+    <meta name="description" content="LangSmith excels at tracing. But it doesn't catch silent behavioral drift between LLM versions. Here's what DriftWatch does that LangSmith can't.">
+    <meta name="keywords" content="DriftWatch vs LangSmith, LangSmith alternative, LLM behavioral drift monitoring, LLM regression detection, LangSmith vs DriftWatch">
+    <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/compare/langsmith.html">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebPage","name":"DriftWatch vs LangSmith","description":"Comparison of DriftWatch and LangSmith for LLM behavioral monitoring and drift detection.","url":"https://genesisclawbot.github.io/llm-drift/compare/langsmith.html"}
+    </script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0a0f1a;color:#e2e8f0;line-height:1.6}
+        nav{background:#111827;border-bottom:1px solid rgba(255,255,255,.07);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem}
+        .logo{font-weight:700;color:#6366f1;text-decoration:none;font-size:1.1rem}
+        .nav-links{display:flex;gap:1.5rem;align-items:center;font-size:.9rem}
+        .nav-links a{color:#9ca3af;text-decoration:none}
+        .nav-cta{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.5rem 1.25rem;border-radius:.375rem;text-decoration:none;font-weight:600;font-size:.875rem}
+        .container{max-width:880px;margin:0 auto;padding:3rem 2rem 5rem}
+        .breadcrumb{color:#6b7280;font-size:.8rem;margin-bottom:2rem}
+        .breadcrumb a{color:#6b7280;text-decoration:none}
+        .breadcrumb a:hover{color:#9ca3af}
+        .hero{margin-bottom:3rem}
+        .tag{display:inline-block;background:rgba(99,102,241,.15);color:#a5b4fc;padding:.25rem .7rem;border-radius:9999px;font-size:.75rem;font-weight:600;margin-bottom:1rem}
+        h1{font-size:2.1rem;font-weight:700;color:#f1f5f9;line-height:1.2;margin-bottom:1rem}
+        .hero-sub{color:#9ca3af;font-size:1.05rem}
+        h2{font-size:1.35rem;font-weight:700;color:#f1f5f9;margin:2.5rem 0 1rem}
+        p{color:#d1d5db;margin-bottom:1.25rem}
+        ul{color:#d1d5db;padding-left:1.5rem;margin-bottom:1.25rem}
+        ul li{margin-bottom:.5rem}
+        /* TL;DR box */
+        .tldr{background:#111827;border:1px solid rgba(99,102,241,.3);border-left:4px solid #6366f1;border-radius:.625rem;padding:1.5rem;margin:2rem 0}
+        .tldr-label{font-weight:700;color:#a5b4fc;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem}
+        .tldr ul{margin-bottom:0}
+        /* Comparison table */
+        .table-wrap{overflow-x:auto;margin:1.5rem 0}
+        table{width:100%;border-collapse:collapse;font-size:.9rem}
+        th{padding:.9rem 1rem;text-align:left;border-bottom:2px solid rgba(255,255,255,.1);color:#9ca3af;font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}
+        th.hl{color:#a5b4fc;border-bottom-color:rgba(99,102,241,.5)}
+        td{padding:.85rem 1rem;border-bottom:1px solid rgba(255,255,255,.05);color:#d1d5db}
+        td.hl{background:rgba(99,102,241,.05);border-left:2px solid rgba(99,102,241,.25);border-right:2px solid rgba(99,102,241,.25)}
+        tr:last-child td{border-bottom:none}
+        .tick{color:#86efac;font-weight:700}
+        .cross{color:#f87171;font-weight:700}
+        .partial{color:#fcd34d;font-size:.85rem;font-weight:500}
+        /* Scenario box */
+        .scenario{background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:.625rem;padding:1.5rem;margin-bottom:1rem}
+        .scenario-title{font-weight:700;color:#f1f5f9;margin-bottom:.5rem;font-size:.95rem}
+        .scenario p{margin-bottom:0;font-size:.9rem}
+        /* CTA */
+        .cta-box{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(79,70,229,.1));border:1px solid rgba(99,102,241,.3);border-radius:.875rem;padding:2.5rem;text-align:center;margin-top:3rem}
+        .cta-box h3{font-size:1.5rem;font-weight:700;color:#f1f5f9;margin-bottom:.75rem}
+        .cta-box p{color:#9ca3af;margin-bottom:1.5rem}
+        .cta-btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.85rem 2rem;border-radius:.5rem;text-decoration:none;font-weight:600}
+        .cta-sub{color:#6b7280;font-size:.8rem;margin-top:.75rem}
+    </style>
+</head>
+<body>
+<nav>
+    <a class="logo" href="../">🌊 DriftWatch</a>
+    <div class="nav-links">
+        <a href="../blog/">Blog</a>
+        <a href="../compare/">Compare</a>
+        <a href="../app.html?demo=1">Demo</a>
+        <a class="nav-cta" href="../app.html">Get Started Free</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="breadcrumb">
+        <a href="../">Home</a> → <a href="./">Compare</a> → DriftWatch vs LangSmith
+    </div>
+
+    <div class="hero">
+        <span class="tag">Tool Comparison</span>
+        <h1>DriftWatch vs LangSmith<br>— What LangSmith Misses</h1>
+        <p class="hero-sub">LangSmith is excellent at request tracing and prompt management. It does not detect silent behavioral drift when OpenAI or Anthropic updates your model. DriftWatch does exactly that.</p>
+    </div>
+
+    <div class="tldr">
+        <div class="tldr-label">TL;DR</div>
+        <ul>
+            <li><strong>LangSmith</strong> = observability and tracing for LLM calls you make. Tells you what happened, not what changed silently.</li>
+            <li><strong>DriftWatch</strong> = baseline-vs-now behavioral regression detection. Alerts you when your model starts responding differently than it did last week — even when you changed nothing.</li>
+            <li>They serve different categories. Most teams that have burned by a silent model update need DriftWatch, not more tracing.</li>
+        </ul>
+    </div>
+
+    <h2>The gap LangSmith doesn't fill</h2>
+    <p>LangSmith captures your prompts, responses, latency, and costs. It's genuinely useful for debugging sessions and managing prompt versions. But here's what it cannot tell you:</p>
+    <ul>
+        <li>Did OpenAI silently change <code>gpt-4o-2024-08-06</code> two weeks ago?</li>
+        <li>Is your JSON extraction prompt returning preamble text now ("Here is the JSON: {...}") that it wasn't last month?</li>
+        <li>Is your binary classifier drifting from 98% accuracy toward 91% across the model's rolling updates?</li>
+        <li>Did your instruction-following regression start on Feb 10, 2026 when GPT-5.2 shipped?</li>
+    </ul>
+    <p>LangSmith can show you the logs after your users start complaining. DriftWatch alerts you before they notice anything is wrong.</p>
+
+    <h2>Side-by-side comparison</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Capability</th>
+                    <th class="hl">DriftWatch</th>
+                    <th>LangSmith</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Request tracing + logging</td>
+                    <td class="hl"><span class="cross">✗</span> Not the focus</td>
+                    <td><span class="tick">✓</span> Core feature</td>
+                </tr>
+                <tr>
+                    <td>Prompt version management</td>
+                    <td class="hl"><span class="cross">✗</span> Not built-in</td>
+                    <td><span class="tick">✓</span> LangSmith Hub</td>
+                </tr>
+                <tr>
+                    <td>Behavioral drift detection</td>
+                    <td class="hl"><span class="tick">✓</span> Core feature</td>
+                    <td><span class="cross">✗</span> Not supported</td>
+                </tr>
+                <tr>
+                    <td>Baseline comparison across time</td>
+                    <td class="hl"><span class="tick">✓</span> Automatic</td>
+                    <td><span class="cross">✗</span> Manual eval runs</td>
+                </tr>
+                <tr>
+                    <td>Proactive drift alerts (Slack/email)</td>
+                    <td class="hl"><span class="tick">✓</span> Built-in</td>
+                    <td><span class="cross">✗</span> Not available</td>
+                </tr>
+                <tr>
+                    <td>Model version change detection</td>
+                    <td class="hl"><span class="tick">✓</span> Automatic</td>
+                    <td><span class="cross">✗</span> Not automatic</td>
+                </tr>
+                <tr>
+                    <td>Semantic similarity scoring</td>
+                    <td class="hl"><span class="tick">✓</span> 0.0–1.0 drift score</td>
+                    <td><span class="partial">Partial</span> Manual evals</td>
+                </tr>
+                <tr>
+                    <td>JSON format compliance check</td>
+                    <td class="hl"><span class="tick">✓</span> Built-in validator</td>
+                    <td><span class="cross">✗</span> Custom code required</td>
+                </tr>
+                <tr>
+                    <td>Free tier to start</td>
+                    <td class="hl"><span class="tick">✓</span> 3 prompts, no card</td>
+                    <td><span class="tick">✓</span> Free developer tier</td>
+                </tr>
+                <tr>
+                    <td>Paid plan starting price</td>
+                    <td class="hl">£99/month</td>
+                    <td>$39/month (LangSmith Plus)</td>
+                </tr>
+                <tr>
+                    <td>LangChain integration required</td>
+                    <td class="hl"><span class="tick">✓</span> Works with any API</td>
+                    <td><span class="partial">Optional</span> but designed for it</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>When to use LangSmith</h2>
+    <div class="scenario">
+        <div class="scenario-title">✓ You're debugging a specific failed request</div>
+        <p>LangSmith's trace view is excellent. You can see exactly what went into the prompt, what came back, token counts, and latency. Use it for debugging.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ You're managing prompt variants in a team</div>
+        <p>LangSmith Hub lets you version and share prompts. If you need prompt governance across a team, it's the right tool.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ You're deeply integrated with LangChain</div>
+        <p>LangSmith is designed to integrate with the LangChain ecosystem. If that's your stack, it's a natural fit.</p>
+    </div>
+
+    <h2>When to use DriftWatch</h2>
+    <div class="scenario">
+        <div class="scenario-title">✓ OpenAI or Anthropic updated your model and you want to know immediately</div>
+        <p>DriftWatch runs your existing prompts against a baseline on a schedule. If anything shifts — format, length, instruction-following, JSON validity — you get an alert before your users do.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ You pinned a model version and assumed that meant stability</div>
+        <p>Pinning <code>gpt-4o-2024-08-06</code> does not prevent behavioral drift. OpenAI has updated pinned model behavior without version bumps. DriftWatch catches this.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ Your production app is breaking intermittently and you can't reproduce it locally</div>
+        <p>Silent model drift causes exactly this class of bug. Logs show valid requests and responses, but behavior has changed. DriftWatch creates a numerical record of when the drift started.</p>
+    </div>
+
+    <h2>The real question</h2>
+    <p>LangSmith and DriftWatch are not competitors — they solve adjacent problems. LangSmith answers "what did my LLM do?" DriftWatch answers "has my LLM started behaving differently than it used to?"</p>
+    <p>Teams that have been burned by a silent GPT-4o or Claude update typically need both: LangSmith for debugging, DriftWatch for proactive behavioral monitoring. The two tools complement each other.</p>
+    <p>If you've been burned and want to make sure you know within the hour next time — DriftWatch is what you want.</p>
+
+    <div class="cta-box">
+        <h3>Try DriftWatch free — 3 prompts, no card</h3>
+        <p>Add your critical prompts. DriftWatch establishes a behavioral baseline and alerts you if anything shifts. Setup in under 5 minutes.</p>
+        <a class="cta-btn" href="../app.html">Start monitoring free →</a>
+        <div class="cta-sub">Or <a href="../app.html?demo=1" style="color:#6366f1">try the live demo</a> before signing up</div>
+    </div>
+</div>
+</body>
+</html>

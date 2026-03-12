@@ -129,8 +129,8 @@
     <!-- Free tier info banner -->
     <div id="upgrade-banner" style="display:none">
       <div>
-        <h3>Free tier — 3 prompts included, no card required</h3>
-        <p>Add up to 3 prompts, set baselines, and run drift checks now. Upgrade to Starter (£99/mo) for 100 prompts + hourly automated monitoring.</p>
+        <h3 id="upgrade-banner-title">Free tier — 3 prompts included, no card required</h3>
+        <p id="upgrade-banner-body">Add up to 3 prompts, set baselines, and run drift checks now. Upgrade to Starter (£99/mo) for 100 prompts + hourly automated monitoring.</p>
       </div>
       <button class="btn btn-primary btn-sm" onclick="startCheckout('starter')" style="width:auto">
         Upgrade — £99/mo →
@@ -357,8 +357,22 @@ async function loadApp() {
     document.getElementById('plan-badge-display').textContent = status.plan;
     document.getElementById('api-key-display').textContent = status.api_key || '—';
 
-    // Show upgrade banner if free plan
+    // Show upgrade banner if free plan — with dynamic scarcity messaging
     if (status.plan === 'free') {
+        const used = status.prompt_count || 0;
+        const remaining = Math.max(0, 3 - used);
+        const title = document.getElementById('upgrade-banner-title');
+        const body = document.getElementById('upgrade-banner-body');
+        if (used === 0) {
+            title.textContent = 'Free tier — 3 prompts included, no card required';
+            body.textContent = 'Add up to 3 prompts, run live drift checks, and see DriftWatch in action. Upgrade to Starter for automated hourly monitoring.';
+        } else if (remaining > 0) {
+            title.innerHTML = `<span style="color:#f59e0b">⚠ ${remaining} free prompt${remaining===1?'':'s'} remaining</span>`;
+            body.textContent = `You've used ${used} of your 3 free prompts. Upgrade to Starter (£99/mo) for 100 prompts + hourly automated monitoring + Slack alerts.`;
+        } else {
+            title.innerHTML = `<span style="color:#ef4444">🔒 Free tier limit reached</span>`;
+            body.textContent = 'You\'ve used all 3 free prompts. Upgrade to Starter (£99/mo) to add more prompts and enable automated hourly drift monitoring.';
+        }
         document.getElementById('upgrade-banner').style.display = 'flex';
     }
 
@@ -431,8 +445,24 @@ async function addPrompt() {
         toast('Prompt added!', 'success');
         toggleAddPrompt();
         await loadPrompts();
+        // Refresh banner to update prompt count
+        const status = await api('/status');
+        const used = status.prompt_count || 0;
+        const remaining = Math.max(0, 3 - used);
+        if (status.plan === 'free' && remaining === 0) {
+            document.getElementById('upgrade-banner-title').innerHTML = `<span style="color:#ef4444">🔒 Free tier limit reached — upgrade to add more prompts</span>`;
+            document.getElementById('upgrade-banner-body').textContent = 'You\'ve used all 3 free prompts. Upgrade to Starter (£99/mo) for 100 prompts + automated hourly monitoring.';
+        } else if (status.plan === 'free' && remaining > 0) {
+            document.getElementById('upgrade-banner-title').innerHTML = `<span style="color:#f59e0b">⚠ ${remaining} free prompt${remaining===1?'':'s'} remaining</span>`;
+        }
     } catch(e) {
-        toast(e.message, 'error');
+        if (e.message.includes('limit') || e.message.includes('Limit') || e.message.includes('subscription')) {
+            // Show modal-level upgrade prompt instead of just a toast
+            toast('Free tier limit reached — upgrade to add more prompts', 'error');
+            document.getElementById('upgrade-banner').scrollIntoView({behavior:'smooth'});
+        } else {
+            toast(e.message, 'error');
+        }
     }
 }
 

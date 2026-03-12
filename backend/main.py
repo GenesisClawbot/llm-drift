@@ -18,6 +18,7 @@ import json
 import logging
 import os
 import sys
+import threading
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional
@@ -48,6 +49,7 @@ from .models import (
 )
 from .drift_runner import run_baseline_for_prompt, run_check_for_prompt
 from .scheduler import start_scheduler, stop_scheduler, run_drift_check_for_user
+from .alerts import send_welcome_email, send_trial_limit_email
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
@@ -141,6 +143,8 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
 
     token = create_access_token(user.id, user.email)
     logger.info(f"New user registered: {user.email}")
+    # Send welcome email in background (non-blocking)
+    threading.Thread(target=send_welcome_email, args=(user.email,), daemon=True).start()
     return {"access_token": token, "token_type": "bearer", "email": user.email, "plan": user.plan}
 
 
@@ -227,6 +231,12 @@ def create_prompt(
     db.add(prompt)
     db.commit()
     db.refresh(prompt)
+
+    # If user just hit the free tier limit, send upgrade nudge in background
+    new_count = current_count + 1
+    if user.plan == "free" and new_count >= limit:
+        threading.Thread(target=send_trial_limit_email, args=(user.email,), daemon=True).start()
+
     return {"id": prompt.id, "name": prompt.name, "created": True}
 
 

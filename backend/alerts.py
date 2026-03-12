@@ -175,3 +175,112 @@ def build_alert_message(run_result: dict, user_email: str) -> str:
         f"DriftWatch alert for {user_email}: "
         f"avg_drift={avg:.3f} max_drift={max_d:.3f} alerts={alerts}"
     )
+
+
+def _send_email(to_email: str, subject: str, body_text: str, body_html: str) -> bool:
+    """Low-level SMTP send. Reused by all email functions."""
+    if not SMTP_PASSWORD:
+        logger.debug("SMTP_PASSWORD not set — skipping email")
+        return False
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = f"DriftWatch <{SMTP_FROM}>"
+    msg["To"] = to_email
+    msg.attach(MIMEText(body_text, "plain"))
+    msg.attach(MIMEText(body_html, "html"))
+    try:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as server:
+            server.ehlo(); server.starttls()
+            server.login(SMTP_FROM, SMTP_PASSWORD)
+            server.sendmail(SMTP_FROM, to_email, msg.as_string())
+        logger.info(f"Email sent to {to_email}: {subject}")
+        return True
+    except Exception as e:
+        logger.warning(f"Email failed to {to_email}: {e}")
+        return False
+
+
+def send_welcome_email(to_email: str) -> bool:
+    """Welcome email sent immediately after registration."""
+    subject = "Welcome to DriftWatch — your first drift check is ready 🚀"
+    APP_URL = "https://genesisclawbot.github.io/llm-drift/app.html"
+    body_text = f"""Welcome to DriftWatch!
+
+You're on the free tier — 3 test prompts included, no card required.
+
+Here's how to get your first drift check in under 5 minutes:
+
+  1. Open your dashboard: {APP_URL}
+  2. Add a test prompt (paste any prompt you use in production)
+  3. Click "Run Baseline" — we record what your LLM outputs today
+  4. Come back tomorrow — we'll tell you if anything changed
+
+GPT-5.2 changed behaviour on Feb 10, 2026. If you're using OpenAI, run a check now.
+
+Questions? Reply to this email — we read every one.
+
+— The DriftWatch team
+"""
+    body_html = f"""<!DOCTYPE html>
+<html><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1f2937">
+<h2 style="color:#6366f1">Welcome to DriftWatch 🚀</h2>
+<p>You're on the <strong>free tier</strong> — 3 test prompts included, no card required.</p>
+<h3 style="color:#374151">Get your first drift check in 5 minutes:</h3>
+<ol style="line-height:2">
+  <li>Open your <a href="{APP_URL}" style="color:#6366f1">dashboard</a></li>
+  <li>Add a test prompt (paste any prompt you use in production)</li>
+  <li>Click <strong>Run Baseline</strong> — we record what your LLM outputs today</li>
+  <li>Come back tomorrow — we'll tell you if anything changed</li>
+</ol>
+<div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:16px;margin:20px 0">
+  <strong>⚡ Timely:</strong> GPT-5.2 changed behaviour on Feb 10, 2026. If you're using OpenAI, run a check now to establish your baseline.
+</div>
+<a href="{APP_URL}" style="background:#6366f1;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:8px">Open Dashboard →</a>
+<hr style="margin-top:32px;border:none;border-top:1px solid #e5e7eb">
+<p style="color:#9ca3af;font-size:.8rem">DriftWatch — LLM Behavioural Monitoring<br>Questions? Reply to this email.</p>
+</body></html>"""
+    return _send_email(to_email, subject, body_text, body_html)
+
+
+def send_trial_limit_email(to_email: str) -> bool:
+    """Nudge email sent when user exhausts all 3 free prompts."""
+    subject = "You've used all 3 free prompts — upgrade to keep monitoring"
+    APP_URL = "https://genesisclawbot.github.io/llm-drift/app.html"
+    STARTER_URL = "https://buy.stripe.com/6oU3cp6oHaBT2jR7BE9ws0k"
+    body_text = f"""You've used all 3 of your free DriftWatch prompts.
+
+Here's what you found:
+
+  • You've established baselines for your prompts
+  • Hourly automated monitoring is one step away
+
+Upgrade to Starter (£99/month) to unlock:
+  ✓ 100 test prompts
+  ✓ Hourly automated monitoring (runs while you sleep)
+  ✓ Email + Slack alerts the moment drift is detected
+  ✓ 90-day history
+
+Upgrade now: {STARTER_URL}
+
+If you caught drift already, you know why this matters.
+If you haven't — that's because your LLM hasn't changed yet. It will.
+
+— The DriftWatch team
+"""
+    body_html = f"""<!DOCTYPE html>
+<html><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1f2937">
+<h2 style="color:#6366f1">You've used all 3 free prompts</h2>
+<p>You've established baselines. Now let DriftWatch watch them for you — automatically.</p>
+<h3 style="color:#374151">Upgrade to Starter (£99/month):</h3>
+<ul style="line-height:2">
+  <li>100 test prompts</li>
+  <li>Hourly automated monitoring (runs while you sleep)</li>
+  <li>Email + Slack alerts the moment drift is detected</li>
+  <li>90-day history</li>
+</ul>
+<a href="{STARTER_URL}" style="background:#6366f1;color:white;padding:14px 28px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:600;font-size:1.1rem">Upgrade to Starter — £99/mo →</a>
+<p style="margin-top:20px;color:#6b7280;font-size:.9rem">Or <a href="{APP_URL}" style="color:#6366f1">open your dashboard</a> to review what you've monitored so far.</p>
+<hr style="margin-top:32px;border:none;border-top:1px solid #e5e7eb">
+<p style="color:#9ca3af;font-size:.8rem">DriftWatch — LLM Behavioural Monitoring<br>Cancel or manage your subscription anytime from your dashboard.</p>
+</body></html>"""
+    return _send_email(to_email, subject, body_text, body_html)

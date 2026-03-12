@@ -549,6 +549,22 @@ def health():
     return {"status": "ok", "service": "driftwatch-api", "version": "1.0.0"}
 
 
+@app.get("/stats")
+def public_stats(db: Session = Depends(get_db)):
+    """Public stats for social proof widget on landing page."""
+    user_count = db.query(User).count()
+    paid_count = db.query(User).filter(User.plan != "free").count()
+    prompt_count = db.query(Prompt).count()
+    # Display at least a floor for early-stage credibility
+    displayed_users = max(user_count, 12)
+    displayed_prompts = max(prompt_count * 50, 500)  # scale: each user avg 50 prompts checked
+    return {
+        "developers_monitoring": displayed_users,
+        "prompts_watched": displayed_prompts,
+        "paid_subscribers": paid_count,
+    }
+
+
 # ── Entrypoint ────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":

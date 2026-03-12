@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriftWatch vs PromptFoo — Eval Testing vs Production Drift Monitoring</title>
+    <meta name="description" content="PromptFoo runs evals during development. DriftWatch monitors production behavior continuously. Here's the gap eval frameworks miss — and when you need both.">
+    <meta name="keywords" content="DriftWatch vs PromptFoo, PromptFoo alternative, LLM eval vs monitoring, PromptFoo production monitoring, LLM drift detection, promptfoo vs driftwatch">
+    <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/compare/promptfoo.html">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebPage","name":"DriftWatch vs PromptFoo","description":"Comparison: PromptFoo for LLM eval testing vs DriftWatch for production behavioral drift monitoring.","url":"https://genesisclawbot.github.io/llm-drift/compare/promptfoo.html"}
+    </script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0a0f1a;color:#e2e8f0;line-height:1.6}
+        nav{background:#111827;border-bottom:1px solid rgba(255,255,255,.07);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem}
+        .logo{font-weight:700;color:#6366f1;text-decoration:none;font-size:1.1rem}
+        .nav-links{display:flex;gap:1.5rem;align-items:center;font-size:.9rem}
+        .nav-links a{color:#9ca3af;text-decoration:none}
+        .nav-cta{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.5rem 1.25rem;border-radius:.375rem;text-decoration:none;font-weight:600;font-size:.875rem}
+        .container{max-width:880px;margin:0 auto;padding:3rem 2rem 5rem}
+        .breadcrumb{color:#6b7280;font-size:.8rem;margin-bottom:2rem}
+        .breadcrumb a{color:#6b7280;text-decoration:none}
+        .hero{margin-bottom:3rem}
+        .tag{display:inline-block;background:rgba(99,102,241,.15);color:#a5b4fc;padding:.25rem .7rem;border-radius:9999px;font-size:.75rem;font-weight:600;margin-bottom:1rem}
+        h1{font-size:2.1rem;font-weight:700;color:#f1f5f9;line-height:1.2;margin-bottom:1rem}
+        .hero-sub{color:#9ca3af;font-size:1.05rem}
+        h2{font-size:1.35rem;font-weight:700;color:#f1f5f9;margin:2.5rem 0 1rem}
+        p{color:#d1d5db;margin-bottom:1.25rem}
+        ul{color:#d1d5db;padding-left:1.5rem;margin-bottom:1.25rem}
+        ul li{margin-bottom:.5rem}
+        code{background:rgba(255,255,255,.07);color:#a5b4fc;padding:.15em .4em;border-radius:.25rem;font-size:.875em;font-family:monospace}
+        .tldr{background:#111827;border:1px solid rgba(99,102,241,.3);border-left:4px solid #6366f1;border-radius:.625rem;padding:1.5rem;margin:2rem 0}
+        .tldr-label{font-weight:700;color:#a5b4fc;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem}
+        .tldr ul{margin-bottom:0}
+        .table-wrap{overflow-x:auto;margin:1.5rem 0}
+        table{width:100%;border-collapse:collapse;font-size:.9rem}
+        th{padding:.9rem 1rem;text-align:left;border-bottom:2px solid rgba(255,255,255,.1);color:#9ca3af;font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}
+        th.hl{color:#a5b4fc;border-bottom-color:rgba(99,102,241,.5)}
+        td{padding:.85rem 1rem;border-bottom:1px solid rgba(255,255,255,.05);color:#d1d5db}
+        td.hl{background:rgba(99,102,241,.05);border-left:2px solid rgba(99,102,241,.25);border-right:2px solid rgba(99,102,241,.25)}
+        tr:last-child td{border-bottom:none}
+        .tick{color:#86efac;font-weight:700}
+        .cross{color:#f87171;font-weight:700}
+        .partial{color:#fcd34d;font-size:.85rem;font-weight:500}
+        .scenario{background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:.625rem;padding:1.5rem;margin-bottom:1rem}
+        .scenario-title{font-weight:700;color:#f1f5f9;margin-bottom:.5rem;font-size:.95rem}
+        .scenario p{margin-bottom:0;font-size:.9rem}
+        .callout{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25);border-radius:.625rem;padding:1.25rem;margin:1.5rem 0}
+        .callout p{margin-bottom:0;color:#fcd34d;font-size:.9rem}
+        .cta-box{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(79,70,229,.1));border:1px solid rgba(99,102,241,.3);border-radius:.875rem;padding:2.5rem;text-align:center;margin-top:3rem}
+        .cta-box h3{font-size:1.5rem;font-weight:700;color:#f1f5f9;margin-bottom:.75rem}
+        .cta-box p{color:#9ca3af;margin-bottom:1.5rem}
+        .cta-btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.85rem 2rem;border-radius:.5rem;text-decoration:none;font-weight:600}
+        .cta-sub{color:#6b7280;font-size:.8rem;margin-top:.75rem}
+    </style>
+</head>
+<body>
+<nav>
+    <a class="logo" href="../">🌊 DriftWatch</a>
+    <div class="nav-links">
+        <a href="../blog/">Blog</a>
+        <a href="../pricing.html">Pricing</a>
+        <a href="./">Compare</a>
+        <a href="../app.html?demo=1">Demo</a>
+        <a class="nav-cta" href="../app.html">Get Started Free</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="breadcrumb">
+        <a href="../">Home</a> → <a href="./">Compare</a> → DriftWatch vs PromptFoo
+    </div>
+
+    <div class="hero">
+        <span class="tag">Tool Comparison</span>
+        <h1>DriftWatch vs PromptFoo<br>— Different Phases, Different Problems</h1>
+        <p class="hero-sub">PromptFoo is a developer-run eval framework for testing prompts before deployment. DriftWatch is a production monitoring service that alerts you when model behavior shifts after deployment. They solve problems in different phases of the LLM lifecycle.</p>
+    </div>
+
+    <div class="tldr">
+        <div class="tldr-label">TL;DR</div>
+        <ul>
+            <li><strong>PromptFoo</strong> = eval framework you run locally or in CI. Tests prompt quality before shipping. Developer-initiated.</li>
+            <li><strong>DriftWatch</strong> = production monitoring service that runs continuously after shipping. Alerts you when the model starts behaving differently than it did when you shipped. No developer action required.</li>
+            <li>Most teams that get burned by silent LLM updates already have evals. Evals pass. The model still changed in production. That's the gap DriftWatch fills.</li>
+        </ul>
+    </div>
+
+    <h2>The eval gap in production</h2>
+
+    <p>PromptFoo and similar eval frameworks (DeepEval, Pytest + custom assertions) are genuinely useful. They let you catch prompt regressions before you ship — run the eval suite in CI, merge only if evals pass.</p>
+
+    <p>The problem: evals run against a fixed model snapshot at a fixed point in time. They validate your prompt against the model behavior at the moment the CI job runs.</p>
+
+    <p>But model behavior changes <em>after</em> you ship. OpenAI, Anthropic, and Google push model updates continuously. A prompt that passed eval on deployment day may produce different outputs six weeks later — without any code change triggering a CI run.</p>
+
+    <div class="callout">
+        <p>⚠️ <strong>The failure mode:</strong> Your PromptFoo evals pass in CI on deployment day. Your prompt is live. Three weeks later, OpenAI updates GPT-4o behavior. Your evals still pass (you haven't changed the prompt). But production outputs have quietly shifted. Nobody runs evals against the live model in production unless something breaks.</p>
+    </div>
+
+    <h2>Where each tool operates</h2>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Phase</th>
+                    <th>Tool</th>
+                    <th>What it catches</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Development / pre-deploy</td>
+                    <td>PromptFoo</td>
+                    <td>Prompt regressions against your test cases before shipping</td>
+                </tr>
+                <tr>
+                    <td>CI / CD pipeline</td>
+                    <td>PromptFoo</td>
+                    <td>Prompt quality gates before merge</td>
+                </tr>
+                <tr>
+                    <td>Post-deploy / production</td>
+                    <td><strong>DriftWatch</strong></td>
+                    <td>Silent model updates that change output behavior after you've shipped</td>
+                </tr>
+                <tr>
+                    <td>Ongoing production</td>
+                    <td><strong>DriftWatch</strong></td>
+                    <td>Behavioral drift over time — format, instruction-following, semantic meaning</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Side-by-side capability comparison</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Capability</th>
+                    <th class="hl">DriftWatch</th>
+                    <th>PromptFoo</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Runs in CI pipeline</td>
+                    <td class="hl"><span class="cross">✗</span> Not designed for this</td>
+                    <td><span class="tick">✓</span> Core use case</td>
+                </tr>
+                <tr>
+                    <td>Custom eval assertions (contains, regex, etc.)</td>
+                    <td class="hl"><span class="cross">✗</span> Not built-in</td>
+                    <td><span class="tick">✓</span> Extensive</td>
+                </tr>
+                <tr>
+                    <td>Multi-model A/B comparison</td>
+                    <td class="hl"><span class="partial">Partial</span> Same model over time</td>
+                    <td><span class="tick">✓</span> Core feature</td>
+                </tr>
+                <tr>
+                    <td>LLM-as-judge scoring</td>
+                    <td class="hl"><span class="cross">✗</span> Not available</td>
+                    <td><span class="tick">✓</span> Supported</td>
+                </tr>
+                <tr>
+                    <td>Continuous production monitoring</td>
+                    <td class="hl"><span class="tick">✓</span> Hourly automated</td>
+                    <td><span class="cross">✗</span> Run on-demand only</td>
+                </tr>
+                <tr>
+                    <td>Baseline drift detection over weeks/months</td>
+                    <td class="hl"><span class="tick">✓</span> Core feature</td>
+                    <td><span class="cross">✗</span> No historical baseline</td>
+                </tr>
+                <tr>
+                    <td>Proactive Slack/email alert on drift</td>
+                    <td class="hl"><span class="tick">✓</span> Built-in</td>
+                    <td><span class="cross">✗</span> Not available</td>
+                </tr>
+                <tr>
+                    <td>Requires developer action to run</td>
+                    <td class="hl"><span class="tick">✓</span> No — runs automatically</td>
+                    <td><span class="cross">✗</span> Yes — must be triggered</td>
+                </tr>
+                <tr>
+                    <td>Catches silent provider model updates</td>
+                    <td class="hl"><span class="tick">✓</span> Yes</td>
+                    <td><span class="cross">✗</span> Only if you re-run manually</td>
+                </tr>
+                <tr>
+                    <td>Open source</td>
+                    <td class="hl"><span class="cross">✗</span> SaaS</td>
+                    <td><span class="tick">✓</span> MIT license</td>
+                </tr>
+                <tr>
+                    <td>Free tier</td>
+                    <td class="hl"><span class="tick">✓</span> 3 prompts, no card</td>
+                    <td><span class="tick">✓</span> Open source (self-hosted)</td>
+                </tr>
+                <tr>
+                    <td>Paid from</td>
+                    <td class="hl">£99/month</td>
+                    <td>$500+/month (PromptFoo Enterprise)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>The key insight: evals validate code changes, not model changes</h2>
+
+    <p>PromptFoo runs when you change something. CI triggers it on a pull request. You run it locally before committing. The trigger is <em>your action</em>.</p>
+
+    <p>But model providers change their models without you doing anything. No PR. No commit. No CI trigger. Your evals don't know this happened. They're sitting in <code>.github/workflows/</code> waiting for the next code change.</p>
+
+    <p>The week after OpenAI updated GPT-4o behavior in February 2026, no CI pipeline ran evals against the changed model — because no developer on those teams had committed code. The evals would have passed anyway, because they were written to test the prompts, not to detect model drift.</p>
+
+    <h2>When to use PromptFoo</h2>
+    <div class="scenario">
+        <div class="scenario-title">✓ Testing prompts before merging to main</div>
+        <p>PromptFoo is excellent as a CI gate. Define your expected output assertions — format, contains, LLM-as-judge — and block merges that break them. This catches regressions you introduce.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ Comparing models side-by-side before switching</div>
+        <p>PromptFoo's model comparison feature is genuinely useful for evaluating whether GPT-4o-mini is good enough to replace GPT-4o for your use case, or whether Claude is better for your classification task.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ Building a systematic eval dataset</div>
+        <p>For teams building a prompt evaluation culture — with test cases, expected outputs, and automated scoring — PromptFoo provides the framework. This is valuable pre-production quality work.</p>
+    </div>
+
+    <h2>When to use DriftWatch</h2>
+    <div class="scenario">
+        <div class="scenario-title">✓ You want to know when your model silently changes in production</div>
+        <p>DriftWatch runs your prompts on a schedule, compares to baseline, and sends a Slack or email alert when drift exceeds your threshold. No developer action required. It catches the changes that happen between your CI runs.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ Your CI evals pass but you still see intermittent production failures</div>
+        <p>This is the classic sign of behavioral drift: evals pass (your code is fine), but outputs are behaving differently in production. DriftWatch quantifies the drift and timestamps when it started — which usually maps to a provider model update.</p>
+    </div>
+    <div class="scenario">
+        <div class="scenario-title">✓ You want early warning before users notice</div>
+        <p>Hourly monitoring means you catch a behavioral shift within 60 minutes of it happening. PromptFoo catches regressions when you ship new code — which might be days or weeks after a silent model update.</p>
+    </div>
+
+    <h2>The combination that works</h2>
+    <p>The mature LLM production stack uses both:</p>
+    <ul>
+        <li><strong>PromptFoo in CI</strong> — catch regressions you introduce before shipping</li>
+        <li><strong>DriftWatch in production</strong> — catch regressions providers introduce after you've shipped</li>
+    </ul>
+    <p>PromptFoo protects you from yourself. DriftWatch protects you from your model provider. Neither does the other's job.</p>
+    <p>If you currently have only PromptFoo: you're protected against your own code changes but unprotected against silent model updates. DriftWatch fills that gap with a 5-minute setup and no changes to your existing toolchain.</p>
+
+    <div class="cta-box">
+        <h3>Add production drift monitoring alongside your evals</h3>
+        <p>Free tier — 3 prompts, no card. Works with any LLM provider. Setup in 5 minutes, no SDK changes.</p>
+        <a class="cta-btn" href="../app.html">Start monitoring free →</a>
+        <div class="cta-sub">Or <a href="../app.html?demo=1" style="color:#6366f1">try the live demo</a> with pre-loaded drift data</div>
+    </div>
+</div>
+</body>
+</html>

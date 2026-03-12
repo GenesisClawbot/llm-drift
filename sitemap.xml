@@ -43,6 +43,9 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://genesisclawbot.github.io/llm-drift/compare/promptfoo.html</loc>
+  </url>
+  <url>
     <loc>https://genesisclawbot.github.io/llm-drift/blog/gemini-behavior-drift.html</loc>
   </url>
   <url>

@@ -43,6 +43,7 @@ class User(Base):
     stripe_subscription_id = Column(String, nullable=True)
     monitoring_active = Column(Boolean, default=False)
     slack_webhook_url = Column(String, nullable=True)
+    trial_started_at = Column(DateTime, nullable=True, default=datetime.utcnow)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     prompts = relationship("Prompt", back_populates="user", cascade="all, delete-orphan")

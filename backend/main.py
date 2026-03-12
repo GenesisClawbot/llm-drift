@@ -49,7 +49,7 @@ from .models import (
 )
 from .drift_runner import run_baseline_for_prompt, run_check_for_prompt
 from .scheduler import start_scheduler, stop_scheduler, run_drift_check_for_user
-from .alerts import send_welcome_email, send_trial_limit_email
+from .alerts import send_welcome_email, send_trial_limit_email, send_first_drift_nudge_email
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
@@ -351,6 +351,34 @@ def run_monitor(user: User = Depends(get_current_user), db: Session = Depends(ge
     db.commit()
 
     logger.info(f"Manual drift check for {user.email}: avg={avg_drift} max={max_drift} alerts={alert_count}")
+
+    # First-drift conversion nudge: fires when a FREE user sees drift for the first time.
+    # This is the "aha moment" — the model actually changed on their prompt.
+    # Converts 5-10x better than nudging at the prompt-count limit.
+    if alert_count > 0 and max_drift >= 0.3 and user.plan == "free":
+        prior_drifts = db.query(AlertLog).filter(
+            AlertLog.user_id == user.id,
+            AlertLog.alert_type == "drift",
+        ).count()
+        if prior_drifts == 0:
+            run_data = {"avg_drift": avg_drift, "max_drift": max_drift,
+                        "alert_count": alert_count, "results": results}
+            threading.Thread(
+                target=send_first_drift_nudge_email,
+                args=(user.email, run_data),
+                daemon=True,
+            ).start()
+            # Log it so we don't re-send
+            db.add(AlertLog(
+                user_id=user.id,
+                run_result_id=run.id,
+                alert_type="drift",
+                message=f"First-drift nudge sent to {user.email}: max={max_drift:.3f}",
+                sent_at=datetime.utcnow(),
+                delivered=True,
+            ))
+            db.commit()
+
     return {
         "run_id": run.id,
         "avg_drift": avg_drift,

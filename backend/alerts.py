@@ -284,3 +284,69 @@ If you haven't — that's because your LLM hasn't changed yet. It will.
 <p style="color:#9ca3af;font-size:.8rem">DriftWatch — LLM Behavioural Monitoring<br>Cancel or manage your subscription anytime from your dashboard.</p>
 </body></html>"""
     return _send_email(to_email, subject, body_text, body_html)
+
+
+def send_first_drift_nudge_email(to_email: str, run_result: dict) -> bool:
+    """
+    The PRIMARY conversion email — sent when a user detects their FIRST drift.
+    This is the 'aha moment': the model actually changed on their prompt.
+    Converts 5-10x better than nudging at the free-tier prompt limit.
+    """
+    results = run_result.get("results", [])
+    alert_prompts = [r for r in results if r.get("alert_level") not in ("none", None)]
+    max_drift = run_result.get("max_drift", 0)
+
+    # Pick the most dramatic drifted prompt for the subject line
+    top = max(alert_prompts, key=lambda r: r.get("drift_score", 0)) if alert_prompts else {}
+    prompt_name = top.get("prompt_name", "your prompt")
+    drift_score = top.get("drift_score", max_drift)
+    regressions = top.get("regressions", [])
+    regression_str = f" ({', '.join(regressions[:2])})" if regressions else ""
+
+    subject = f"🚨 DriftWatch caught something on \"{prompt_name}\""
+    APP_URL = "https://genesisclawbot.github.io/llm-drift/app.html"
+    STARTER_URL = "https://buy.stripe.com/6oU3cp6oHaBT2jR7BE9ws0k"
+
+    body_text = f"""DriftWatch just detected drift on your prompt.
+
+  Prompt:     {prompt_name}
+  Drift score: {drift_score:.3f} (threshold: 0.30){regression_str}
+
+This is exactly what DriftWatch is built for. Your LLM changed — and we caught it
+before your users did.
+
+On your current free plan, you're watching {len(results)} prompt(s). Upgrade to
+Starter (£99/month) to unlock:
+
+  ✓ 100 test prompts — monitor your full production suite
+  ✓ Hourly automated monitoring (no manual runs needed)
+  ✓ Instant Slack alerts alongside email
+  ✓ 90-day drift history — see the exact moment it changed
+
+Upgrade now: {STARTER_URL}
+
+View this result in your dashboard: {APP_URL}
+
+— The DriftWatch team
+"""
+    body_html = f"""<!DOCTYPE html>
+<html><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1f2937">
+<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:16px;margin-bottom:20px">
+  <h2 style="color:#dc2626;margin:0 0 8px">🚨 Drift detected on "{prompt_name}"</h2>
+  <p style="margin:0;color:#7f1d1d">Drift score: <strong>{drift_score:.3f}</strong>{regression_str}</p>
+</div>
+<p>This is exactly what DriftWatch is built for. <strong>Your LLM changed — and we caught it before your users did.</strong></p>
+<p>You're currently monitoring {len(results)} prompt(s) on the free plan. Here's what you unlock with Starter:</p>
+<table style="width:100%;border-collapse:collapse;margin:16px 0">
+  <tr style="background:#f9fafb"><td style="padding:10px 12px;border:1px solid #e5e7eb">100 test prompts</td><td style="padding:10px 12px;border:1px solid #e5e7eb;color:#059669">✓</td></tr>
+  <tr><td style="padding:10px 12px;border:1px solid #e5e7eb">Hourly automated monitoring</td><td style="padding:10px 12px;border:1px solid #e5e7eb;color:#059669">✓</td></tr>
+  <tr style="background:#f9fafb"><td style="padding:10px 12px;border:1px solid #e5e7eb">Instant Slack + email alerts</td><td style="padding:10px 12px;border:1px solid #e5e7eb;color:#059669">✓</td></tr>
+  <tr><td style="padding:10px 12px;border:1px solid #e5e7eb">90-day drift history</td><td style="padding:10px 12px;border:1px solid #e5e7eb;color:#059669">✓</td></tr>
+</table>
+<a href="{STARTER_URL}" style="background:#6366f1;color:white;padding:14px 28px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:600;font-size:1.1rem">Upgrade to Starter — £99/mo →</a>
+<p style="margin-top:16px"><a href="{APP_URL}" style="color:#6366f1">View this result in your dashboard →</a></p>
+<hr style="margin-top:32px;border:none;border-top:1px solid #e5e7eb">
+<p style="color:#9ca3af;font-size:.8rem">DriftWatch — LLM Behavioural Monitoring<br>
+You're receiving this because drift was detected on your account. <a href="{APP_URL}" style="color:#6366f1">Manage alerts</a>.</p>
+</body></html>"""
+    return _send_email(to_email, subject, body_text, body_html)

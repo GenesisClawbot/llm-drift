@@ -9,7 +9,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 
 from .models import SessionLocal, User, Prompt, Baseline, RunResult, AlertLog
 from .drift_runner import run_check_for_prompt
-from .alerts import send_slack_alert, send_email_alert, build_alert_message
+from .alerts import send_slack_alert, send_email_alert, send_first_drift_nudge_email, build_alert_message
 
 logger = logging.getLogger(__name__)
 

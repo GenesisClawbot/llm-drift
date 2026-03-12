@@ -248,9 +248,11 @@
 
 <script>
 // ── Config ────────────────────────────────────────────────────────────────────
+// Update DRIFTWATCH_API below when Railway URL is set
+const DRIFTWATCH_API = 'https://911f1b33de67a182-209-35-69-79.serveousercontent.com';
 const API_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:8000'
-    : (window._DRIFTWATCH_API_URL || 'https://driftwatch-api.up.railway.app');
+    ? 'http://localhost:9000'
+    : (window._DRIFTWATCH_API_URL || DRIFTWATCH_API);
 
 let authToken = localStorage.getItem('dw_token');
 let isRegisterMode = false;

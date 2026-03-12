@@ -506,6 +506,40 @@ def _handle_payment_failed(invoice_obj: dict, db: Session):
         logger.warning(f"Payment failed for {user.email} — monitoring continues for now")
 
 
+# ── Settings ─────────────────────────────────────────────────────────────────
+
+class SettingsUpdate(BaseModel):
+    slack_webhook_url: Optional[str] = None
+
+
+@app.patch("/settings")
+def update_settings(
+    req: SettingsUpdate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update user notification settings (Slack webhook, etc.)."""
+    if req.slack_webhook_url is not None:
+        # Basic validation
+        if req.slack_webhook_url and not req.slack_webhook_url.startswith("https://hooks.slack.com/"):
+            raise HTTPException(status_code=400, detail="Invalid Slack webhook URL")
+        user.slack_webhook_url = req.slack_webhook_url or None
+    db.commit()
+    return {
+        "updated": True,
+        "slack_webhook_url": user.slack_webhook_url,
+    }
+
+
+@app.get("/settings")
+def get_settings(user: User = Depends(get_current_user)):
+    """Return current user notification settings."""
+    return {
+        "slack_webhook_url": user.slack_webhook_url,
+        "monitoring_active": user.monitoring_active,
+    }
+
+
 # ── Health ────────────────────────────────────────────────────────────────────
 
 @app.get("/health")

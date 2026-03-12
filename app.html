@@ -243,6 +243,26 @@
       </div>
     </div>
 
+    <!-- Slack alerts -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Slack Alerts</div>
+        <span style="font-size:.75rem;color:var(--muted)">Alerts fire when drift > 0.3</span>
+      </div>
+      <div class="section-body">
+        <p style="color:var(--muted);font-size:.875rem;margin-bottom:1rem">
+          Paste your Slack Incoming Webhook URL to receive drift alerts in your channel.
+          <a href="https://api.slack.com/messaging/webhooks" target="_blank" style="color:var(--accent)">How to create one →</a>
+        </p>
+        <div style="display:flex;gap:.75rem;align-items:center">
+          <input id="slack-webhook-input" placeholder="https://hooks.slack.com/services/..." style="flex:1;font-size:.875rem">
+          <button class="btn btn-primary btn-sm" onclick="saveSlackWebhook()" style="white-space:nowrap">Save</button>
+          <button class="btn btn-outline btn-sm" onclick="testSlackWebhook()" style="white-space:nowrap">Test</button>
+        </div>
+        <div id="slack-status" style="margin-top:.5rem;font-size:.8rem;color:var(--muted)"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -343,7 +363,7 @@ async function loadApp() {
     }
 
     // Load data
-    await Promise.all([loadPrompts(), loadResults()]);
+    await Promise.all([loadPrompts(), loadResults(), loadSlackSettings()]);
 }
 
 // ── API Helper ────────────────────────────────────────────────────────────────
@@ -525,6 +545,36 @@ async function startCheckout(plan) {
 function copyApiKey() {
     const key = document.getElementById('api-key-display').textContent;
     navigator.clipboard.writeText(key).then(() => toast('API key copied!', 'success'));
+}
+
+// ── Slack Settings ────────────────────────────────────────────────────────────
+async function loadSlackSettings() {
+    try {
+        const s = await api('/settings');
+        const el = document.getElementById('slack-webhook-input');
+        if (el && s.slack_webhook_url) el.value = s.slack_webhook_url;
+        const status = document.getElementById('slack-status');
+        if (status) status.textContent = s.slack_webhook_url ? '✅ Webhook configured' : '';
+    } catch(e) { /* non-critical */ }
+}
+
+async function saveSlackWebhook() {
+    const url = document.getElementById('slack-webhook-input').value.trim();
+    try {
+        await api('/settings', {method:'PATCH', body: JSON.stringify({slack_webhook_url: url || null})});
+        document.getElementById('slack-status').textContent = url ? '✅ Saved' : 'Cleared';
+        toast('Slack webhook saved', 'success');
+    } catch(e) { toast(e.message, 'error'); }
+}
+
+async function testSlackWebhook() {
+    const url = document.getElementById('slack-webhook-input').value.trim();
+    if (!url) { toast('Enter a webhook URL first', 'error'); return; }
+    try {
+        // Save first then trigger a manual check to fire an alert
+        await api('/settings', {method:'PATCH', body: JSON.stringify({slack_webhook_url: url})});
+        toast('Webhook saved — run a drift check to test the alert', 'success');
+    } catch(e) { toast(e.message, 'error'); }
 }
 
 let toastTimer;

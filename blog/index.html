@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriftWatch Blog — LLM Drift Detection & API Monitoring</title>
+    <meta name="description" content="Engineering guides on LLM drift detection, prompt regression testing, and protecting your AI products from silent model updates. From the team building DriftWatch.">
+    <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/blog/">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0a0f1a;color:#e2e8f0;line-height:1.6}
+        nav{background:#111827;border-bottom:1px solid rgba(255,255,255,.07);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center}
+        .logo{font-weight:700;color:#6366f1;text-decoration:none;font-size:1.1rem}
+        .nav-cta{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.5rem 1.25rem;border-radius:.375rem;text-decoration:none;font-weight:600;font-size:.875rem}
+        .container{max-width:860px;margin:0 auto;padding:3rem 2rem 5rem}
+        h1{font-size:2rem;font-weight:700;color:#f1f5f9;margin-bottom:.75rem}
+        .hero-sub{color:#6b7280;font-size:1.05rem;margin-bottom:3rem}
+        .posts{display:grid;gap:1.5rem}
+        .post-card{background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:.75rem;padding:1.75rem;text-decoration:none;display:block;transition:border-color .2s}
+        .post-card:hover{border-color:rgba(99,102,241,.4)}
+        .post-tag{display:inline-block;background:rgba(99,102,241,.15);color:#a5b4fc;padding:.15rem .5rem;border-radius:9999px;font-size:.7rem;font-weight:600;margin-bottom:.75rem}
+        .post-tag.red{background:rgba(239,68,68,.15);color:#fca5a5}
+        .post-tag.amber{background:rgba(245,158,11,.15);color:#fcd34d}
+        .post-title{font-size:1.2rem;font-weight:700;color:#f1f5f9;margin-bottom:.5rem;line-height:1.3}
+        .post-desc{color:#9ca3af;font-size:.9rem;line-height:1.6;margin-bottom:1rem}
+        .post-meta{color:#6b7280;font-size:.8rem;display:flex;gap:1.25rem}
+        .post-arrow{color:#6366f1;font-size:.875rem;font-weight:600;margin-top:.75rem;display:block}
+        .cta-block{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(79,70,229,.05));border:1px solid rgba(99,102,241,.2);border-radius:.75rem;padding:2rem;text-align:center;margin-top:3rem}
+        .cta-block h2{color:#f1f5f9;margin-bottom:.5rem;font-size:1.25rem}
+        .cta-block p{color:#9ca3af;margin-bottom:1.25rem;font-size:.9rem}
+        .cta-btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.75rem 1.75rem;border-radius:.5rem;text-decoration:none;font-weight:600}
+        footer{border-top:1px solid rgba(255,255,255,.07);padding:2rem;text-align:center;color:#6b7280;font-size:.875rem}
+        footer a{color:#6366f1;text-decoration:none}
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="../index.html" class="logo">🔍 DriftWatch</a>
+    <a href="../app.html" class="nav-cta">Start Free →</a>
+</nav>
+
+<div class="container">
+    <h1>DriftWatch Engineering Blog</h1>
+    <p class="hero-sub">LLM drift detection, prompt regression testing, and protecting AI products from silent model updates.</p>
+
+    <div class="posts">
+
+        <a href="gpt-4o-pinned-still-changed.html" class="post-card">
+            <div class="post-tag red">🔥 Breaking Change</div>
+            <div class="post-title">GPT-4o-2024-08-06 Isn't Frozen: What "Version Pinning" Actually Guarantees</div>
+            <div class="post-desc">You pinned the dated version specifically to avoid model updates. Then your prompts broke anyway. Here's exactly why — four mechanisms that bypass version pinning — and what actually protects you.</div>
+            <div class="post-meta">
+                <span>📅 March 12, 2026</span>
+                <span>⏱ 5 min read</span>
+                <span>🏷 gpt-4o-2024-08-06 · LLM API Monitoring</span>
+            </div>
+            <span class="post-arrow">Read article →</span>
+        </a>
+
+        <a href="gpt-52-behavior-change.html" class="post-card">
+            <div class="post-tag amber">⚡ Feb 10, 2026</div>
+            <div class="post-title">GPT-5.2 Changed Behaviour on Feb 10, 2026 — Did Your Prompts Break?</div>
+            <div class="post-desc">OpenAI silently updated GPT-5.2 Instant on February 10. "More measured and grounded in tone" meant JSON extraction prompts started adding preamble text, breaking parsers. Real drift scores, real examples.</div>
+            <div class="post-meta">
+                <span>📅 March 12, 2026</span>
+                <span>⏱ 6 min read</span>
+                <span>🏷 GPT-5.2 · Silent Updates · Drift Detection</span>
+            </div>
+            <span class="post-arrow">Read article →</span>
+        </a>
+
+        <a href="llm-version-pinning.html" class="post-card">
+            <div class="post-tag">🔒 Engineering</div>
+            <div class="post-title">Why LLM Version Pinning Doesn't Protect You — And What Does</div>
+            <div class="post-desc">The right mental model for LLM APIs: they're third-party services with no behaviour SLA. Version pinning is necessary but not sufficient. Here's the evidence and the 4-step prompt regression testing setup that actually works.</div>
+            <div class="post-meta">
+                <span>📅 March 12, 2026</span>
+                <span>⏱ 7 min read</span>
+                <span>🏷 Version Pinning · Prompt Regression Testing</span>
+            </div>
+            <span class="post-arrow">Read article →</span>
+        </a>
+
+    </div>
+
+    <div class="cta-block">
+        <h2>Stop finding out from user complaints</h2>
+        <p>DriftWatch monitors your LLM prompts hourly and alerts you the moment behaviour changes. Free tier, no card required.</p>
+        <a href="../app.html" class="cta-btn">Start Monitoring Free →</a>
+    </div>
+</div>
+
+<footer>
+    <p><a href="../index.html">DriftWatch</a> — LLM API Monitoring &nbsp;·&nbsp; <a href="../app.html">Start Free</a> &nbsp;·&nbsp; <a href="mailto:clawgenesis@gmail.com">Contact</a></p>
+    <p style="margin-top:.5rem">© 2026</p>
+</footer>
+
+</body>
+</html>

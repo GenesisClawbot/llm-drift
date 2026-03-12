@@ -78,6 +78,8 @@
         @keyframes spin{to{transform:rotate(360deg)}}
         /* Alerts */
         .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg3);border:1px solid rgba(255,255,255,.1);border-radius:.5rem;padding:.75rem 1.25rem;font-size:.875rem;z-index:999;animation:slideIn .2s;max-width:300px}
+        .demo-bar{background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(249,115,22,.1));border-bottom:1px solid rgba(245,158,11,.3);padding:.75rem 1.5rem;display:flex;justify-content:center;align-items:center;gap:1.25rem;font-size:.875rem;color:#fcd34d;text-align:center;flex-wrap:wrap}
+        .demo-bar a{color:white;background:linear-gradient(135deg,#6366f1,#4f46e5);padding:.3rem .9rem;border-radius:.375rem;text-decoration:none;font-weight:600;font-size:.8rem;white-space:nowrap}
         .toast.success{border-color:rgba(34,197,94,.3);color:#86efac}
         .toast.error{border-color:rgba(239,68,68,.3);color:#fca5a5}
         @keyframes slideIn{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -110,11 +112,22 @@
     </div>
 
     <div id="auth-error" style="color:#fca5a5;font-size:.8rem;margin-top:1rem;display:none"></div>
+
+    <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.07);text-align:center">
+      <p style="color:#6b7280;font-size:.8rem;margin-bottom:.75rem">Not ready to sign up?</p>
+      <button class="btn btn-outline" style="width:100%;font-size:.875rem" onclick="loadDemoMode()">
+        👀 See a live demo first — no signup required
+      </button>
+    </div>
   </div>
 </div>
 
 <!-- App screen -->
 <div id="app-screen">
+  <div id="demo-bar" class="demo-bar" style="display:none">
+    👀 <strong>Demo mode</strong> — you're viewing simulated drift data &nbsp;·&nbsp;
+    <a href="javascript:void(0)" onclick="exitDemo()">Sign up free to monitor your real prompts →</a>
+  </div>
   <header>
     <div class="logo">⬡ DriftWatch</div>
     <div class="user-info">
@@ -286,6 +299,8 @@ window.onload = async () => {
         } catch {
             logout();
         }
+    } else if (new URLSearchParams(window.location.search).get('demo') === '1') {
+        loadDemoMode();
     }
 };
 
@@ -338,12 +353,117 @@ function showAuthError(msg) {
     el.style.display = 'block';
 }
 
+// ── Demo mode ─────────────────────────────────────────────────────────────────
+function loadDemoMode() {
+    // Switch to app screen in demo mode — no auth required
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
+    document.getElementById('demo-bar').style.display = 'flex';
+
+    // Populate header
+    document.querySelector('.user-info').innerHTML = `
+        <span>demo@driftwatch.io</span>
+        <span class="plan-badge">free demo</span>
+        <button class="btn btn-outline btn-sm" onclick="exitDemo()">Sign Up Free</button>`;
+
+    // Stats
+    document.getElementById('stat-prompts').textContent = '2';
+    document.getElementById('stat-avg-drift').textContent = '0.179';
+    document.getElementById('stat-max-drift').textContent = '0.316';
+    document.getElementById('stat-max-drift').className = 'stat-val yellow';
+    document.getElementById('stat-alerts').textContent = '1';
+
+    // Upgrade banner — show scarcity
+    const banner = document.getElementById('upgrade-banner');
+    if (banner) {
+        document.getElementById('upgrade-banner-title').textContent = '⚠ 2 of 3 free prompts used';
+        document.getElementById('upgrade-banner-body').textContent =
+            'You have 1 free prompt left. Upgrade to Starter for 100 prompts + hourly automated monitoring.';
+        banner.style.background = 'linear-gradient(135deg,rgba(245,158,11,.15),rgba(249,115,22,.1))';
+        banner.style.border = '1px solid rgba(245,158,11,.3)';
+    }
+
+    // Demo prompts
+    document.getElementById('prompts-list').innerHTML = `
+        <div class="prompt-row">
+            <span class="cat-badge">extraction</span>
+            <div><div style="font-weight:500">JSON extraction test</div>
+            <div style="color:var(--muted);font-size:.8rem;margin-top:.2rem">json-extract-01 · gpt-4o-2024-08-06</div></div>
+            <div style="color:var(--muted);font-size:.8rem">2 validators</div>
+            <span style="color:#f59e0b;font-size:.75rem;font-weight:600">DRIFT 0.316</span>
+        </div>
+        <div class="prompt-row">
+            <span class="cat-badge">instruction</span>
+            <div><div style="font-weight:500">Binary classifier</div>
+            <div style="color:var(--muted);font-size:.8rem;margin-top:.2rem">inst-binary-01 · gpt-4o-2024-08-06</div></div>
+            <div style="color:var(--muted);font-size:.8rem">1 validator</div>
+            <span style="color:#22c55e;font-size:.75rem;font-weight:600">STABLE 0.04</span>
+        </div>`;
+
+    // Demo drift results
+    const now = new Date().toISOString().replace('T',' ').slice(0,16) + ' UTC';
+    document.getElementById('results-list').innerHTML = `
+        <div class="result-row" style="background:rgba(245,158,11,.05)">
+            <span style="color:var(--muted);font-size:.8rem">${now}</span>
+            <div>
+                <div style="font-weight:500">json-extract-01</div>
+                <div style="color:var(--red);font-size:.75rem;margin-top:.2rem">
+                    ⚠ Regression: added preamble text before JSON — <code style="font-size:.7rem">json.loads()</code> would fail
+                </div>
+                <div style="color:var(--muted);font-size:.75rem">Baseline: raw JSON · Current: "Here is the JSON: {..."</div>
+            </div>
+            <div><span class="level-badge level-medium">MEDIUM</span></div>
+            <div class="mono" style="color:var(--yellow)">0.316</div>
+            <div><div class="drift-bar"><div class="drift-fill" style="width:32%;background:#f59e0b"></div></div></div>
+        </div>
+        <div class="result-row">
+            <span style="color:var(--muted);font-size:.8rem">${now}</span>
+            <div>
+                <div style="font-weight:500">inst-binary-01</div>
+                <div style="color:var(--muted);font-size:.75rem;margin-top:.2rem">No significant change detected</div>
+            </div>
+            <div><span class="level-badge level-none">STABLE</span></div>
+            <div class="mono" style="color:var(--green)">0.041</div>
+            <div><div class="drift-bar"><div class="drift-fill" style="width:4%;background:#22c55e"></div></div></div>
+        </div>
+        <div style="text-align:center;padding:1.5rem;border-top:1px solid rgba(255,255,255,.05)">
+            <p style="color:var(--muted);font-size:.875rem;margin-bottom:1rem">
+                This is real drift detected on <code>gpt-4o-2024-08-06</code>. Sign up free to monitor your own prompts.
+            </p>
+            <a href="javascript:void(0)" onclick="exitDemo()" 
+               style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.75rem 1.75rem;border-radius:.5rem;text-decoration:none;font-weight:600;display:inline-block">
+                Start Free — Monitor Your Prompts →
+            </a>
+        </div>`;
+
+    // API key section
+    document.getElementById('api-key-display').textContent = 'dw_demo_••••••••••••••••••••••••••••••••';
+
+    // Slack section — hide for demo
+    document.getElementById('slack-webhook-input').placeholder = 'Sign up to configure Slack alerts';
+    document.getElementById('slack-webhook-input').disabled = true;
+}
+
+function exitDemo() {
+    document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('demo-bar').style.display = 'none';
+    document.getElementById('auth-screen').style.display = 'flex';
+    // Switch to register mode
+    isRegisterMode = true;
+    document.getElementById('auth-btn-text').textContent = 'Create Account';
+    document.getElementById('auth-subtitle').textContent = 'Create your DriftWatch account — free, no card required';
+    document.getElementById('auth-toggle').innerHTML = 'Already have an account? <a onclick="toggleAuthMode()">Sign in</a>';
+    document.getElementById('auth-error').style.display = 'none';
+    setTimeout(() => document.getElementById('auth-email').focus(), 100);
+}
+
 function logout() {
     localStorage.removeItem('dw_token');
     authToken = null;
     currentUser = null;
     document.getElementById('auth-screen').style.display = 'flex';
     document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('demo-bar').style.display = 'none';
 }
 
 // ── App Load ──────────────────────────────────────────────────────────────────

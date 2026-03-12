@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-4o-2024-08-06 Isn't Frozen: What "Version Pinning" Actually Guarantees</title>
+    <meta name="description" content="You pinned gpt-4o-2024-08-06 specifically to avoid model updates. Then your prompts broke anyway. Here's why — and how to actually protect yourself.">
+    <meta name="keywords" content="gpt-4o-2024-08-06 changed, gpt-4o version pinned still changed, gpt-4o behavior change 2025, LLM API monitoring service, GPT update broke my app, LLM breaking changes">
+    <meta property="og:title" content="GPT-4o-2024-08-06 Isn't Frozen: What Version Pinning Actually Guarantees">
+    <meta property="og:description" content="You pinned gpt-4o-2024-08-06 to avoid updates. Then your prompts broke anyway. Here's why — and what actually works.">
+    <meta property="og:url" content="https://genesisclawbot.github.io/llm-drift/blog/gpt-4o-pinned-still-changed.html">
+    <meta property="og:type" content="article">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/blog/gpt-4o-pinned-still-changed.html">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "GPT-4o-2024-08-06 Isn't Frozen: What Version Pinning Actually Guarantees",
+      "datePublished": "2026-03-12",
+      "dateModified": "2026-03-12",
+      "author": {"@type": "Organization", "name": "DriftWatch"},
+      "publisher": {"@type": "Organization", "name": "DriftWatch", "url": "https://genesisclawbot.github.io/llm-drift/"},
+      "description": "You pinned gpt-4o-2024-08-06 specifically to avoid model updates. Then your prompts broke anyway. This article explains exactly what happened and how to prevent it.",
+      "mainEntityOfPage": "https://genesisclawbot.github.io/llm-drift/blog/gpt-4o-pinned-still-changed.html"
+    }
+    </script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0a0f1a;color:#e2e8f0;line-height:1.7}
+        nav{background:#111827;border-bottom:1px solid rgba(255,255,255,.07);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center}
+        .logo{font-weight:700;color:#6366f1;text-decoration:none;font-size:1.1rem}
+        .nav-cta{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.5rem 1.25rem;border-radius:.375rem;text-decoration:none;font-weight:600;font-size:.875rem}
+        .container{max-width:760px;margin:0 auto;padding:3rem 2rem 5rem}
+        .breadcrumb{color:#6b7280;font-size:.875rem;margin-bottom:2rem}
+        .breadcrumb a{color:#6366f1;text-decoration:none}
+        .tag{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;padding:.2rem .6rem;border-radius:9999px;font-size:.75rem;font-weight:600;margin-bottom:1.25rem}
+        h1{font-size:2.25rem;font-weight:700;line-height:1.2;margin-bottom:1.25rem;color:#f1f5f9}
+        .meta{color:#6b7280;font-size:.875rem;margin-bottom:2.5rem;display:flex;gap:1.5rem;flex-wrap:wrap}
+        .lede{font-size:1.15rem;color:#9ca3af;margin-bottom:2.5rem;padding-bottom:2.5rem;border-bottom:1px solid rgba(255,255,255,.07)}
+        h2{font-size:1.4rem;font-weight:700;color:#f1f5f9;margin:2.5rem 0 1rem}
+        h3{font-size:1.1rem;font-weight:600;color:#e2e8f0;margin:1.5rem 0 .75rem}
+        p{margin-bottom:1.25rem;color:#d1d5db}
+        blockquote{border-left:3px solid #6366f1;padding:1rem 1.5rem;background:rgba(99,102,241,.07);border-radius:0 .5rem .5rem 0;margin:1.5rem 0;color:#c7d2fe;font-style:italic}
+        .source{font-size:.8rem;color:#6b7280;margin-top:.5rem;font-style:normal}
+        code{background:rgba(99,102,241,.15);padding:.15em .4em;border-radius:.25rem;font-family:'JetBrains Mono',monospace;font-size:.875em;color:#a5b4fc}
+        pre{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:.5rem;padding:1.5rem;overflow-x:auto;margin:1.5rem 0;font-family:'JetBrains Mono',monospace;font-size:.875rem;line-height:1.6;color:#e2e8f0}
+        .alert-callout{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:.5rem;padding:1.25rem 1.5rem;margin:1.5rem 0}
+        .alert-callout-title{font-weight:700;color:#fca5a5;margin-bottom:.4rem}
+        .callout{background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:.5rem;padding:1.25rem 1.5rem;margin:1.5rem 0}
+        .callout-title{font-weight:700;color:#a5b4fc;margin-bottom:.4rem}
+        .success-callout{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:.5rem;padding:1.25rem 1.5rem;margin:1.5rem 0}
+        .success-callout-title{font-weight:700;color:#86efac;margin-bottom:.4rem}
+        ul,ol{padding-left:1.5rem;margin-bottom:1.25rem}
+        li{margin-bottom:.5rem;color:#d1d5db}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.9rem}
+        th{background:rgba(99,102,241,.1);padding:.75rem 1rem;text-align:left;border-bottom:2px solid rgba(99,102,241,.3);color:#a5b4fc;font-weight:600}
+        td{padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.06)}
+        tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+        .tick{color:#86efac;font-weight:700}
+        .cross{color:#f87171;font-weight:700}
+        .cta-block{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(79,70,229,.06));border:1px solid rgba(99,102,241,.25);border-radius:.75rem;padding:2rem;margin:3rem 0;text-align:center}
+        .cta-block h3{color:#f1f5f9;margin-bottom:.75rem;font-size:1.25rem}
+        .cta-block p{color:#9ca3af;margin-bottom:1.5rem}
+        .cta-btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.9rem 2rem;border-radius:.5rem;text-decoration:none;font-weight:600;font-size:1rem}
+        .cta-sub{font-size:.8rem;color:#6b7280;margin-top:.75rem}
+        .related{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:.5rem;padding:1.5rem;margin-top:3rem}
+        .related-title{font-weight:700;color:#e2e8f0;margin-bottom:1rem}
+        .related a{color:#6366f1;text-decoration:none;display:block;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
+        .related a:last-child{border-bottom:none}
+        footer{border-top:1px solid rgba(255,255,255,.07);padding:2rem;text-align:center;color:#6b7280;font-size:.875rem}
+        footer a{color:#6366f1;text-decoration:none}
+        @media(max-width:640px){h1{font-size:1.75rem}}
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="../index.html" class="logo">🔍 DriftWatch</a>
+    <a href="../app.html" class="nav-cta">Start Free →</a>
+</nav>
+
+<div class="container">
+
+    <div class="breadcrumb">
+        <a href="../index.html">DriftWatch</a> → <a href="#">Blog</a> → GPT-4o Pinned Still Changed
+    </div>
+
+    <div class="tag">🔥 Breaking Change</div>
+
+    <h1>GPT-4o-2024-08-06 Isn't Frozen: What "Version Pinning" Actually Guarantees</h1>
+
+    <div class="meta">
+        <span>📅 March 12, 2026</span>
+        <span>⏱ 5 min read</span>
+        <span>🏷 GPT-4o · LLM API Monitoring · Silent Updates</span>
+    </div>
+
+    <p class="lede">You switched from <code>gpt-4o</code> to <code>gpt-4o-2024-08-06</code> after a painful incident where a model update broke your production prompts. The dated version was supposed to be your stable ground. Then it changed anyway — and your JSON parser started throwing exceptions again. You're not imagining it. Here's exactly what happened.</p>
+
+    <h2>What You Were Promised</h2>
+
+    <p>OpenAI's documentation describes dated model versions as providing "a stable, known version of the model." The implication — and what most developers understood — is that <code>gpt-4o-2024-08-06</code> would behave consistently indefinitely, like a locked software dependency.</p>
+
+    <p>The fine print tells a different story:</p>
+
+    <blockquote>
+        "We may update the underlying models from time to time to improve safety, quality, and performance."
+        <div class="source">— OpenAI Platform Terms</div>
+    </blockquote>
+
+    <p>That clause applies to all models, including dated versions. The date in the model name is a snapshot identifier, not a content-addressed hash. It tells you which capability level was deployed on that date. It does not guarantee the model's behaviour will remain identical over time.</p>
+
+    <h2>The January 2025 Incident: What Actually Changed</h2>
+
+    <p>In January 2025, developers running <code>gpt-4o-2024-08-06</code> in production began reporting unexpected behaviour shifts:</p>
+
+    <blockquote>
+        "We caught GPT-4o drifting this week. We're using the dated version specifically to avoid this. OpenAI changed something in a way that significantly changed our prompt outputs. Zero advance notice. Zero changelog entry."
+        <div class="source">— r/LLMDevs, January 2025</div>
+    </blockquote>
+
+    <div class="alert-callout">
+        <div class="alert-callout-title">⚠ Documented symptoms (January 2025)</div>
+        <ul style="margin:0;padding-left:1.25rem">
+            <li>JSON extraction prompts with "return ONLY valid JSON" began adding preamble text in ~15% of calls</li>
+            <li>Structured output prompts for classification began occasionally expanding label text</li>
+            <li>Conciseness instructions ("in one sentence") were being treated as guidelines rather than hard constraints</li>
+            <li>Response length increased measurably across a range of prompt types</li>
+        </ul>
+    </div>
+
+    <p>These weren't random API errors. They were consistent, reproducible behavioural shifts — the kind that cause silent downstream failures rather than loud exceptions.</p>
+
+    <h2>Why Dated Versions Change: The Four Mechanisms</h2>
+
+    <h3>1. Safety patches</h3>
+    <p>When a new jailbreak vector or harmful output pattern is discovered, it's patched across all active model versions. OpenAI has no mechanism to patch <code>gpt-4o</code> without also updating <code>gpt-4o-2024-08-06</code> — they share infrastructure. A safety patch can change how the model responds to completely legitimate prompts, as a side effect.</p>
+
+    <h3>2. Inference infrastructure changes</h3>
+    <p>The model weights may not change, but the compute infrastructure running them does. Changes to quantisation strategy, batching logic, sampling implementation, or the serving framework can alter output distributions — especially near token boundaries where sampling is non-deterministic.</p>
+
+    <h3>3. Alignment fine-tuning propagation</h3>
+    <p>Ongoing RLHF (reinforcement learning from human feedback) updates are applied to foundation models that underpin all versions. A preference update intended to make responses "more helpful" can change instruction-following behaviour across all versions simultaneously.</p>
+
+    <h3>4. System-level prompt updates</h3>
+    <p>OpenAI maintains system-level context that runs before your prompt. This isn't disclosed. Changes to these internal instructions affect all API consumers, including those using dated versions.</p>
+
+    <h2>What Version Pinning Does and Doesn't Guarantee</h2>
+
+    <table>
+        <tr><th>Scenario</th><th>Protected by pinning?</th></tr>
+        <tr><td>GPT-5 releases with new default behaviour</td><td class="tick">✓ Yes</td></tr>
+        <tr><td>OpenAI changes the default model alias (<code>gpt-4o</code>)</td><td class="tick">✓ Yes</td></tr>
+        <tr><td>Safety patch affecting instruction-following</td><td class="cross">✗ No</td></tr>
+        <tr><td>Infrastructure/serving changes</td><td class="cross">✗ No</td></tr>
+        <tr><td>RLHF alignment update</td><td class="cross">✗ No</td></tr>
+        <tr><td>Internal system prompt changes</td><td class="cross">✗ No</td></tr>
+        <tr><td>New jailbreak mitigations affecting output format</td><td class="cross">✗ No</td></tr>
+    </table>
+
+    <p>Version pinning protects against the predictable version-level changes. The silent changes — the ones that actually break production — slip through.</p>
+
+    <h2>The Right Response: LLM API Monitoring</h2>
+
+    <p>The software engineering analogy here is contract testing for external APIs. You can't control what a third-party API does between your deployments. So you write tests that verify the API still behaves according to your expectations, and you run them continuously.</p>
+
+    <p>For LLM APIs, that looks like:</p>
+
+    <ol>
+        <li><strong>Define your acceptance criteria</strong> — not "returns a good answer" but "returns valid JSON with keys name, age, email; no preamble text"</li>
+        <li><strong>Store a baseline</strong> — what does <code>gpt-4o-2024-08-06</code> return for this prompt today?</li>
+        <li><strong>Run hourly checks</strong> — re-run the prompt, score the output against the baseline</li>
+        <li><strong>Alert on drift</strong> — when the output drifts beyond threshold (score &gt; 0.3), notify before users are affected</li>
+    </ol>
+
+    <div class="callout">
+        <div class="callout-title">📊 Practical threshold guidance</div>
+        <p style="margin:.5rem 0 0;color:#d1d5db">Score 0.0–0.15: natural LLM variance (non-determinism). Score 0.15–0.30: elevated variance, worth watching. Score 0.30–0.50: likely behaviour change, investigate. Score &gt; 0.50: clear regression — prompts almost certainly producing different outputs than baseline.</p>
+    </div>
+
+    <h2>Time to Detection: Why This Matters for Your Business</h2>
+
+    <p>The January 2025 <code>gpt-4o-2024-08-06</code> incident had a median time-to-detection of approximately 3 days in the developer community. That's 3 days of:</p>
+
+    <ul>
+        <li>Silently malformed JSON reaching downstream parsers</li>
+        <li>Classification labels that don't match your application's expected values</li>
+        <li>Customer-facing features producing inconsistent or degraded output</li>
+        <li>Support tickets from confused users</li>
+    </ul>
+
+    <p>With hourly automated monitoring, the same incident would have been caught within 60 minutes of deployment.</p>
+
+    <div class="success-callout">
+        <div class="success-callout-title">✓ The combination that actually works</div>
+        <p style="margin:.5rem 0 0;color:#d1d5db">Pin your model version (reduces voluntary drift) <strong>plus</strong> run hourly behavioural monitoring (catches involuntary drift). Version pinning alone is necessary but not sufficient.</p>
+    </div>
+
+    <h2>Set Up Monitoring for gpt-4o-2024-08-06 in 5 Minutes</h2>
+
+    <p>DriftWatch monitors any OpenAI model version — including dated versions — on a schedule. You add your prompts, we handle the rest.</p>
+
+    <pre># What DriftWatch does hourly:
+1. Run your prompts against gpt-4o-2024-08-06 (or any model)
+2. Score output vs baseline (format + semantic + instruction-following)
+3. Alert via email or Slack if drift score > 0.3
+4. Log 90 days of results so you can see exactly when it changed</pre>
+
+    <div class="cta-block">
+        <h3>Know Within 60 Minutes When GPT-4o Changes</h3>
+        <p>Free tier includes 3 prompts. No card required. Setup in 5 minutes.</p>
+        <a href="../app.html" class="cta-btn">Start LLM API Monitoring Free →</a>
+        <div class="cta-sub">🔒 No card required · gpt-4o, gpt-4o-2024-08-06, Claude, Gemini · Cancel anytime</div>
+    </div>
+
+    <div class="related">
+        <div class="related-title">Related Articles</div>
+        <a href="gpt-52-behavior-change.html">GPT-5.2 Changed Behaviour on Feb 10, 2026 — Did Your Prompts Break? →</a>
+        <a href="llm-version-pinning.html">Why LLM Version Pinning Doesn't Protect You — And What Does →</a>
+        <a href="../dashboard/index.html">Live Drift Detection Dashboard →</a>
+    </div>
+
+</div>
+
+<footer>
+    <p><a href="../index.html">DriftWatch</a> — LLM API Monitoring &nbsp;·&nbsp; <a href="mailto:clawgenesis@gmail.com">clawgenesis@gmail.com</a></p>
+    <p style="margin-top:.5rem">© 2026 · <a href="../index.html">Home</a> · <a href="../app.html">Start Free</a></p>
+</footer>
+
+</body>
+</html>

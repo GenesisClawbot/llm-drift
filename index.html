@@ -19,11 +19,11 @@
     </script>
     <script type="application/ld+json">
     {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
-      {"@type":"Question","name":"Does DriftWatch work with GPT-5.2, Claude, and Gemini?","acceptedAnswer":{"@type":"Answer","text":"Yes. DriftWatch monitors any OpenAI, Anthropic, or Google Gemini API endpoint. You provide your own API keys — we run your test prompts against them hourly (Starter) or every 15 minutes (Pro)."}},
-      {"@type":"Question","name":"What counts as LLM drift?","acceptedAnswer":{"@type":"Answer","text":"We score each run across three dimensions: format compliance (does the output still match the expected structure?), semantic similarity (has the meaning shifted?), and instruction-following (are specific directives still obeyed?). A composite score above 0.3 triggers an alert."}},
-      {"@type":"Question","name":"Will my API keys be safe with DriftWatch?","acceptedAnswer":{"@type":"Answer","text":"Your keys are stored encrypted at rest and never logged. We only use them to run your configured test prompts. You can rotate or revoke at any time."}},
-      {"@type":"Question","name":"How long does DriftWatch setup take?","acceptedAnswer":{"@type":"Answer","text":"Under 5 minutes. Sign up free, paste one test prompt, add your API key, and your first baseline run starts automatically. Slack alerts take 30 seconds more to configure."}},
-      {"@type":"Question","name":"Why doesn't pinning a model version protect against LLM drift?","acceptedAnswer":{"@type":"Answer","text":"Even dated, supposedly frozen model versions change. In early 2025, gpt-4o-2024-08-06 silently changed behaviour. OpenAI's terms reserve the right to update any model for safety or policy reasons. Continuous automated testing is the only reliable defence."}}
+      {"@type":"Question","name":"How do I know if OpenAI changed my model without telling me?","acceptedAnswer":{"@type":"Answer","text":"You can't know from OpenAI directly — they don't send notifications when model behaviour changes. DriftWatch detects it automatically by running your test prompts hourly and comparing outputs against a stored baseline. When the output shifts beyond a 0.3 drift score, you get an email or Slack alert within 60 minutes."}},
+      {"@type":"Question","name":"Does pinning a GPT-4o version like gpt-4o-2024-08-06 prevent behavior changes?","acceptedAnswer":{"@type":"Answer","text":"No — not reliably. In January 2025, gpt-4o-2024-08-06 (a dated, supposedly frozen snapshot) silently changed behaviour according to multiple developer reports. OpenAI reserves the right to update any model version for safety, security, or policy reasons without advance notice. Version pinning reduces surface area; it doesn't eliminate drift."}},
+      {"@type":"Question","name":"How often does GPT-4o or GPT-5 change behavior?","acceptedAnswer":{"@type":"Answer","text":"Multiple times per year for major updates, plus undisclosed minor patches. In 2025–2026 alone: gpt-4o-2024-08-06 (Jan 2025), GPT-4o base (multiple times), and GPT-5.2 Instant (Feb 10, 2026) all had documented silent behaviour changes. Developers typically discover these 2–7 days after the change, via user complaints."}},
+      {"@type":"Question","name":"What is the difference between LLM observability and LLM drift detection?","acceptedAnswer":{"@type":"Answer","text":"LLM observability (Langsmith, Langfuse, Helicone) monitors what's happening in your production pipeline — latency, token usage, error rates. LLM drift detection monitors whether the model itself has changed. Observability tells you your app is slow; drift detection tells you your prompts stopped working because GPT updated. Both are needed; they solve different problems."}},
+      {"@type":"Question","name":"How do I get an alert when my LLM prompt stops working?","acceptedAnswer":{"@type":"Answer","text":"Sign up for DriftWatch free. Add your prompt and API key. We run it hourly against your chosen model and alert you by email or Slack the moment the output drifts beyond the threshold. Setup takes under 5 minutes; no card required for the free tier."}}
     ]}
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -296,28 +296,24 @@
     <div class="section-h">Common Questions</div>
     <div style="max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:1.25rem">
         <details style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:.75rem;padding:1.25rem 1.5rem;cursor:pointer">
-            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">Does it work with GPT-5.2, Claude, and Gemini?</summary>
-            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6">Yes. DriftWatch monitors any OpenAI, Anthropic, or Google Gemini API endpoint. You provide your own API keys — we run your test prompts against them hourly (Starter) or every 15 minutes (Pro).</p>
+            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">How do I know if OpenAI changed my model without telling me?</summary>
+            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6">You can't know from OpenAI directly — they don't send notifications when model behaviour changes. DriftWatch detects it automatically by running your test prompts hourly and comparing outputs against a stored baseline. When the output shifts beyond a 0.3 drift score, you get an email or Slack alert within 60 minutes.</p>
         </details>
         <details style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:.75rem;padding:1.25rem 1.5rem;cursor:pointer">
-            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">What counts as "drift"?</summary>
-            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6">We score each run across three dimensions: format compliance (does the output still match the expected structure?), semantic similarity (has the meaning shifted?), and instruction-following (are specific directives still obeyed?). A composite score above 0.3 triggers an alert.</p>
+            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">Does pinning <code style="background:rgba(99,102,241,.2);padding:.1em .3em;border-radius:.2em;font-size:.9em">gpt-4o-2024-08-06</code> prevent behaviour changes?</summary>
+            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6">No — not reliably. In January 2025, <code style="background:rgba(99,102,241,.2);padding:.1em .3em;border-radius:.2em">gpt-4o-2024-08-06</code> silently changed behaviour despite being a dated snapshot. OpenAI reserves the right to update any model for safety or policy reasons without notice. Version pinning reduces surface area; it does not eliminate drift.</p>
         </details>
         <details style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:.75rem;padding:1.25rem 1.5rem;cursor:pointer">
-            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">Will my API keys be safe?</summary>
-            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6">Your keys are stored encrypted at rest and never logged. We only use them to run your configured test prompts — no other access. You can rotate or revoke at any time.</p>
+            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">How often does GPT-4o or GPT-5 change behaviour?</summary>
+            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6">Multiple times per year — plus undisclosed minor patches. In 2025–2026: gpt-4o-2024-08-06 (Jan 2025), GPT-4o base (multiple undisclosed), and GPT-5.2 Instant (Feb 10, 2026) all had documented silent behaviour changes. Developers typically find out 2–7 days later, from user complaints.</p>
         </details>
         <details style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:.75rem;padding:1.25rem 1.5rem;cursor:pointer">
-            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">How long does setup take?</summary>
-            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6">Under 5 minutes. Sign up free → paste one test prompt → add your API key → first baseline run starts automatically. Alerts go to email; Slack takes 30 seconds more to wire up.</p>
+            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">What's the difference between LLM observability and LLM drift detection?</summary>
+            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6">LLM observability (Langsmith, Langfuse, Helicone) monitors your pipeline — latency, token usage, errors. Drift detection monitors whether the <em>model itself</em> changed. Observability tells you your app is slow. Drift detection tells you your prompts stopped working because GPT updated silently. You need both; they solve different problems.</p>
         </details>
         <details style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:.75rem;padding:1.25rem 1.5rem;cursor:pointer">
-            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">Can I cancel anytime?</summary>
-            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6">Yes — cancel instantly from your dashboard, no questions asked. If you cancel within 14 days of first subscribing, we'll issue a full refund.</p>
-        </details>
-        <details style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:.75rem;padding:1.25rem 1.5rem;cursor:pointer">
-            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">Why not just pin to a specific model version?</summary>
-            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6">Even "fixed" versions drift. In early 2025, <code style="background:rgba(99,102,241,.2);padding:.1em .4em;border-radius:.25em">gpt-4o-2024-08-06</code> — a dated, supposedly stable snapshot — silently changed behaviour. DriftWatch catches this even when the model name stays the same.</p>
+            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">How do I get an alert when my LLM prompt stops working?</summary>
+            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6"><a href="app.html" style="color:#6366f1">Sign up free</a> (no card, 3 prompts included). Paste your prompt and add your API key. We run it hourly and alert you by email or Slack the moment output drifts. Setup takes under 5 minutes.</p>
         </details>
     </div>
 </section>

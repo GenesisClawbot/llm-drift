@@ -1,0 +1,88 @@
+name: Hourly Drift Check
+
+on:
+  schedule:
+    # Run every hour at :05 past the hour
+    - cron: '5 * * * *'
+  workflow_dispatch:
+    inputs:
+      model:
+        description: 'LLM model to test'
+        required: false
+        default: 'claude-3-haiku-20240307'
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    name: Run LLM Drift Detection
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run baseline (if missing)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ ! -f data/baseline.json ]; then
+            echo "No baseline found — establishing baseline..."
+            python3 core/drift_detector.py --run baseline --model ${{ github.event.inputs.model || 'claude-3-haiku-20240307' }}
+          else
+            echo "Baseline exists — skipping baseline run"
+          fi
+
+      - name: Run drift check
+        id: drift
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python3 core/drift_detector.py --run check --model ${{ github.event.inputs.model || 'claude-3-haiku-20240307' }}
+
+          # Extract key metrics for the summary
+          python3 -c "
+          import json
+          with open('data/results.json') as f:
+              r = json.load(f)
+          s = r.get('summary', {})
+          print(f'avg_drift={s.get(\"avg_drift\", 0)}')
+          print(f'max_drift={s.get(\"max_drift\", 0)}')
+          print(f'alerts={s.get(\"alerts\", 0)}')
+          " >> $GITHUB_OUTPUT
+
+      - name: Commit results
+        run: |
+          git config user.name "DriftWatch Bot"
+          git config user.email "actions@github.com"
+          git add data/results.json data/history.json
+          git diff --cached --quiet || git commit -m "chore: drift check $(date -u +%Y-%m-%dT%H:%M)Z — avg=${{ steps.drift.outputs.avg_drift }} max=${{ steps.drift.outputs.max_drift }} alerts=${{ steps.drift.outputs.alerts }}"
+          git push
+
+      - name: Alert on high drift
+        if: ${{ steps.drift.outputs.alerts > 0 }}
+        run: |
+          echo "::warning::🚨 DRIFT ALERT — ${{ steps.drift.outputs.alerts }} prompt(s) exceeded threshold"
+          echo "Avg drift: ${{ steps.drift.outputs.avg_drift }}"
+          echo "Max drift: ${{ steps.drift.outputs.max_drift }}"
+          # In production: send Slack/email via webhook
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK }} -d '{"text": "🚨 LLM drift detected..."}'
+
+      - name: Deployment summary
+        run: |
+          echo "## Drift Check Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Avg Drift | ${{ steps.drift.outputs.avg_drift }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Max Drift | ${{ steps.drift.outputs.max_drift }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Alerts | ${{ steps.drift.outputs.alerts }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dashboard | [View →](https://genesisclawbot.github.io/llm-drift/dashboard/) |" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to DriftWatch — Getting Started</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0a0f1a;color:#f1f5f9;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:4rem 2rem}
+        .container{max-width:700px;width:100%}
+        .success-badge{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#86efac;padding:.5rem 1.25rem;border-radius:9999px;font-size:.9rem;font-weight:600;display:inline-flex;align-items:center;gap:.5rem;margin-bottom:2rem}
+        h1{font-size:2rem;font-weight:700;margin-bottom:.75rem;line-height:1.2}
+        h1 span{color:#6366f1}
+        .subtitle{color:#9ca3af;font-size:1.1rem;margin-bottom:3rem}
+        .steps{display:flex;flex-direction:column;gap:1.5rem;margin-bottom:3rem}
+        .step{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:.75rem;padding:1.5rem;display:grid;grid-template-columns:48px 1fr;gap:1rem;align-items:start}
+        .step-num{width:48px;height:48px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;flex-shrink:0}
+        .step h3{font-size:1rem;font-weight:600;margin-bottom:.4rem;color:#e2e8f0}
+        .step p{color:#9ca3af;font-size:.9rem;line-height:1.6}
+        .code-block{background:#0a0f1a;border:1px solid rgba(255,255,255,.1);border-radius:.375rem;padding:1rem;margin-top:.75rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#86efac;overflow-x:auto;position:relative}
+        .copy-btn{position:absolute;top:.5rem;right:.5rem;background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;padding:.2rem .5rem;border-radius:.25rem;font-size:.7rem;cursor:pointer;font-family:'Inter',sans-serif}
+        .copy-btn:hover{background:rgba(99,102,241,.4)}
+        .plan-badge{display:inline-block;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;padding:.2rem .6rem;border-radius:.25rem;font-size:.8rem;font-weight:600;margin-bottom:1rem}
+        .cta-section{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(79,70,229,.05));border:1px solid rgba(99,102,241,.2);border-radius:.75rem;padding:1.5rem;text-align:center;margin-bottom:2rem}
+        .cta-section h3{margin-bottom:.5rem}
+        .cta-section p{color:#9ca3af;font-size:.9rem;margin-bottom:1rem}
+        .btn{display:inline-block;padding:.75rem 1.5rem;border-radius:.5rem;font-weight:600;font-size:.95rem;cursor:pointer;border:none;text-decoration:none}
+        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white}
+        .btn-secondary{background:rgba(255,255,255,.07);color:#e2e8f0;border:1px solid rgba(255,255,255,.1);margin-left:.75rem}
+        .links{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+        .link-card{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:.5rem;padding:1rem 1.25rem;text-align:center;flex:1;min-width:160px;transition:border-color .2s;text-decoration:none;color:inherit}
+        .link-card:hover{border-color:rgba(99,102,241,.3)}
+        .link-card .icon{font-size:1.5rem;margin-bottom:.4rem}
+        .link-card .label{font-size:.875rem;color:#9ca3af}
+        .link-card .name{font-weight:600;font-size:.95rem;color:#e2e8f0}
+        .alert{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:.5rem;padding:1rem;color:#fcd34d;font-size:.875rem;margin-top:1rem}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="success-badge">✓ Payment successful — welcome aboard</div>
+    
+    <h1>You're in. Let's catch your first <span>LLM drift</span>.</h1>
+    <p class="subtitle">Follow these 3 steps to have DriftWatch monitoring your endpoints in under 10 minutes.</p>
+
+    <div id="plan-info"></div>
+
+    <div class="steps">
+        <div class="step">
+            <div class="step-num">1</div>
+            <div>
+                <h3>Clone the repository & install</h3>
+                <p>DriftWatch runs from your machine or CI/CD pipeline. Clone the repo and install the single dependency.</p>
+                <div class="code-block" id="code1">
+git clone https://github.com/GenesisClawbot/llm-drift.git
+cd llm-drift
+pip install -r requirements.txt
+                <button class="copy-btn" onclick="copy('code1')">copy</button></div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-num">2</div>
+            <div>
+                <h3>Set your API key & run baseline</h3>
+                <p>Set your LLM API key and establish a baseline — this is what future runs are compared against.</p>
+                <div class="code-block" id="code2">
+# For Claude (Anthropic):
+export ANTHROPIC_API_KEY=sk-ant-...
+
+# Establish baseline (stores responses for all 20 test prompts)
+python3 core/drift_detector.py --run baseline
+
+# Output: data/baseline.json
+                <button class="copy-btn" onclick="copy('code2')">copy</button></div>
+                <div class="alert">💡 Run baseline when your model is behaving correctly — this becomes your reference point.</div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-num">3</div>
+            <div>
+                <h3>Run your first drift check</h3>
+                <p>Run a drift check to see current deviation from baseline. Schedule this hourly in CI/CD for continuous monitoring.</p>
+                <div class="code-block" id="code3">
+# Single drift check
+python3 core/drift_detector.py --run check
+
+# Results: data/results.json + console output
+# Dashboard: open dashboard/index.html in your browser
+
+# ── Schedule hourly (GitHub Actions) ──────────────────
+# See .github/workflows/drift-check.yml in the repo.
+# Add ANTHROPIC_API_KEY to your repo secrets.
+                <button class="copy-btn" onclick="copy('code3')">copy</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cta-section">
+        <h3>Set up GitHub Actions monitoring</h3>
+        <p>The repo includes a pre-configured GitHub Actions workflow that runs drift checks every hour automatically. Just add your <code style="background:rgba(255,255,255,.1);padding:.1rem .4rem;border-radius:.25rem">ANTHROPIC_API_KEY</code> to your repo secrets.</p>
+        <a href="https://github.com/GenesisClawbot/llm-drift/blob/main/.github/workflows/drift-check.yml" class="btn btn-primary" target="_blank">View Workflow Config →</a>
+        <a href="https://github.com/GenesisClawbot/llm-drift" class="btn btn-secondary" target="_blank">GitHub Repo</a>
+    </div>
+
+    <div class="links">
+        <a href="dashboard/index.html" class="link-card">
+            <div class="icon">📊</div>
+            <div class="name">Dashboard</div>
+            <div class="label">View live results</div>
+        </a>
+        <a href="https://github.com/GenesisClawbot/llm-drift" class="link-card" target="_blank">
+            <div class="icon">⌨️</div>
+            <div class="name">GitHub Repo</div>
+            <div class="label">Source + docs</div>
+        </a>
+        <a href="mailto:clawgenesis@gmail.com" class="link-card">
+            <div class="icon">✉️</div>
+            <div class="name">Support</div>
+            <div class="label">Get help</div>
+        </a>
+    </div>
+</div>
+
+<script>
+function copy(id) {
+    const el = document.getElementById(id);
+    const text = el.innerText.replace(/copy$/, '').trim();
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = el.querySelector('.copy-btn');
+        btn.textContent = 'copied!';
+        setTimeout(() => btn.textContent = 'copy', 2000);
+    });
+}
+
+// Show plan info from URL param
+const plan = new URLSearchParams(window.location.search).get('plan') || 'starter';
+const plans = {
+    starter: { name: 'Starter', price: '£99/month', prompts: '100 prompts', cadence: 'Hourly monitoring' },
+    pro:     { name: 'Pro',     price: '£249/month', prompts: 'Unlimited prompts', cadence: '15-minute monitoring' }
+};
+const p = plans[plan] || plans.starter;
+document.getElementById('plan-info').innerHTML = `
+    <div class="plan-badge">✓ ${p.name} Plan — ${p.price}</div>
+    <p style="color:#6b7280;font-size:.875rem;margin-bottom:2rem">${p.prompts} · ${p.cadence} · Email + Slack alerts</p>
+`;
+</script>
+</body>
+</html>

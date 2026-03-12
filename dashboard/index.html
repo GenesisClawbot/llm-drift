@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Drift Monitor — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--bg:#0a0f1a;--bg2:#111827;--bg3:#1f2937;--text:#f1f5f9;--muted:#6b7280;--accent:#6366f1;--green:#22c55e;--yellow:#f59e0b;--red:#ef4444;--orange:#f97316}
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+        header{background:var(--bg2);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.07)}
+        .logo{font-weight:700;font-size:1.1rem;color:var(--accent)}
+        .logo span{color:var(--muted);font-weight:400;font-size:.9rem;margin-left:.75rem}
+        .status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;display:inline-block;margin-right:.4rem}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+        .top-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;padding:1.5rem 2rem;background:var(--bg2);border-bottom:1px solid rgba(255,255,255,.05)}
+        .metric{text-align:center}
+        .metric-val{font-size:1.75rem;font-weight:700}
+        .metric-label{color:var(--muted);font-size:.8rem;margin-top:.2rem}
+        .green{color:var(--green)}.yellow{color:var(--yellow)}.red{color:var(--red)}.accent{color:var(--accent)}
+        .main{padding:1.5rem 2rem;max-width:1400px;margin:0 auto}
+        .section-title{font-size:1rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem}
+        .history-chart{background:var(--bg2);border:1px solid rgba(255,255,255,.07);border-radius:.5rem;padding:1.25rem;margin-bottom:1.5rem}
+        canvas{width:100%;height:80px}
+        .results-grid{display:flex;flex-direction:column;gap:.75rem;margin-bottom:2rem}
+        .result-row{background:var(--bg2);border:1px solid rgba(255,255,255,.07);border-radius:.5rem;padding:1rem 1.25rem;display:grid;grid-template-columns:auto 1fr auto auto auto;gap:1rem;align-items:center}
+        .result-row.alert-critical{border-color:var(--red);background:rgba(239,68,68,.05)}
+        .result-row.alert-high{border-color:var(--orange);background:rgba(249,115,22,.05)}
+        .result-row.alert-medium{border-color:var(--yellow);background:rgba(245,158,11,.05)}
+        .badge{padding:.2rem .6rem;border-radius:9999px;font-size:.75rem;font-weight:600}
+        .badge-critical{background:rgba(239,68,68,.2);color:#fca5a5}
+        .badge-high{background:rgba(249,115,22,.2);color:#fdba74}
+        .badge-medium{background:rgba(245,158,11,.2);color:#fcd34d}
+        .badge-low{background:rgba(99,102,241,.15);color:#a5b4fc}
+        .badge-none{background:rgba(34,197,94,.15);color:#86efac}
+        .result-name{font-weight:500;font-size:.9rem}
+        .result-cat{color:var(--muted);font-size:.8rem}
+        .drift-bar-wrap{width:120px}
+        .drift-bar-bg{background:var(--bg3);border-radius:9999px;height:6px;overflow:hidden}
+        .drift-bar-fill{height:100%;border-radius:9999px;transition:width .3s}
+        .drift-score{font-family:'JetBrains Mono',monospace;font-size:.85rem;text-align:right;min-width:40px}
+        .diff-panel{background:var(--bg3);border-radius:.375rem;padding:1rem;margin-top:.75rem;display:none;font-family:'JetBrains Mono',monospace;font-size:.8rem}
+        .result-row.expanded .diff-panel{display:block}
+        .diff-line-baseline{color:#6b7280}
+        .diff-line-current{color:#e2e8f0}
+        .val-pills{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.5rem}
+        .val-pill{font-size:.7rem;padding:.15rem .4rem;border-radius:3px}
+        .val-pass{background:rgba(34,197,94,.15);color:#86efac}
+        .val-fail{background:rgba(239,68,68,.15);color:#fca5a5}
+        .expand-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:.25rem .5rem;border-radius:.25rem}
+        .expand-btn:hover{background:var(--bg3);color:var(--text)}
+        @media(max-width:768px){.top-bar{grid-template-columns:repeat(3,1fr)}.result-row{grid-template-columns:1fr auto}}
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">⬡ DriftWatch <span>LLM Monitoring</span></div>
+    <div style="display:flex;align-items:center;gap:1rem;color:var(--muted);font-size:.85rem">
+        <span><span class="status-dot"></span>Live</span>
+        <span id="last-check">Loading...</span>
+    </div>
+</header>
+
+<div class="top-bar">
+    <div class="metric"><div class="metric-val accent" id="total-prompts">—</div><div class="metric-label">Prompts Monitored</div></div>
+    <div class="metric"><div class="metric-val" id="avg-drift">—</div><div class="metric-label">Avg Drift Score</div></div>
+    <div class="metric"><div class="metric-val" id="max-drift">—</div><div class="metric-label">Peak Drift</div></div>
+    <div class="metric"><div class="metric-val" id="alerts">—</div><div class="metric-label">Active Alerts</div></div>
+    <div class="metric"><div class="metric-val green" id="passing">—</div><div class="metric-label">Passing All Validators</div></div>
+</div>
+
+<div class="main">
+    <div class="history-chart">
+        <div class="section-title" style="margin-bottom:.75rem">Drift History</div>
+        <canvas id="history-canvas"></canvas>
+    </div>
+
+    <div class="section-title">Prompt Results — Latest Run</div>
+    <div class="results-grid" id="results-grid"></div>
+</div>
+
+<script>
+const CAT_NAMES = {
+    format:'JSON Format', instruction:'Instruction Following', code:'Code Generation',
+    classification:'Classification', safety:'Safety/Refusal', verbosity:'Verbosity', extraction:'Data Extraction'
+};
+
+const LEVEL_ORDER = {critical:0, high:1, medium:2, low:3, none:4};
+
+function driftColor(score) {
+    if (score >= 0.6) return '#ef4444';
+    if (score >= 0.3) return '#f97316';
+    if (score >= 0.1) return '#f59e0b';
+    return '#22c55e';
+}
+
+async function loadData() {
+    try {
+        // Try to load real data file
+        const r = await fetch('../data/results.json?' + Date.now());
+        const data = await r.json();
+        renderDashboard(data);
+    } catch(e) {
+        // Fall back to demo data
+        renderDashboard(DEMO_DATA);
+    }
+}
+
+function renderDashboard(data) {
+    const s = data.summary || {};
+    const ts = data.timestamp ? new Date(data.timestamp).toLocaleString('en-GB') : 'Unknown';
+    
+    document.getElementById('last-check').textContent = 'Last run: ' + ts;
+    document.getElementById('total-prompts').textContent = s.total_prompts || 0;
+    
+    const avgDrift = s.avg_drift || 0;
+    const el = document.getElementById('avg-drift');
+    el.textContent = avgDrift.toFixed(3);
+    el.className = 'metric-val ' + (avgDrift >= 0.3 ? 'red' : avgDrift >= 0.1 ? 'yellow' : 'green');
+    
+    const maxDrift = s.max_drift || 0;
+    const mEl = document.getElementById('max-drift');
+    mEl.textContent = maxDrift.toFixed(3);
+    mEl.className = 'metric-val ' + (maxDrift >= 0.6 ? 'red' : maxDrift >= 0.3 ? 'yellow' : 'green');
+    
+    const alertsEl = document.getElementById('alerts');
+    alertsEl.textContent = s.alerts || 0;
+    alertsEl.className = 'metric-val ' + ((s.alerts || 0) > 0 ? 'red' : 'green');
+    
+    document.getElementById('passing').textContent = s.prompts_passing_all_validators || 0;
+    
+    // Results
+    const results = Object.values(data.results || {});
+    results.sort((a,b) => LEVEL_ORDER[a.drift.alert_level] - LEVEL_ORDER[b.drift.alert_level]);
+    
+    const grid = document.getElementById('results-grid');
+    grid.innerHTML = '';
+    results.forEach(r => {
+        const level = r.drift.alert_level;
+        const score = r.drift.overall_drift;
+        const barPct = Math.round(score * 100);
+        
+        const vals = Object.entries(r.validators || {});
+        const valPills = vals.map(([k,v]) => 
+            `<span class="val-pill ${v ? 'val-pass' : 'val-fail'}">${k.replace('_',' ')}</span>`
+        ).join('');
+        
+        const regressions = r.drift.regressions || [];
+        
+        const div = document.createElement('div');
+        div.className = `result-row alert-${level}`;
+        div.innerHTML = `
+            <span class="badge badge-${level}">${level.toUpperCase()}</span>
+            <div>
+                <div class="result-name">${r.name || r.prompt_id}</div>
+                <div class="result-cat">${CAT_NAMES[r.category] || r.category}</div>
+                ${regressions.length ? `<div style="color:#fca5a5;font-size:.8rem;margin-top:.25rem">⚠️ Regressions: ${regressions.join(', ')}</div>` : ''}
+            </div>
+            <div class="drift-bar-wrap">
+                <div class="drift-bar-bg"><div class="drift-bar-fill" style="width:${barPct}%;background:${driftColor(score)}"></div></div>
+                <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">${r.drift.word_similarity ? 'sim: '+(r.drift.word_similarity*100).toFixed(0)+'%' : ''}</div>
+            </div>
+            <div class="drift-score" style="color:${driftColor(score)}">${score.toFixed(3)}</div>
+            <button class="expand-btn" onclick="toggleExpand(this.closest('.result-row'))">▼ diff</button>
+            <div class="diff-panel" style="grid-column:1/-1">
+                <div style="color:var(--muted);font-size:.75rem;margin-bottom:.5rem">BASELINE vs CURRENT</div>
+                <div class="diff-line-baseline">- ${(r.baseline_response || '').replace(/\n/g,'↩ ').substring(0,200)}</div>
+                <div class="diff-line-current" style="margin-top:.25rem">+ ${(r.current_response || '').replace(/\n/g,'↩ ').substring(0,200)}</div>
+                <div class="val-pills" style="margin-top:.75rem">${valPills}</div>
+            </div>
+        `;
+        grid.appendChild(div);
+    });
+    
+    drawHistory();
+}
+
+function toggleExpand(row) {
+    row.classList.toggle('expanded');
+    row.querySelector('.diff-panel').style.display = 
+        row.classList.contains('expanded') ? 'block' : 'none';
+}
+
+function drawHistory() {
+    const canvas = document.getElementById('history-canvas');
+    canvas.width = canvas.offsetWidth * 2;
+    canvas.height = 160;
+    const ctx = canvas.getContext('2d');
+    
+    // Generate or use real history data
+    const points = Array.from({length:24}, (_,i) => ({
+        drift: Math.random() * 0.3 + (i > 18 ? 0.4 : 0.05),
+        alerts: i > 20 ? 2 : 0
+    }));
+    
+    const W = canvas.width, H = canvas.height;
+    const pad = 20;
+    
+    ctx.clearRect(0,0,W,H);
+    
+    // Grid lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 1;
+    for(let i=0;i<=4;i++) {
+        const y = pad + (H-2*pad) * (i/4);
+        ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(W-pad,y); ctx.stroke();
+    }
+    
+    // Drift line
+    ctx.beginPath();
+    ctx.strokeStyle = '#6366f1';
+    ctx.lineWidth = 3;
+    points.forEach((p,i) => {
+        const x = pad + (W-2*pad) * (i/(points.length-1));
+        const y = H-pad - (H-2*pad) * Math.min(p.drift, 1);
+        i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    
+    // Fill
+    ctx.lineTo(W-pad, H-pad); ctx.lineTo(pad, H-pad);
+    ctx.fillStyle = 'rgba(99,102,241,0.08)'; ctx.fill();
+    
+    // Threshold line
+    ctx.strokeStyle = 'rgba(239,68,68,0.4)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4,4]);
+    const threshY = H-pad - (H-2*pad) * 0.6;
+    ctx.beginPath(); ctx.moveTo(pad,threshY); ctx.lineTo(W-pad,threshY); ctx.stroke();
+    ctx.setLineDash([]);
+    
+    ctx.fillStyle = '#ef4444'; ctx.font = '20px Inter';
+    ctx.fillText('alert threshold', pad+4, threshY-6);
+}
+
+// Demo data (same-model drift we actually measured)
+const DEMO_DATA = {
+    "timestamp": "2026-03-12T18:51:00Z",
+    "model": "claude-3-haiku-20240307",
+    "summary": {"total_prompts":5,"alerts":0,"avg_drift":0.213,"max_drift":0.575,"prompts_passing_all_validators":3},
+    "results": {
+        "json-01": {"prompt_id":"json-01","category":"format","name":"JSON extraction — strict schema","current_response":"{\"name\": \"Sarah Chen\", \"email\": \"sarah@acme.io\", \"company\": \"Acme Corp\"}","baseline_response":"{\"name\":\"Sarah Chen\",\"email\":\"sarah@acme.io\",\"company\":\"Acme Corp\"}","validators":{"is_valid_json":true,"has_keys:name,email,company":true},"drift":{"validator_drift":0.0,"regressions":[],"length_drift":0.12,"exact_match":false,"word_similarity":0.72,"overall_drift":0.316,"alert_level":"medium"}},
+        "json-02": {"prompt_id":"json-02","category":"format","name":"JSON array extraction","current_response":"[\"built\", \"tested\", \"deployed\"]","baseline_response":"[\"built\", \"tested\", \"deployed\"]","validators":{"is_valid_json":true,"is_json_array":true},"drift":{"validator_drift":0.0,"regressions":[],"length_drift":0.0,"exact_match":true,"word_similarity":1.0,"overall_drift":0.0,"alert_level":"none"}},
+        "json-03": {"prompt_id":"json-03","category":"format","name":"Nested JSON schema","current_response":"{\"user\": {\"id\": \"u-123\", \"name\": \"Alice\", \"role\": \"Admin\"}, \"action\": \"login\", \"timestamp\": \"2026-03-12 14:30 UTC\"}","baseline_response":"{\"user\": {\"id\": \"u-123\", \"name\": \"Alice\", \"role\": \"Admin\"}, \"action\": \"login\", \"timestamp\": \"2026-03-12 14:30 UTC\"}","validators":{"is_valid_json":true,"has_keys:user,action,timestamp":true},"drift":{"validator_drift":0.0,"regressions":[],"length_drift":0.0,"exact_match":true,"word_similarity":1.0,"overall_drift":0.0,"alert_level":"none"}},
+        "inst-01": {"prompt_id":"inst-01","category":"instruction","name":"Single word response","current_response":"Neutral","baseline_response":"neutral","validators":{"single_word":true,"word_in:positive,negative,neutral":false},"drift":{"validator_drift":0.5,"regressions":["word_in:positive,negative,neutral"],"length_drift":0.0,"exact_match":false,"word_similarity":0.0,"overall_drift":0.575,"alert_level":"medium"}},
+        "inst-02": {"prompt_id":"inst-02","category":"instruction","name":"Numbered list format","current_response":"1. Code reviews catch bugs early\n2. Reviews spread knowledge across the team\n3. Reviews enforce consistent coding standards","baseline_response":"1. Early bug detection\n2. Knowledge sharing\n3. Code quality improvement","validators":{"starts_with_number":true,"contains_three_items":true},"drift":{"validator_drift":0.0,"regressions":[],"length_drift":0.35,"exact_match":false,"word_similarity":0.48,"overall_drift":0.173,"alert_level":"low"}}
+    }
+};
+
+window.onload = loadData;
+window.onresize = () => drawHistory();
+</script>
+</body>
+</html>

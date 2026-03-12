@@ -524,7 +524,9 @@ def update_settings(
         if req.slack_webhook_url and not req.slack_webhook_url.startswith("https://hooks.slack.com/"):
             raise HTTPException(status_code=400, detail="Invalid Slack webhook URL")
         user.slack_webhook_url = req.slack_webhook_url or None
+    user = db.merge(user)
     db.commit()
+    db.refresh(user)
     return {
         "updated": True,
         "slack_webhook_url": user.slack_webhook_url,

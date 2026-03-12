@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriftWatch vs LangSmith vs Langfuse vs Helicone — LLM Monitoring Comparison</title>
+    <meta name="description" content="Choosing between LLM monitoring tools? DriftWatch, LangSmith, Langfuse, and Helicone solve different problems. Here's the exact comparison — what each tool detects, misses, and costs.">
+    <meta name="keywords" content="DriftWatch vs LangSmith, LangSmith alternative, Langfuse alternative, Helicone alternative, LLM API monitoring comparison, LLM drift detection service">
+    <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/compare/">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebPage",
+     "name":"DriftWatch vs LangSmith vs Langfuse vs Helicone — LLM Monitoring Comparison",
+     "description":"Side-by-side comparison of LLM monitoring tools: DriftWatch for drift detection, LangSmith/Langfuse/Helicone for observability.",
+     "url":"https://genesisclawbot.github.io/llm-drift/compare/"}
+    </script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0a0f1a;color:#e2e8f0;line-height:1.6}
+        nav{background:#111827;border-bottom:1px solid rgba(255,255,255,.07);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem}
+        .logo{font-weight:700;color:#6366f1;text-decoration:none;font-size:1.1rem}
+        .nav-links{display:flex;gap:1.5rem;align-items:center;font-size:.9rem}
+        .nav-links a{color:#9ca3af;text-decoration:none}
+        .nav-cta{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.5rem 1.25rem;border-radius:.375rem;text-decoration:none;font-weight:600;font-size:.875rem}
+        .container{max-width:980px;margin:0 auto;padding:3rem 2rem 5rem}
+        .hero{text-align:center;margin-bottom:3.5rem}
+        .tag{display:inline-block;background:rgba(99,102,241,.15);color:#a5b4fc;padding:.25rem .7rem;border-radius:9999px;font-size:.75rem;font-weight:600;margin-bottom:1rem}
+        h1{font-size:2.25rem;font-weight:700;color:#f1f5f9;line-height:1.2;margin-bottom:1rem}
+        .hero-sub{color:#9ca3af;font-size:1.05rem;max-width:640px;margin:0 auto}
+        h2{font-size:1.4rem;font-weight:700;color:#f1f5f9;margin:3rem 0 1.25rem}
+        p{color:#d1d5db;margin-bottom:1.25rem}
+        /* Comparison table */
+        .table-wrap{overflow-x:auto;margin:1.5rem 0}
+        table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:700px}
+        th{padding:.9rem 1rem;text-align:left;border-bottom:2px solid rgba(255,255,255,.1);color:#9ca3af;font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}
+        th.highlight{color:#a5b4fc;border-bottom-color:rgba(99,102,241,.5)}
+        td{padding:.85rem 1rem;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top}
+        td.highlight{background:rgba(99,102,241,.05);border-left:2px solid rgba(99,102,241,.3);border-right:2px solid rgba(99,102,241,.3)}
+        tr:last-child td{border-bottom:none}
+        .tick{color:#86efac;font-weight:700}
+        .cross{color:#f87171;font-weight:700}
+        .partial{color:#fcd34d;font-weight:600;font-size:.85rem}
+        /* Tool cards */
+        .tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1.5rem 0}
+        .tool-card{background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:.625rem;padding:1.25rem}
+        .tool-card.featured{border-color:rgba(99,102,241,.4);background:rgba(99,102,241,.05)}
+        .tool-name{font-weight:700;font-size:1rem;margin-bottom:.25rem}
+        .tool-type{color:#6b7280;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+        .tool-desc{color:#9ca3af;font-size:.85rem;margin-top:.625rem;line-height:1.5}
+        .tool-price{color:#d1d5db;font-size:.825rem;margin-top:.75rem;font-weight:500}
+        /* CTA */
+        .cta-block{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(79,70,229,.06));border:1px solid rgba(99,102,241,.25);border-radius:.75rem;padding:2rem;text-align:center;margin:3rem 0}
+        .cta-block h3{color:#f1f5f9;margin-bottom:.5rem;font-size:1.25rem}
+        .cta-block p{color:#9ca3af;margin-bottom:1.25rem;font-size:.9rem}
+        .cta-btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.85rem 2rem;border-radius:.5rem;text-decoration:none;font-weight:600;margin-right:.75rem}
+        .cta-demo{display:inline-block;color:#a5b4fc;padding:.85rem 1.25rem;border-radius:.5rem;text-decoration:none;font-weight:500;border:1px solid rgba(99,102,241,.3)}
+        .callout{background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:.5rem;padding:1.25rem 1.5rem;margin:1.5rem 0}
+        .callout-title{font-weight:700;color:#a5b4fc;margin-bottom:.4rem}
+        ul,ol{padding-left:1.5rem;margin-bottom:1.25rem}
+        li{color:#d1d5db;margin-bottom:.4rem}
+        footer{border-top:1px solid rgba(255,255,255,.07);padding:2rem;text-align:center;color:#6b7280;font-size:.875rem}
+        footer a{color:#6366f1;text-decoration:none}
+        @media(max-width:640px){h1{font-size:1.75rem}.cta-btn,.cta-demo{display:block;margin:.5rem 0;text-align:center}}
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="../index.html" class="logo">🔍 DriftWatch</a>
+    <div class="nav-links">
+        <a href="../blog/">Blog</a>
+        <a href="../index.html#pricing">Pricing</a>
+        <a href="../app.html" class="nav-cta">Start Free →</a>
+    </div>
+</nav>
+
+<div class="container">
+
+<div class="hero">
+    <div class="tag">🔍 Tool Comparison</div>
+    <h1>DriftWatch vs LangSmith vs Langfuse vs Helicone</h1>
+    <p class="hero-sub">These tools solve different problems. Here's the exact breakdown — what each detects, what it misses, and when you need which one.</p>
+</div>
+
+<h2>TL;DR — The Key Distinction</h2>
+<p>LangSmith, Langfuse, and Helicone are <strong>LLM observability</strong> tools: they monitor your pipeline's performance — latency, token usage, error rates, and traces. They tell you <em>how your app is running</em>.</p>
+<p>DriftWatch is an <strong>LLM drift detection</strong> tool: it monitors whether the model itself has changed by running behavioural regression tests on a schedule. It tells you <em>whether your prompts still work the same way</em>.</p>
+
+<div class="callout">
+    <div class="callout-title">The question each tool answers</div>
+    <ul style="margin:0">
+        <li><strong>LangSmith / Langfuse / Helicone:</strong> "Is my LLM pipeline slow? Erroring? Expensive?"</li>
+        <li><strong>DriftWatch:</strong> "Did GPT-4o silently change how it responds to my prompts?"</li>
+    </ul>
+</div>
+
+<p>You likely need both. They don't overlap.</p>
+
+<h2>Tool Overview</h2>
+<div class="tools">
+    <div class="tool-card featured">
+        <div class="tool-type">Drift Detection</div>
+        <div class="tool-name">🔍 DriftWatch</div>
+        <div class="tool-desc">Runs your prompts on a schedule, compares outputs to a stored baseline, alerts when model behaviour shifts beyond a threshold.</div>
+        <div class="tool-price">Free (3 prompts) · £99/mo Starter · £249/mo Pro</div>
+    </div>
+    <div class="tool-card">
+        <div class="tool-type">Observability</div>
+        <div class="tool-name">LangSmith</div>
+        <div class="tool-desc">Tracing, evaluation, and prompt management from the LangChain team. Strong dataset management and human-in-the-loop evaluation.</div>
+        <div class="tool-price">Free (5k traces/mo) · $39+/mo</div>
+    </div>
+    <div class="tool-card">
+        <div class="tool-type">Observability</div>
+        <div class="tool-name">Langfuse</div>
+        <div class="tool-desc">Open-source LLM observability. Tracing, cost monitoring, prompt versioning. Self-hostable. Strong community.</div>
+        <div class="tool-price">Free (open source) · $59+/mo cloud</div>
+    </div>
+    <div class="tool-card">
+        <div class="tool-type">Observability</div>
+        <div class="tool-name">Helicone</div>
+        <div class="tool-desc">Proxy-based LLM monitoring. One-line integration via OpenAI SDK. Cost and latency tracking, prompt caching.</div>
+        <div class="tool-price">Free (10k req/mo) · $20+/mo</div>
+    </div>
+</div>
+
+<h2>Feature Comparison</h2>
+<div class="table-wrap">
+<table>
+    <thead>
+        <tr>
+            <th>Capability</th>
+            <th class="highlight">DriftWatch</th>
+            <th>LangSmith</th>
+            <th>Langfuse</th>
+            <th>Helicone</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Detects silent model behaviour change</strong></td>
+            <td class="highlight"><span class="tick">✓</span> Core feature</td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+            <td><strong>Scheduled automated testing</strong></td>
+            <td class="highlight"><span class="tick">✓</span> Hourly / 15-min</td>
+            <td><span class="partial">Manual / CI only</span></td>
+            <td><span class="partial">Manual / CI only</span></td>
+            <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+            <td><strong>Drift score (format + semantic + instruction)</strong></td>
+            <td class="highlight"><span class="tick">✓</span></td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+            <td><strong>Alert when GPT/Claude/Gemini updates</strong></td>
+            <td class="highlight"><span class="tick">✓</span> Email + Slack</td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+            <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+            <td><strong>Request tracing + latency monitoring</strong></td>
+            <td class="highlight"><span class="cross">✗</span></td>
+            <td><span class="tick">✓</span></td>
+            <td><span class="tick">✓</span></td>
+            <td><span class="tick">✓</span></td>
+        </tr>
+        <tr>
+            <td><strong>Token usage + cost tracking</strong></td>
+            <td class="highlight"><span class="cross">✗</span></td>
+            <td><span class="tick">✓</span></td>
+            <td><span class="tick">✓</span></td>
+            <td><span class="tick">✓</span></td>
+        </tr>
+        <tr>
+            <td><strong>Prompt versioning</strong></td>
+            <td class="highlight"><span class="cross">✗</span></td>
+            <td><span class="tick">✓</span></td>
+            <td><span class="tick">✓</span></td>
+            <td><span class="partial">Limited</span></td>
+        </tr>
+        <tr>
+            <td><strong>No code change required</strong></td>
+            <td class="highlight"><span class="tick">✓</span> External tester</td>
+            <td><span class="cross">✗</span> SDK required</td>
+            <td><span class="cross">✗</span> SDK required</td>
+            <td><span class="tick">✓</span> Proxy</td>
+        </tr>
+        <tr>
+            <td><strong>Free tier</strong></td>
+            <td class="highlight"><span class="tick">✓</span> 3 prompts</td>
+            <td><span class="tick">✓</span> 5k traces</td>
+            <td><span class="tick">✓</span> Self-host</td>
+            <td><span class="tick">✓</span> 10k req</td>
+        </tr>
+        <tr>
+            <td><strong>Setup time</strong></td>
+            <td class="highlight">5 minutes</td>
+            <td>30–60 min</td>
+            <td>1–2 hours</td>
+            <td>10 minutes</td>
+        </tr>
+        <tr>
+            <td><strong>Starting price</strong></td>
+            <td class="highlight">£99/mo</td>
+            <td>$39/mo</td>
+            <td>$59/mo</td>
+            <td>$20/mo</td>
+        </tr>
+    </tbody>
+</table>
+</div>
+
+<h2>When to Use Each</h2>
+
+<p><strong>Use DriftWatch when:</strong></p>
+<ul>
+    <li>You need to know immediately when GPT-4o, Claude, or Gemini changes behaviour</li>
+    <li>Your app has structured output prompts (JSON, classification labels, format constraints)</li>
+    <li>You've been burned by a silent model update before</li>
+    <li>You want automated hourly monitoring without adding SDK code to your app</li>
+    <li>You're testing against a specific dated version (like <code>gpt-4o-2024-08-06</code>) and want to know when it drifts</li>
+</ul>
+
+<p><strong>Use LangSmith / Langfuse when:</strong></p>
+<ul>
+    <li>You need full request tracing across multi-step LLM chains</li>
+    <li>You want to track cost per user or per feature</li>
+    <li>You're running human evaluation on LLM outputs</li>
+    <li>You need a prompt registry with version history</li>
+</ul>
+
+<p><strong>Use Helicone when:</strong></p>
+<ul>
+    <li>You want drop-in cost and latency monitoring with zero code changes</li>
+    <li>You need request caching to reduce costs</li>
+    <li>You want rate limiting across your LLM calls</li>
+</ul>
+
+<div class="callout">
+    <div class="callout-title">💡 The combination that works</div>
+    <p style="margin:0;color:#d1d5db">Many teams run DriftWatch + Helicone together. Helicone catches performance issues (slow, expensive, erroring). DriftWatch catches behavioural issues (outputs changed, prompts regressed). Helicone monitors every request; DriftWatch monitors model behaviour on a schedule. They don't overlap.</p>
+</div>
+
+<h2>The Real Cost of Not Using Drift Detection</h2>
+<p>The median time between a silent model update and developer discovery — via user complaints — is 2–7 days. At that point:</p>
+<ul>
+    <li>Customers have already experienced degraded output</li>
+    <li>Support tickets are filing in</li>
+    <li>Your JSON parsers have been silently failing (or throwing exceptions)</li>
+    <li>Your classification pipeline has been returning wrong labels</li>
+</ul>
+<p>LangSmith, Langfuse, and Helicone don't catch this — they only see your pipeline's health, not the model's behavioural stability. DriftWatch closes this gap.</p>
+
+<div class="cta-block">
+    <h3>Add Drift Detection to Your Stack in 5 Minutes</h3>
+    <p>Free tier, 3 prompts, no card required. Works alongside your existing observability stack.</p>
+    <a href="../app.html" class="cta-btn">Start Free →</a>
+    <a href="../app.html?demo=1" class="cta-demo">👀 See demo first</a>
+    <div style="color:#6b7280;font-size:.8rem;margin-top:.75rem">🔒 No card · No SDK changes · Works with any LLM API</div>
+</div>
+
+</div>
+
+<footer>
+    <p><a href="../index.html">DriftWatch</a> — LLM Drift Detection &nbsp;·&nbsp; <a href="../blog/">Blog</a> &nbsp;·&nbsp; <a href="../app.html">Start Free</a></p>
+    <p style="margin-top:.5rem">© 2026</p>
+</footer>
+
+</body>
+</html>

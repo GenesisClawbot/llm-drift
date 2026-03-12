@@ -9,9 +9,16 @@ from sqlalchemy import (
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
-DATABASE_URL = "sqlite:///./driftwatch.db"
+import os
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./driftwatch.db")
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+# Railway provides PostgreSQL URLs as postgres:// — SQLAlchemy needs postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+# connect_args is SQLite-specific; PostgreSQL doesn't support check_same_thread
+connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

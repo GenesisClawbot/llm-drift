@@ -24,6 +24,8 @@ ENV STRIPE_PUBLISHABLE_KEY=""
 ENV STRIPE_WEBHOOK_SECRET=""
 ENV STRIPE_STARTER_PRICE_ID="price_1TAEMZ7dVu3KiOEDGuyO9mtF"
 ENV STRIPE_PRO_PRICE_ID="price_1TAEMa7dVu3KiOEDEgg8hFWf"
-ENV PORT=9000
+ENV SECRET_KEY="change-me-in-production"
+ENV PORT=8000
 
-CMD ["python3", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "9000"]
+# Use shell form so $PORT is expanded at runtime
+CMD python3 -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT

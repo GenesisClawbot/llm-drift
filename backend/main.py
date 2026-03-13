@@ -673,12 +673,29 @@ def join_waitlist(payload: dict = Body(...), db: Session = Depends(get_db)):
 
 @app.get("/stats")
 def public_stats(db: Session = Depends(get_db)):
-    """Public stats for social proof widget on landing page. Real counts only."""
-    user_count = db.query(User).count()
-    paid_count = db.query(User).filter(User.plan != "free").count()
-    prompt_count = db.query(Prompt).count()
+    """Public stats for social proof widget on landing page. Real counts only — excludes test/smoke accounts."""
+    # Exclude known test/smoke domains used during development
+    TEST_DOMAINS = (
+        "@driftwatch.io", "@driftwatch.dev",
+        "@test.io", "@test.com", "@example.com",
+    )
+    TEST_PREFIXES = (
+        "smoke_", "test_", "smoketest", "final_", "runtest", "errtest",
+        "flowtest", "demo1", "demo2", "check1", "check2", "verify-",
+        "baseline_", "prtest_", "ih_user_", "settings", "statuscheck",
+        "hb2-", "demotest", "final-",
+    )
+    all_users = db.query(User).all()
+    real_users = [
+        u for u in all_users
+        if not any(u.email.endswith(d) for d in TEST_DOMAINS)
+        and not any(u.email.lower().startswith(p) for p in TEST_PREFIXES)
+    ]
+    real_ids = {u.id for u in real_users}
+    paid_count = sum(1 for u in real_users if u.plan != "free")
+    prompt_count = db.query(Prompt).filter(Prompt.user_id.in_(real_ids)).count() if real_ids else 0
     return {
-        "developers_monitoring": user_count,
+        "developers_monitoring": len(real_users),
         "prompts_watched": prompt_count,
         "paid_subscribers": paid_count,
         "status": "beta",

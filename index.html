@@ -165,8 +165,8 @@
 </section>
 
 <div class="social-proof">
-    <div class="proof-stat"><div class="proof-n" id="stat-devs">12+</div><div class="proof-l">Developers monitoring</div></div>
-    <div class="proof-stat"><div class="proof-n" id="stat-prompts">6+</div><div class="proof-l">Prompts watched</div></div>
+    <div class="proof-stat"><div class="proof-n">0.575</div><div class="proof-l">Max drift score detected</div></div>
+    <div class="proof-stat"><div class="proof-n">Free</div><div class="proof-l">Early access — no card required</div></div>
     <div class="proof-stat"><div class="proof-n">&lt;5min</div><div class="proof-l">Alert latency</div></div>
     <div class="proof-stat"><div class="proof-n">£0</div><div class="proof-l">Extra infra to manage</div></div>
 </div>
@@ -382,20 +382,6 @@
 </footer>
 
 <script src="api-config.js"></script>
-<script>
-// Live stats counter — fetches from DriftWatch API; gracefully falls back to static values
-(function() {
-    const DRIFTWATCH_API = (window._DRIFTWATCH_API_URL || 'https://makes-timing-applicable-recent.trycloudflare.com');
-    fetch(DRIFTWATCH_API + '/stats', { signal: AbortSignal.timeout(3000) })
-        .then(r => r.json())
-        .then(d => {
-            const devEl = document.getElementById('stat-devs');
-            const promEl = document.getElementById('stat-prompts');
-            if (devEl && d.developers_monitoring) devEl.textContent = d.developers_monitoring + '+';
-            if (promEl && d.prompts_watched) promEl.textContent = d.prompts_watched + '+';
-        })
-        .catch(() => {}); // silent fallback — static values remain
-})();
-</script>
+
 </body>
 </html>

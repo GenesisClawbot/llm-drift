@@ -15,7 +15,12 @@ check_api() {
 start_api() {
     log "Starting llm-drift backend on port $API_PORT..."
     cd /workspace/llm-drift
-    PORT=$API_PORT python3 -m uvicorn backend.main:app \
+    PORT=$API_PORT \
+    STRIPE_STARTER_PRICE_ID="${STRIPE_STARTER_PRICE_ID:-price_1TAEMZ7dVu3KiOEDGuyO9mtF}" \
+    STRIPE_PRO_PRICE_ID="${STRIPE_PRO_PRICE_ID:-price_1TAEMa7dVu3KiOEDEgg8hFWf}" \
+    STRIPE_WEBHOOK_ID="${STRIPE_WEBHOOK_ID:-we_1TAHNg7dVu3KiOEDFQwTIjyY}" \
+    SECRET_KEY="${SECRET_KEY:-driftwatch-secret-key-2026}" \
+    python3 -m uvicorn backend.main:app \
         --host 0.0.0.0 --port "$API_PORT" --log-level warning \
         > /tmp/llm-drift-backend.log 2>&1 &
     sleep 5

@@ -79,11 +79,43 @@ update_configs() {
   fi
 }
 
+start_backend() {
+  log "Starting backend on port $BACKEND_PORT..."
+  cd "$REPO" || return 1
+  PORT=$BACKEND_PORT \
+  STRIPE_STARTER_PRICE_ID="${STRIPE_STARTER_PRICE_ID:-price_1TAEMZ7dVu3KiOEDGuyO9mtF}" \
+  STRIPE_PRO_PRICE_ID="${STRIPE_PRO_PRICE_ID:-price_1TAEMa7dVu3KiOEDEgg8hFWf}" \
+  STRIPE_WEBHOOK_ID="${STRIPE_WEBHOOK_ID:-we_1TAHNg7dVu3KiOEDFQwTIjyY}" \
+  SECRET_KEY="${SECRET_KEY:-driftwatch-secret-key-2026}" \
+  nohup python3 -m uvicorn backend.main:app \
+    --host 0.0.0.0 --port "$BACKEND_PORT" --log-level warning \
+    > /tmp/llm-drift-backend.log 2>&1 &
+  sleep 5
+  curl -sf --max-time 5 "http://localhost:$BACKEND_PORT/health" > /dev/null 2>&1 \
+    && log "Backend started OK (PID $!)" \
+    || log "Backend start failed — check /tmp/llm-drift-backend.log"
+}
+
+check_backend() {
+  curl -sf --max-time 3 "http://localhost:$BACKEND_PORT/health" > /dev/null 2>&1
+}
+
 log "=== DriftWatch Tunnel Keep-Alive starting ==="
+
+# Ensure backend is running before starting tunnel
+check_backend || start_backend
+
 start_tunnel
 
 while true; do
   sleep 60
+
+  # Check backend health
+  if ! check_backend; then
+    log "Backend DOWN — restarting"
+    start_backend
+  fi
+
   CURRENT_URL=$(cat /tmp/current-tunnel-url 2>/dev/null)
   if [ -z "$CURRENT_URL" ]; then
     log "No tunnel URL — restarting"

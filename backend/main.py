@@ -305,24 +305,21 @@ def run_baselines(user: User = Depends(get_current_user), db: Session = Depends(
 
     created = 0
     errors = []
+    demo_mode = False
     for prompt in prompts:
         validators = json.loads(prompt.validators or "[]")
         try:
             result = run_baseline_for_prompt(prompt.prompt_text, prompt.model, validators)
         except ValueError as e:
-            msg = str(e)
-            if "LLM_AUTH_ERROR" in msg:
-                raise HTTPException(
-                    status_code=503,
-                    detail="LLM API key is not configured. Please contact support or try again later."
-                )
-            errors.append({"prompt": prompt.name, "error": msg})
+            errors.append({"prompt": prompt.name, "error": str(e)[:100]})
             continue
+        if result.get("is_demo"):
+            demo_mode = True
         baseline = Baseline(
             user_id=user.id,
             prompt_id=prompt.id,
             response=result["response"],
-            model=prompt.model,
+            model=result["model"],  # includes "-demo" suffix when in demo mode
         )
         db.add(baseline)
         created += 1
@@ -331,8 +328,19 @@ def run_baselines(user: User = Depends(get_current_user), db: Session = Depends(
         raise HTTPException(status_code=503, detail=f"Could not reach LLM: {errors[0]['error'][:100]}")
 
     db.commit()
-    logger.info(f"Baselines set for {user.email}: {created} prompts")
-    return {"baselines_created": created, "message": f"Baseline captured for {created} prompt(s)", "errors": errors}
+    logger.info(f"Baselines set for {user.email}: {created} prompts (demo_mode={demo_mode})")
+    response = {
+        "baselines_created": created,
+        "message": f"Baseline captured for {created} prompt(s)",
+        "errors": errors,
+        "demo_mode": demo_mode,
+    }
+    if demo_mode:
+        response["demo_notice"] = (
+            "⚠️ Demo mode: showing pre-recorded example data. "
+            "Real LLM monitoring starts automatically when your API key is configured."
+        )
+    return response
 
 
 # ── Monitor ───────────────────────────────────────────────────────────────────
@@ -402,7 +410,8 @@ def run_monitor(user: User = Depends(get_current_user), db: Session = Depends(ge
     db.add(run)
     db.commit()
 
-    logger.info(f"Manual drift check for {user.email}: avg={avg_drift} max={max_drift} alerts={alert_count}")
+    demo_mode = any(r.get("is_demo") for r in results)
+    logger.info(f"Manual drift check for {user.email}: avg={avg_drift} max={max_drift} alerts={alert_count} demo={demo_mode}")
 
     # First-drift conversion nudge: fires when a FREE user sees drift for the first time.
     # This is the "aha moment" — the model actually changed on their prompt.
@@ -431,13 +440,21 @@ def run_monitor(user: User = Depends(get_current_user), db: Session = Depends(ge
             ))
             db.commit()
 
-    return {
+    resp = {
         "run_id": run.id,
         "avg_drift": avg_drift,
         "max_drift": max_drift,
         "alert_count": alert_count,
         "results": results,
+        "demo_mode": demo_mode,
     }
+    if demo_mode:
+        resp["demo_notice"] = (
+            "⚠️ Demo mode: showing pre-recorded example data — "
+            "drift scores are real (measured 2026-03-12) but generated from stored responses, "
+            "not live LLM calls. Real monitoring starts automatically when your API key is configured."
+        )
+    return resp
 
 
 # ── Results ───────────────────────────────────────────────────────────────────

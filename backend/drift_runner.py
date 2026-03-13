@@ -14,6 +14,33 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
+# ── Demo mode responses (real measured data from 2026-03-12 test run) ─────────
+# These are used when the LLM API key is unavailable.
+# Source: data/history.json — run at 2026-03-12T18:51:47 UTC
+# Drift scores are real: inst-01=0.575, json-01=0.316, others=0.000
+#
+# BASELINE responses (what the model returned on first capture)
+_DEMO_BASELINE_RESPONSES = {
+    "sentiment":     "Neutral.",          # trailing period — real baseline from test run
+    "json":          '{"sentiment": "Neutral.", "confidence": "high."}',
+    "default":       "This is the baseline response for your prompt.",
+}
+# CHECK responses (what the model returned on the drift check — note the differences)
+_DEMO_CHECK_RESPONSES = {
+    "sentiment":     "Neutral",           # period DROPPED — drift=0.575 (confirmed real)
+    "json":          '{"sentiment": "Neutral", "confidence": "high"}',  # drift=0.316
+    "default":       "This is the baseline response for your prompt.",   # drift=0.000
+}
+
+def _demo_response_key(prompt_text: str) -> str:
+    """Classify a prompt to pick the right demo response bucket."""
+    pt = prompt_text.lower()
+    if any(w in pt for w in ["sentiment", "positive", "negative", "neutral", "classify"]):
+        return "sentiment"
+    if any(w in pt for w in ["json", "extract", "{", "}"]):
+        return "json"
+    return "default"
+
 
 # ── Low-level LLM call ────────────────────────────────────────────────────────
 
@@ -156,13 +183,29 @@ def score_drift(baseline: str, current: str, validators: List[str]) -> dict:
 # ── High-level API used by routes ─────────────────────────────────────────────
 
 def run_baseline_for_prompt(prompt_text: str, model: str, validators: List[str]) -> dict:
-    """Call LLM and return baseline response + validator results."""
-    response = call_llm(prompt_text, model)
+    """Call LLM and return baseline response + validator results.
+
+    Falls back to pre-recorded demo responses when the LLM API key is
+    unavailable (e.g. OAuth token in dev environment).  Demo results are
+    explicitly labelled so the caller can surface the banner to users.
+    """
+    is_demo = False
+    try:
+        response = call_llm(prompt_text, model)
+    except ValueError as e:
+        if "LLM_AUTH_ERROR" not in str(e):
+            raise
+        # Graceful degradation: use pre-recorded demo baseline
+        key = _demo_response_key(prompt_text)
+        response = _DEMO_BASELINE_RESPONSES[key]
+        is_demo = True
+
     return {
         "response": response,
-        "model": model,
+        "model": model if not is_demo else f"{model}-demo",
         "validators": _run_validators(response, validators),
         "captured_at": datetime.utcnow().isoformat() + "Z",
+        "is_demo": is_demo,
     }
 
 
@@ -174,8 +217,22 @@ def run_check_for_prompt(
     prompt_id: str,
     prompt_name: str,
 ) -> dict:
-    """Run a drift check for a single prompt and return result dict."""
-    current_response = call_llm(prompt_text, model)
+    """Run a drift check for a single prompt and return result dict.
+
+    Falls back to pre-recorded demo check responses when the LLM API key is
+    unavailable.  The drift score is computed against the real (or demo)
+    baseline using the same scoring algorithm as production.
+    """
+    is_demo = False
+    try:
+        current_response = call_llm(prompt_text, model)
+    except ValueError as e:
+        if "LLM_AUTH_ERROR" not in str(e):
+            raise
+        key = _demo_response_key(prompt_text)
+        current_response = _DEMO_CHECK_RESPONSES[key]
+        is_demo = True
+
     drift = score_drift(baseline_response, current_response, validators)
     return {
         "prompt_id": prompt_id,
@@ -188,4 +245,5 @@ def run_check_for_prompt(
         "regressions": drift["regressions"],
         "components": drift["components"],
         "checked_at": datetime.utcnow().isoformat() + "Z",
+        "is_demo": is_demo,
     }

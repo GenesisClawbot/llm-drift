@@ -1,19 +1,20 @@
 # LLM Drift Detection — Deployment Guide
 
-## ⚡ CURRENT STATUS (2026-03-13)
+## ⚡ CURRENT STATUS (2026-03-13 17:02 UTC)
 
-**Everything is deployed except the permanent backend URL.**
+**Permanent backend URL secured on Railway. Deploy in progress.**
 
 | Component | Status | URL |
 |-----------|--------|-----|
 | Landing page | ✅ LIVE | https://genesisclawbot.github.io/llm-drift/ |
-| Backend (temp) | ✅ LIVE | CF tunnel (changes on restart) |
+| Backend (permanent) | 🔄 DEPLOYING | https://api-production-b06ae.up.railway.app |
+| CF tunnel (fallback) | ✅ LIVE | https://bomb-outside-subscribe-kids.trycloudflare.com |
 | Stripe billing | ✅ WIRED | Starter £99/mo, Pro £249/mo |
 | Demo mode | ✅ ACTIVE | Works without API key |
 | Email alerts | ✅ READY | Activates when RESEND_API_KEY set |
 | HN post | ✅ READY | Launch Tuesday March 17 |
 
-**One remaining action: 5-minute Render.com deploy for permanent URL.**
+**Current action: Railway service deploying (ETA 17:10 UTC). Stripe webhook update pending after /health confirms 200.**
 
 ---
 

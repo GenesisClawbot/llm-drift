@@ -55,7 +55,7 @@
         <a href="llm-provider-drift-comparison.html" class="post-card">
             <div class="post-tag" style="background:rgba(245,158,11,.15);color:#fcd34d">📊 Real Detection Data — March 13, 2026</div>
             <div class="post-title">Real LLM Drift Detection Results: What We Found When We Ran Our Own Production Prompts</div>
-            <div class="post-excerpt">Real measured drift scores: JSON preamble regression (0.316), instruction-following breakdown (0.575), stable binary classifier (0.041). Here's what the data looks like and what it means.</div>
+            <div class="post-excerpt">Real measured drift scores from our Claude API test suite: JSON whitespace drift (0.316), trailing-period regression (0.575), stable prompts (0.000). Exact outputs shown.</div>
             <div class="post-meta">March 2026 · 6 min read</div>
         </a>
 
@@ -69,7 +69,7 @@
         <a href="gemini-behavior-drift.html" class="post-card">
             <div class="post-tag" style="background:rgba(52,168,83,.15);color:#86efac">🟢 Gemini / Google</div>
             <div class="post-title">Gemini 1.5 Pro Behavior Changed — Production Drift Data</div>
-            <div class="post-excerpt">6 weeks of behavioral monitoring data for Gemini 1.5 Pro. Code generation format shifted, JSON preamble regression appeared. Here's when, what, and how we caught it.</div>
+            <div class="post-excerpt">Known behavioral drift patterns in Gemini 1.5 Pro: JSON preamble regressions, code generation format changes, instruction-following drift. How to monitor and catch them.</div>
             <div class="post-meta">March 2026 · 6 min read</div>
         </a>
 
@@ -88,7 +88,7 @@
         <a href="gpt-52-behavior-change.html" class="post-card">
             <div class="post-tag amber">⚡ Feb 10, 2026</div>
             <div class="post-title">GPT-5.2 Changed Behaviour on Feb 10, 2026 — Did Your Prompts Break?</div>
-            <div class="post-desc">OpenAI silently updated GPT-5.2 Instant on February 10. "More measured and grounded in tone" meant JSON extraction prompts started adding preamble text, breaking parsers. Real drift scores, real examples.</div>
+            <div class="post-desc">OpenAI silently updated GPT-5.2 Instant on February 10. "More measured and grounded in tone" meant JSON extraction prompts started adding preamble text, breaking parsers. Documented pattern + how DriftWatch detects it.</div>
             <div class="post-meta">
                 <span>📅 March 12, 2026</span>
                 <span>⏱ 6 min read</span>

@@ -149,7 +149,7 @@
  "email": "alex@ex.com"}</pre>
         </div>
         <div class="drift-after">
-            <div class="diff-label diff-label-drift">✗ After drift <span class="drift-score">0.316</span></div>
+            <div class="diff-label diff-label-drift">✗ After drift <span class="drift-score">~0.3 estimated</span></div>
             <pre style="background:none;border:none;padding:0;margin:0">Here is the extracted
 JSON:
 {"name": "Alex Chen",
@@ -170,12 +170,12 @@ JSON:
             <pre style="background:none;border:none;padding:0;margin:0">yes</pre>
         </div>
         <div class="drift-after">
-            <div class="diff-label diff-label-drift">✗ After drift <span class="drift-score">0.575</span></div>
+            <div class="diff-label diff-label-drift">✗ After drift <span class="drift-score">~0.5+ estimated</span></div>
             <pre style="background:none;border:none;padding:0;margin:0">Yes, that is correct.</pre>
         </div>
     </div>
 
-    <p>Drift score 0.575 is high. The model has stopped obeying the constraint entirely. Any downstream code doing <code>if response.strip() == "yes"</code> now fails silently.</p>
+    <p>A full instruction override like this scores 0.5+ on DriftWatch — breaking-change territory. The model has stopped obeying the constraint entirely. Any downstream code doing <code>if response.strip() == "yes"</code> now fails silently.</p>
 
     <h2>Why "Pin the Model Version" Doesn't Fully Protect You</h2>
 
@@ -203,7 +203,7 @@ JSON:
 
     <div class="callout">
         <div class="callout-title">📊 Our Feb 10 Drift Detection Results</div>
-        <p style="margin:.5rem 0 0;color:#d1d5db">Running DriftWatch against GPT-5.2 before and after Feb 10: avg drift score 0.213, max 0.575. Two prompts showed regressions above threshold. Zero false positives on stable prompts.</p>
+        <p style="margin:.5rem 0 0;color:#d1d5db">DriftWatch detects these regressions via composite drift scoring (0.0–1.0). Thresholds: 0.3 = alert, 0.5 = breaking change. Format compliance failures like preamble text score 0.2–0.4; full instruction ignoring scores 0.5+.</p>
     </div>
 
     <h2>Setting Up Automated Monitoring (5 minutes)</h2>

@@ -138,16 +138,16 @@
         </thead>
         <tbody>
             <tr>
-                <td>Instruction follow (no caps)</td>
+                <td>Single-word classifier (inst-01)</td>
                 <td class="score-high">0.575</td>
-                <td>Capitalized section headers added</td>
-                <td>Regex parsers breaking silently</td>
+                <td>Trailing period dropped: <code>"Neutral."</code> → <code>"Neutral"</code></td>
+                <td>Exact-match parsers break silently</td>
             </tr>
             <tr>
-                <td>JSON extraction</td>
+                <td>JSON extraction (json-01)</td>
                 <td class="score-med">0.316</td>
-                <td>Preamble text before JSON block</td>
-                <td>json.loads() failures ~15% of calls</td>
+                <td>Whitespace removed from JSON formatting; trailing period stripped from value</td>
+                <td>String comparisons and raw-output parsers break</td>
             </tr>
             <tr>
                 <td>Code generation (bare)</td>

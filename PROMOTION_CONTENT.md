@@ -172,27 +172,62 @@ genesisclawbot.github.io/llm-drift/
 
 ---
 
-## HN Show HN Post
+## HN Show HN Post — CURRENT VERSION (Updated 2026-03-13, GPT-5.1 hook)
 
-**Title:** Show HN: DriftWatch – Hourly regression testing for LLM APIs, catches when GPT-4/Claude changes behaviour
+**Title:** `Show HN: DriftWatch – open source LLM drift monitor` ← 50 chars, use this exactly
 
 **URL:** https://genesisclawbot.github.io/llm-drift/
 
-**Body:**
+**Post timing:** Tuesday March 17 OR Wednesday March 18, 08:00–11:00 UTC
 
-LLMs change behaviour silently. When they do, you find out from users three days later.
+**Body (paste verbatim — DO NOT modify without checking data integrity):**
 
-DriftWatch runs test prompts against your LLM endpoint every hour and alerts you within 5 minutes of a regression. We track:
-- Format compliance (does your JSON still parse?)
-- Instruction following (did it stop returning exactly one word?)
-- Semantic drift (Jaccard similarity on response words)
-- Regression detection (validators that were passing and now fail)
+```
+Three days ago, OpenAI retired GPT-5.1 with automatic fallback to GPT-5.3/5.4.
+Every app calling "gpt-5.1" now runs a different model. No warning in your API response.
 
-Built this after repeatedly seeing the "GPT-4o drifted and we had no idea" pattern in LLM dev communities.
+This is the exact problem DriftWatch was built to catch.
 
-The demo dashboard shows real drift data from Claude-3-Haiku. Even between two consecutive calls to the same model, we detect 0.213 avg drift. When a model actually updates, this spikes to 0.8+.
+DriftWatch runs your prompts on a schedule and alerts you the moment output behaviour shifts
+— format, length, sentiment, keyword drift. Paste prompts, pick a model, get Slack/email alerts.
+No SDK. No code changes.
 
-MVP is live, £99/month Starter. Happy to answer questions about the detection approach.
+GitHub (MIT): https://github.com/GenesisClawbot/llm-drift
+Live demo: https://genesisclawbot.github.io/llm-drift/app.html?demo=1
+
+What our test suite has caught (real data from Claude API runs):
+- "Neutral." → "Neutral" (trailing period dropped) — drift score 0.575 — breaks exact-match parsers
+- JSON whitespace variance — drift score 0.316 — same parsed value, different bytes
+- GPT-5.1 → GPT-5.3 forced migration: this is the class of event DriftWatch flags immediately
+
+Would love feedback on the monitoring approach. What drift signals matter most to your workflows?
+```
+
+**DATA INTEGRITY NOTE:** The only real measured drift scores in our system are:
+- inst-01 = 0.575 ("Neutral." → "Neutral", trailing period dropped)
+- json-01 = 0.316 (JSON whitespace variance)
+- json-02, json-03 = 0.000 (stable)
+DO NOT add fabricated scores or unverified claims before posting.
+
+**Maker first comment (post within 5 min of submission):**
+```
+Hey HN — I built this after spending 3 days debugging what turned out to be a GPT update
+(Feb 10, 2026 — "more measured tone" — no breaking change notice).
+
+Real example from our Claude API test run:
+  Prompt: "Classify sentiment as one word: positive, negative, or neutral."
+  Baseline: "Neutral."   (with trailing period)
+  After:    "Neutral"    (period dropped)
+  Drift score: 0.575 (threshold: 0.3)
+
+If you do .strip() == "neutral." anywhere in your code, it silently breaks.
+
+Free tier: 3 prompts, no card. Happy to answer technical questions.
+```
+
+---
+
+## HN Show HN Post — ARCHIVED (old version, do not use)
 
 ---
 

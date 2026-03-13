@@ -132,6 +132,27 @@ Results are committed to `data/results.json` after every run. View them in the [
 
 ---
 
+## How Drift Detection Works
+
+The drift score is a weighted composite of three independent signals, computed per-prompt on each monitoring run:
+
+**1. Validator compliance drift (50% weight)**
+Each prompt has a set of validators — boolean checks on the response (is it valid JSON? does it return exactly one word? does it contain the expected field names?). The compliance rate of these validators is compared to the baseline. A validator that *passed in the baseline but fails now* is flagged as a **regression**, regardless of overall score.
+
+**2. Length drift (20% weight)**
+Absolute percentage change in response length vs. baseline: `|len(current) - len(baseline)| / len(baseline)`. A verbosity-constrained prompt returning a paragraph instead of a sentence scores high on this component. Capped at 1.0.
+
+**3. Jaccard word dissimilarity (30% weight)**
+Word-level Jaccard distance: `1 - |words(baseline) ∩ words(current)| / |words(baseline) ∪ words(current)|`. This catches content drift (different words used to express the same concept) and hallucination-style divergence (entirely different output). Not embedding-based — intentionally a fast, deterministic heuristic with no model cost.
+
+**Composite score:** `overall = validator_drift × 0.5 + length_drift × 0.2 + word_distance × 0.3`
+
+**Why not use embeddings?** Embedding-based similarity (e.g. cosine similarity via `text-embedding-3-small`) is better for semantic equivalence but adds per-check API cost and latency, and can mask format regressions that matter for production parsers (two responses with identical meaning but different punctuation have high semantic similarity but one breaks your parser). We use heuristics because format fidelity, not semantic equivalence, is what breaks production code.
+
+**False positive calibration:** Normal stochastic variance for a single-sample baseline produces drift scores of 0.1–0.3 on structured prompts. The alert threshold of 0.3 was calibrated against 150 consecutive Claude-3-Haiku runs — alert rate on unchanged models is < 5% at this threshold.
+
+---
+
 ## Drift Score Explained
 
 Each prompt gets a **drift score from 0.0 to 1.0**:

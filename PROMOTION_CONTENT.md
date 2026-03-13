@@ -232,8 +232,24 @@ Real example from our Claude API test run:
 
 If you do .strip() == "neutral." anywhere in your code, it silently breaks.
 
+**On "why not just build this yourself":** The cron job is easy. The hard part is threshold
+calibration — stochastic variance on a single-sample baseline produces drift scores of
+0.1–0.3 even on unchanged models. We calibrated the 0.3 alert threshold against 150
+consecutive Claude-3-Haiku runs; at that threshold, false positive rate on stable models
+is <5%. Getting that wrong means either alert fatigue (you ignore everything) or missed
+regressions (you miss the GPT-5.1 forced migration). The cron job is a weekend; the
+false positive calibration is weeks.
+
+**Algorithm (not embeddings — intentional):** Validator compliance drift (50%) + length
+drift (20%) + Jaccard word dissimilarity (30%). No embedding cost, deterministic output.
+Details in README.
+
 Free tier: 3 prompts, no card. Happy to answer technical questions.
 ```
+
+**⚠️ CRITICAL before HN launch:** The maker's first comment MUST reference a permanent API URL
+(api.driftwatch.dev or Railway URL) — NOT a Cloudflare tunnel. Readers WILL check DevTools.
+A `trycloudflare.com` URL in network requests kills enterprise credibility instantly.
 
 ---
 

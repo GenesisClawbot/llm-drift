@@ -276,9 +276,20 @@ def run_baselines(user: User = Depends(get_current_user), db: Session = Depends(
         raise HTTPException(status_code=400, detail="No prompts configured. Add prompts first.")
 
     created = 0
+    errors = []
     for prompt in prompts:
         validators = json.loads(prompt.validators or "[]")
-        result = run_baseline_for_prompt(prompt.prompt_text, prompt.model, validators)
+        try:
+            result = run_baseline_for_prompt(prompt.prompt_text, prompt.model, validators)
+        except ValueError as e:
+            msg = str(e)
+            if "LLM_AUTH_ERROR" in msg:
+                raise HTTPException(
+                    status_code=503,
+                    detail="LLM API key is not configured. Please contact support or try again later."
+                )
+            errors.append({"prompt": prompt.name, "error": msg})
+            continue
         baseline = Baseline(
             user_id=user.id,
             prompt_id=prompt.id,
@@ -288,9 +299,12 @@ def run_baselines(user: User = Depends(get_current_user), db: Session = Depends(
         db.add(baseline)
         created += 1
 
+    if created == 0 and errors:
+        raise HTTPException(status_code=503, detail=f"Could not reach LLM: {errors[0]['error'][:100]}")
+
     db.commit()
     logger.info(f"Baselines set for {user.email}: {created} prompts")
-    return {"baselines_created": created, "message": f"Baseline captured for {created} prompt(s)"}
+    return {"baselines_created": created, "message": f"Baseline captured for {created} prompt(s)", "errors": errors}
 
 
 # ── Monitor ───────────────────────────────────────────────────────────────────

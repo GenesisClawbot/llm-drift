@@ -19,12 +19,19 @@ client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
 def call_llm(prompt: str, model: str = "claude-3-haiku-20240307") -> str:
     """Call the LLM and return the response text."""
-    msg = client.messages.create(
-        model=model,
-        max_tokens=512,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return msg.content[0].text if msg.content else ""
+    try:
+        msg = client.messages.create(
+            model=model,
+            max_tokens=512,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return msg.content[0].text if msg.content else ""
+    except anthropic.AuthenticationError:
+        raise ValueError("LLM_AUTH_ERROR: API key invalid or missing. Please contact support.")
+    except anthropic.RateLimitError:
+        raise ValueError("LLM_RATE_LIMIT: Rate limit exceeded. Please try again shortly.")
+    except Exception as e:
+        raise ValueError(f"LLM_ERROR: {str(e)[:100]}")
 
 
 # ── Validator helpers ─────────────────────────────────────────────────────────

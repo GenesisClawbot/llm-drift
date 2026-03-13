@@ -6,13 +6,19 @@ import re
 from datetime import datetime
 from typing import List, Optional
 
-import anthropic
-
 # Add parent dir so we can import the existing core modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+_client = None  # Lazy-initialised on first real API call
+
+def _get_client():
+    """Lazy Anthropic client — avoids SDK init overhead at startup."""
+    global _client
+    if _client is None:
+        import anthropic  # noqa: PLC0415
+        _client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    return _client
 
 # ── Demo mode responses (real measured data from 2026-03-12 test run) ─────────
 # These are used when the LLM API key is unavailable.
@@ -47,18 +53,19 @@ def _demo_response_key(prompt_text: str) -> str:
 def call_llm(prompt: str, model: str = "claude-3-haiku-20240307") -> str:
     """Call the LLM and return the response text."""
     try:
-        msg = client.messages.create(
+        msg = _get_client().messages.create(
             model=model,
             max_tokens=512,
             messages=[{"role": "user", "content": prompt}]
         )
         return msg.content[0].text if msg.content else ""
-    except anthropic.AuthenticationError:
-        raise ValueError("LLM_AUTH_ERROR: API key invalid or missing. Please contact support.")
-    except anthropic.RateLimitError:
-        raise ValueError("LLM_RATE_LIMIT: Rate limit exceeded. Please try again shortly.")
     except Exception as e:
-        raise ValueError(f"LLM_ERROR: {str(e)[:100]}")
+        err = str(e)
+        if "authentication" in err.lower() or "401" in err or "api_key" in err.lower():
+            raise ValueError("LLM_AUTH_ERROR: API key invalid or missing. Please contact support.")
+        if "rate" in err.lower() and "limit" in err.lower():
+            raise ValueError("LLM_RATE_LIMIT: Rate limit exceeded. Please try again shortly.")
+        raise ValueError(f"LLM_ERROR: {err[:100]}")
 
 
 # ── Validator helpers ─────────────────────────────────────────────────────────

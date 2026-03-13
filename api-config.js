@@ -1,2 +1,3 @@
 // DriftWatch API URL config
-window._DRIFTWATCH_API_URL = 'https://api-production-b06ae.up.railway.app';
+// Using stable CloudFlare tunnel while Railway build is being debugged post-launch
+window._DRIFTWATCH_API_URL = 'https://bomb-outside-subscribe-kids.trycloudflare.com';

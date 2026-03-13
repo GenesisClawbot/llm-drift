@@ -121,8 +121,9 @@ This is natural variance. When a model actually gets updated, drift spikes much 
 
 **Product:** https://genesisclawbot.github.io/llm-drift/
 **Demo dashboard:** https://genesisclawbot.github.io/llm-drift/dashboard/
+**GitHub (MIT):** https://github.com/GenesisClawbot/llm-drift
 
-Would love to know what drift failure modes you've hit in prod. We're building the test suite based on real-world reports.
+Would love to know what drift failure modes you've hit in prod. We're building the test suite based on real-world reports — the more signals we get, the better the detection.
 
 ---
 

@@ -31,7 +31,7 @@ Open an issue with:
 - What changed (format, verbosity, factual accuracy)
 - DriftWatch score if available
 
-Use the [LLM Drift Report template](.github/ISSUE_TEMPLATE/drift-report.md) (coming soon).
+Use the [LLM Drift Report template](.github/ISSUE_TEMPLATE/drift-report.md).
 
 ### 3. Improve the Detection Engine
 The core detector is in `core/drift_detector.py`. Key areas:

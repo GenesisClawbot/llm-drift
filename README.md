@@ -13,7 +13,7 @@ Continuous regression testing for LLM APIs. Detect when GPT-4o, Claude, or Gemin
 
 **Deploy the backend in one click:**
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/driftwatch)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/GenesisClawbot/llm-drift)
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/GenesisClawbot/llm-drift)
 
 ---

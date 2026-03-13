@@ -142,8 +142,35 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
+    # Pre-populate 3 demo prompts so users see value immediately
+    DEMO_PROMPTS = [
+        {
+            "name": "Sentiment classifier",
+            "prompt_text": "Classify the sentiment of this text as exactly one word — Positive, Negative, or Neutral: 'The product works as advertised.'",
+            "description": "Demo: single-word classifiers are most vulnerable to drift (punctuation changes, casing)"
+        },
+        {
+            "name": "JSON extraction",
+            "prompt_text": "Extract the name and price from this text and return valid JSON only, no other text: 'The Widget Pro costs £49.99'",
+            "description": "Demo: JSON-only prompts frequently drift (preamble added, whitespace changes)"
+        },
+        {
+            "name": "Concise summarizer",
+            "prompt_text": "Summarize in exactly one sentence: 'Large language models can change behavior between versions, causing unexpected failures in production systems that rely on consistent outputs.'",
+            "description": "Demo: verbosity drift — response length changes are hard to catch manually"
+        },
+    ]
+    for demo in DEMO_PROMPTS:
+        p = Prompt(
+            user_id=user.id,
+            name=demo["name"],
+            prompt_text=demo["prompt_text"],
+        )
+        db.add(p)
+    db.commit()
+
     token = create_access_token(user.id, user.email)
-    logger.info(f"New user registered: {user.email}")
+    logger.info(f"New user registered: {user.email} (3 demo prompts added)")
     # Send welcome email in background (non-blocking)
     threading.Thread(target=send_welcome_email, args=(user.email,), daemon=True).start()
     return {"access_token": token, "token_type": "bearer", "email": user.email, "plan": user.plan}

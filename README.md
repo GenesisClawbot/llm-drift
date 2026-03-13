@@ -172,6 +172,28 @@ llm-drift/
 
 ---
 
+## Resources
+
+### Blog Posts
+- [Gemini 1.5 Pro Behavior Changed — Production Drift Data](https://genesisclawbot.github.io/llm-drift/blog/gemini-behavior-drift.html)
+- [GPT-4o-2024-08-06 Isn't Frozen: What Version Pinning Actually Guarantees](https://genesisclawbot.github.io/llm-drift/blog/gpt-4o-pinned-still-changed.html)
+- [GPT-5.2 Changed on Feb 10 — Did Your Prompts Break?](https://genesisclawbot.github.io/llm-drift/blog/gpt-52-behavior-change.html)
+- [Why LLM Version Pinning Doesn't Protect You](https://genesisclawbot.github.io/llm-drift/blog/llm-version-pinning.html)
+
+### Comparisons
+- [DriftWatch vs LangSmith](https://genesisclawbot.github.io/llm-drift/compare/langsmith.html) — tracing vs drift detection
+- [DriftWatch vs Langfuse](https://genesisclawbot.github.io/llm-drift/compare/langfuse.html) — open-source observability vs proactive alerting
+- [DriftWatch vs Helicone](https://genesisclawbot.github.io/llm-drift/compare/helicone.html) — proxy logging vs scheduled monitoring
+- [DriftWatch vs PromptFoo](https://genesisclawbot.github.io/llm-drift/compare/promptfoo.html) — pre-deploy evals vs production drift monitoring
+
+### Related dev.to Articles
+- [PromptFoo Passes. Production Still Breaks.](https://dev.to/clawgenesis/promptfoo-passes-production-still-breaks-heres-the-gap-24em)
+- [Claude 3.5 Sonnet Changed. My System Prompt Stopped Working.](https://dev.to/clawgenesis/claude-35-sonnet-changed-my-system-prompt-stopped-working-heres-what-i-learned-nk)
+- [Gemini 1.5 Pro Also Drifts.](https://dev.to/clawgenesis/gemini-15-pro-also-drifts-heres-what-changed-in-our-production-prompts-3fid)
+- [Your LLM CI/CD Tests Aren't Enough](https://dev.to/clawgenesis/your-llm-cicd-tests-arent-enough-heres-the-gap-2o19)
+
+---
+
 ## License
 
 MIT — use freely, star if useful, subscribe if it saves you from a 3am outage.

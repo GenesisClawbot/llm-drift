@@ -243,45 +243,53 @@ Questions? Reply to this email — we read every one.
 
 
 def send_trial_limit_email(to_email: str) -> bool:
-    """Nudge email sent when user exhausts all 3 free prompts."""
-    subject = "You've used all 3 free prompts — upgrade to keep monitoring"
+    """
+    Sent when user hits 3-prompt limit with ZERO prior runs.
+    Goal: guide them to run their first drift check (the aha moment),
+    not to pay immediately. The first-drift email handles conversion.
+    """
+    subject = "Your DriftWatch prompts are set up — run your first check"
     APP_URL = "https://genesisclawbot.github.io/llm-drift/app.html"
-    STARTER_URL = "https://buy.stripe.com/6oU3cp6oHaBT2jR7BE9ws0k"
-    body_text = f"""You've used all 3 of your free DriftWatch prompts.
+    body_text = f"""You've added 3 prompts and established baselines. Good setup.
 
-Here's what you found:
+Next step: run your first drift check.
 
-  • You've established baselines for your prompts
-  • Hourly automated monitoring is one step away
+  → Open your dashboard: {APP_URL}
+  → Click "Run Drift Check"
+  → See your drift scores in about 30 seconds
 
-Upgrade to Starter (£99/month) to unlock:
-  ✓ 100 test prompts
-  ✓ Hourly automated monitoring (runs while you sleep)
-  ✓ Email + Slack alerts the moment drift is detected
-  ✓ 90-day history
+This is where DriftWatch earns its keep. Your baselines are locked in from
+today. If your model's behavior has already shifted since your last deployment,
+the check will catch it now.
 
-Upgrade now: {STARTER_URL}
+If everything's stable — great. DriftWatch will keep watching hourly and
+alert you the moment something changes.
 
-If you caught drift already, you know why this matters.
-If you haven't — that's because your LLM hasn't changed yet. It will.
+Go run the check: {APP_URL}
 
 — The DriftWatch team
+
+P.S. If the check catches something, we'll send you a detailed report with
+exactly what changed and an option to upgrade for continuous monitoring.
 """
     body_html = f"""<!DOCTYPE html>
 <html><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1f2937">
-<h2 style="color:#6366f1">You've used all 3 free prompts</h2>
-<p>You've established baselines. Now let DriftWatch watch them for you — automatically.</p>
-<h3 style="color:#374151">Upgrade to Starter (£99/month):</h3>
-<ul style="line-height:2">
-  <li>100 test prompts</li>
-  <li>Hourly automated monitoring (runs while you sleep)</li>
-  <li>Email + Slack alerts the moment drift is detected</li>
-  <li>90-day history</li>
-</ul>
-<a href="{STARTER_URL}" style="background:#6366f1;color:white;padding:14px 28px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:600;font-size:1.1rem">Upgrade to Starter — £99/mo →</a>
-<p style="margin-top:20px;color:#6b7280;font-size:.9rem">Or <a href="{APP_URL}" style="color:#6366f1">open your dashboard</a> to review what you've monitored so far.</p>
+<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin-bottom:24px">
+  <h2 style="color:#166534;margin:0 0 8px">✅ Baselines established for 3 prompts</h2>
+  <p style="margin:0;color:#166534">You're set up. Time to see what DriftWatch actually does.</p>
+</div>
+<h3 style="color:#374151">Run your first drift check:</h3>
+<ol style="line-height:2.2;color:#4b5563">
+  <li>Open your dashboard → <a href="{APP_URL}" style="color:#6366f1">app.html</a></li>
+  <li>Click <strong>"Run Drift Check"</strong></li>
+  <li>See your drift scores in ~30 seconds</li>
+</ol>
+<p style="color:#374151">Your baselines are locked in from today. If your model's behavior has already shifted since your last deployment, the check will surface it now.</p>
+<a href="{APP_URL}" style="background:#6366f1;color:white;padding:14px 28px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:600;font-size:1.05rem;margin:8px 0 24px">Run my first drift check →</a>
+<p style="color:#6b7280;font-size:.9rem">If the check catches drift, we'll send you a detailed report with exactly what changed — and options to expand monitoring across your full prompt suite.</p>
 <hr style="margin-top:32px;border:none;border-top:1px solid #e5e7eb">
-<p style="color:#9ca3af;font-size:.8rem">DriftWatch — LLM Behavioural Monitoring<br>Cancel or manage your subscription anytime from your dashboard.</p>
+<p style="color:#9ca3af;font-size:.8rem">DriftWatch — LLM Behavioural Monitoring<br>
+<a href="{APP_URL}" style="color:#6366f1">Manage your account</a></p>
 </body></html>"""
     return _send_email(to_email, subject, body_text, body_html)
 

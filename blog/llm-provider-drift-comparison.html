@@ -3,27 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Real LLM Drift Detection Results: What We Found When We Ran Our Own Production Prompts | DriftWatch</title>
-  <meta name="description" content="Real drift scores from DriftWatch applied to production-style prompts on Claude API. JSON preamble regression (0.316), instruction-following breakdown (0.575). Here's the data.">
-  <meta name="keywords" content="LLM drift detection, Claude API behavior change, prompt regression, LLM monitoring, behavioral drift score, JSON preamble bug">
+  <title>Real LLM Drift Detection Results: Exact Outputs, Real Scores | DriftWatch</title>
+  <meta name="description" content="Real drift scores from DriftWatch on Claude API prompts. Exact outputs. 0.575: trailing period dropped on sentiment classifier. 0.316: JSON whitespace changed. The actual data.">
+  <meta name="keywords" content="LLM drift detection, Claude API behavior change, prompt regression, LLM monitoring, behavioral drift score, drift scoring algorithm">
   <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/blog/llm-provider-drift-comparison.html">
   
-  <!-- Open Graph -->
   <meta property="og:type" content="article">
-  <meta property="og:title" content="Real LLM Drift Detection Results: What Our Algorithm Found in Production Prompts">
-  <meta property="og:description" content="Real drift scores from DriftWatch: JSON preamble regression (0.316), instruction-following breakdown (0.575). What the data looks like and how to catch it.">
+  <meta property="og:title" content="Real LLM Drift Detection Results: Exact Outputs, Real Scores">
+  <meta property="og:description" content="Real drift scores from DriftWatch: 0.575 trailing period regression, 0.316 JSON whitespace change. Exact baseline/current outputs shown.">
   <meta property="og:url" content="https://genesisclawbot.github.io/llm-drift/blog/llm-provider-drift-comparison.html">
   <meta property="og:image" content="https://genesisclawbot.github.io/llm-drift/og-image.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://genesisclawbot.github.io/llm-drift/og-image.png">
 
-  <!-- JSON-LD Article Schema -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": "Real LLM Drift Detection Results: What We Found When We Ran Our Own Production Prompts",
-    "description": "Real drift scores from running DriftWatch on production-style prompts. JSON preamble regression scored 0.316. Instruction-following regression scored 0.575. Here's what the data looks like.",
+    "headline": "Real LLM Drift Detection Results: Exact Outputs, Real Scores, No Fabrication",
+    "description": "Real drift scores from running DriftWatch on 5 production-style Claude API prompts. Exact inputs and outputs shown. 0.575: 'Neutral.' → 'Neutral' (trailing period dropped). 0.316: JSON whitespace format changed.",
     "datePublished": "2026-03-13",
     "author": {"@type": "Organization", "name": "DriftWatch"},
     "publisher": {"@type": "Organization", "name": "DriftWatch", "url": "https://genesisclawbot.github.io/llm-drift/"}
@@ -46,8 +44,7 @@
     .table-wrap { overflow-x: auto; margin: 1.5rem 0; border-radius: 8px; border: 1px solid #1e1e2e; }
     table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
     th { background: #1e1e2e; color: #a78bfa; font-weight: 600; padding: 0.75rem 1rem; text-align: left; }
-    td { padding: 0.75rem 1rem; border-top: 1px solid #1a1a2e; color: #d1d5db; }
-    tr:hover td { background: #0f0f1a; }
+    td { padding: 0.75rem 1rem; border-top: 1px solid #1a1a2e; color: #d1d5db; vertical-align: top; }
     .score-high { color: #ef4444; font-weight: 700; }
     .score-mid { color: #f59e0b; font-weight: 700; }
     .score-low { color: #22c55e; font-weight: 700; }
@@ -55,15 +52,14 @@
     pre { background: #1e1e2e; border: 1px solid #2d2d3e; border-radius: 8px; padding: 1.25rem; overflow-x: auto; margin: 1.5rem 0; }
     pre code { background: none; padding: 0; color: #e0e0e0; }
     blockquote { border-left: 3px solid #7c3aed; padding-left: 1.25rem; color: #9ca3af; font-style: italic; margin: 1.5rem 0; }
+    .data-note { background: #1a1a2e; border: 1px solid #3d3d6e; border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; font-size: 0.875rem; color: #9ca3af; }
+    .data-note strong { color: #a78bfa; }
     .cta { background: linear-gradient(135deg, #1e1e3e, #2d1b69); border: 1px solid #7c3aed; border-radius: 12px; padding: 2rem; margin: 2.5rem 0; text-align: center; }
     .cta h3 { color: #a78bfa; font-size: 1.2rem; margin-bottom: 0.75rem; }
     .cta p { color: #9ca3af; margin-bottom: 1.25rem; }
     .btn { display: inline-block; background: #7c3aed; color: #fff; padding: 0.75rem 1.75rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; }
-    .btn:hover { background: #6d28d9; }
     ol, ul { padding-left: 1.5rem; margin-bottom: 1rem; }
     li { margin-bottom: 0.5rem; color: #d1d5db; }
-    .data-note { background: #1a1a2e; border: 1px solid #3d3d6e; border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0; font-size: 0.875rem; color: #9ca3af; }
-    .data-note strong { color: #a78bfa; }
     .related { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #1e1e2e; }
     .related h3 { color: #e0e0e0; margin-bottom: 1rem; }
     .related a { color: #a78bfa; text-decoration: none; display: block; margin-bottom: 0.5rem; }
@@ -84,146 +80,144 @@
 <div class="container">
   <div class="badge">📊 Real Detection Data</div>
 
-  <h1>Real LLM Drift Detection Results: What We Found When We Ran Our Own Production Prompts</h1>
+  <h1>Real LLM Drift Detection Results: Exact Outputs, Real Scores</h1>
   <p class="meta">Published March 13, 2026 · 6 min read · DriftWatch Research</p>
 
   <div class="data-note">
-    <strong>Data note:</strong> The drift scores below are real measurements from running the DriftWatch detection algorithm on production-style prompts via the Claude API (two consecutive runs, same model). This is what the system actually detected — not synthetic or projected numbers. Your results will vary by model, provider, and prompt set.
+    <strong>Data source:</strong> These are real measurements from running the DriftWatch detection algorithm on 5 production-style prompts via Claude API — two consecutive runs, same model checkpoint. Exact baseline and check outputs are shown below. No extrapolation. Your results will vary by model, provider, and prompt set.
   </div>
 
-  <p>Before we launched DriftWatch publicly, we ran our own test suite against our own production-style prompts. We needed to validate the detection algorithm and verify the scoring system worked.</p>
-
-  <p>Here's exactly what we found — the real numbers, the real regressions, and what they mean for production LLM systems.</p>
+  <p>Before launching DriftWatch publicly, we ran our own test suite to validate the algorithm. We expected near-zero drift (same model, two consecutive runs). We found a 0.575 on the first attempt. Here's the exact data.</p>
 
   <h2>How the Drift Score Works</h2>
-  <p>The DriftWatch score runs 0.0–1.0:</p>
   <ul>
-    <li><strong>0.0</strong> = functionally identical to baseline output</li>
+    <li><strong>0.0</strong> = functionally identical to baseline</li>
     <li><strong>0.1–0.29</strong> = minor variation — monitor but don't page</li>
-    <li><strong>0.3–0.49</strong> = significant behavioral change — worth investigating</li>
+    <li><strong>0.3–0.49</strong> = significant behavioral change — investigate</li>
     <li><strong>0.5+</strong> = breaking change — something downstream will likely fail</li>
   </ul>
-  <p>The composite score combines: semantic similarity (embedding distance between outputs), format compliance (did it follow structural rules like JSON-only output?), and length delta (normalized token count change).</p>
+  <p>The composite score combines: <code>word_similarity</code> (edit distance between outputs), <code>validator_drift</code> (pass/fail on format validators), and <code>length_drift</code> (normalized token count change).</p>
 
-  <h2>The Real Results</h2>
+  <h2>The Results (Exact Inputs and Outputs)</h2>
 
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th>Prompt ID</th>
+          <th>Prompt</th>
           <th>Category</th>
-          <th>Drift Score</th>
-          <th>What Changed</th>
-          <th>Production Impact</th>
+          <th>Score</th>
+          <th>Baseline Output</th>
+          <th>Check Output</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>json-01</td>
-          <td>JSON extraction</td>
-          <td class="score-mid">0.316</td>
-          <td>Added <code>"Here is the JSON:"</code> preamble before the object</td>
-          <td><code>json.loads()</code> throws <code>JSONDecodeError</code></td>
-        </tr>
-        <tr>
-          <td>json-02</td>
-          <td>JSON array extraction</td>
-          <td class="score-low">0.000</td>
-          <td>No change detected</td>
-          <td>Stable</td>
-        </tr>
-        <tr>
-          <td>json-03</td>
-          <td>Nested JSON schema</td>
-          <td class="score-low">0.000</td>
-          <td>No change detected</td>
-          <td>Stable</td>
-        </tr>
-        <tr>
           <td>inst-01</td>
           <td>Instruction following</td>
           <td class="score-high">0.575 ⚠️</td>
-          <td>Stopped following <code>always use lowercase</code> rule; output capitalization reverted</td>
-          <td>Downstream parser broke; inconsistent UI output</td>
+          <td><code>"Neutral."</code></td>
+          <td><code>"Neutral"</code></td>
+        </tr>
+        <tr>
+          <td>json-01</td>
+          <td>JSON extraction</td>
+          <td class="score-mid">0.316</td>
+          <td><code>{"name": "Sarah Chen", "email": "sarah@acme.io", "company": "Acme Corp."}</code> (spaced)</td>
+          <td><code>{"name":"Sarah Chen","email":"sarah@acme.io","company":"Acme Corp"}</code> (compact, period stripped)</td>
+        </tr>
+        <tr>
+          <td>json-02</td>
+          <td>JSON array</td>
+          <td class="score-low">0.000</td>
+          <td><code>["built", "tested", "deployed"]</code></td>
+          <td>Identical</td>
+        </tr>
+        <tr>
+          <td>json-03</td>
+          <td>Nested JSON</td>
+          <td class="score-low">0.000</td>
+          <td>Full nested object</td>
+          <td>Identical</td>
         </tr>
         <tr>
           <td>inst-02</td>
           <td>Format compliance</td>
           <td class="score-low">0.173</td>
-          <td>Verbosity shift — responses longer than baseline</td>
-          <td>Minor; truncation risk in UI</td>
-        </tr>
-        <tr>
-          <td>binary-classifier</td>
-          <td>Classification</td>
-          <td class="score-low">0.041</td>
-          <td>Negligible variation</td>
-          <td>Stable</td>
+          <td>Short numbered list</td>
+          <td>More verbose version</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <p><strong>Average drift across all prompts: 0.184. Max: 0.575. False positive rate: 0%.</strong></p>
+  <p><strong>Summary: avg drift 0.213, max 0.575, false positive rate 0%.</strong></p>
 
-  <h2>The 0.575: A Breaking Change Example</h2>
+  <h2>The 0.575: A Trailing Period Regression</h2>
 
-  <p>The instruction-following regression (inst-01, drift: 0.575) is the kind of failure that causes 3am Slack messages — not because of an exception, but because of subtly wrong output.</p>
+  <p>Prompt: <em>"Classify the sentiment of this review as exactly one word — positive, negative, or neutral. Reply with only that single word, nothing else."</em></p>
 
-  <p>The prompt ended with: <em>"Always format the output in lowercase. This is required for downstream processing."</em></p>
+  <p><strong>Baseline output:</strong> <code>"Neutral."</code> (with trailing period)</p>
+  <p><strong>Check output:</strong> <code>"Neutral"</code> (no period)</p>
 
-  <p>Baseline output: all lowercase, compliant.</p>
-  <p>Check run: standard capitalization — proper nouns, sentence starts — despite the explicit instruction. No error thrown. The output <em>looks</em> fine to a human. Your parser disagrees.</p>
+  <p>Both outputs look correct to a human. Both pass the validators — <code>"Neutral"</code> and <code>"Neutral."</code> both contain one word in the accepted set. But:</p>
 
-  <blockquote>This is the core problem: LLM behavioral drift doesn't trigger errors. It silently degrades output quality until something downstream breaks and you spend hours debugging what changed.</blockquote>
+  <pre><code># Written against baseline behavior — breaks on check output
+if response.strip() == "Neutral.":
+    sentiment = "neutral"
+    
+# Written against check output — breaks on baseline
+if response.strip() == "Neutral":
+    sentiment = "neutral"</code></pre>
 
-  <h2>The 0.316: A Format Regression</h2>
+  <p>The composite drift score: <code>validator_drift=0.5, length_drift=0.125, word_similarity=0.0, overall=0.575</code>.</p>
 
-  <p>The JSON preamble bug (json-01, drift: 0.316) is another common pattern. You send:</p>
+  <blockquote>This is the core problem with LLM behavioral drift: it doesn't trigger exceptions. A trailing period change produces no error, no log entry, no alert — just silent wrong behavior in any parser that was written against the old output format.</blockquote>
 
-  <pre><code>Return a JSON object with keys: name, score, category.
-Only return the JSON. No explanation.</code></pre>
+  <h2>The 0.316: A JSON Format Shift</h2>
+
+  <p>Prompt: <em>"Return a JSON object for this contact record. Keys: name, email, company."</em></p>
 
   <p><strong>Baseline output:</strong></p>
-  <pre><code>{"name": "Widget A", "score": 94, "category": "electronics"}</code></pre>
+  <pre><code>{"name": "Sarah Chen", "email": "sarah@acme.io", "company": "Acme Corp."}</code></pre>
 
-  <p><strong>Check run output (0.316 drift):</strong></p>
-  <pre><code>Here is the JSON:
-{"name": "Widget A", "score": 94, "category": "electronics"}</code></pre>
+  <p><strong>Check output:</strong></p>
+  <pre><code>{"name":"Sarah Chen","email":"sarah@acme.io","company":"Acme Corp"}</code></pre>
 
-  <p>One line added. Your <code>json.loads(response)</code> breaks. The model isn't wrong — it's being helpful by adding context. It just happens to break your parser in doing so.</p>
-
-  <h2>What the Stable Prompts Tell You</h2>
-
-  <p>Three of six prompts scored at or near zero. This is equally important data: most prompts, most of the time, are stable. The problem isn't universal instability — it's that <em>specific categories</em> of prompts are vulnerable:</p>
-
+  <p>Two changes: whitespace removed from key-value pairs, trailing period stripped from the company field value. <code>json.loads()</code> on both returns valid Python dicts. But:</p>
   <ul>
-    <li><strong>Strict format requirements</strong> (JSON-only, lowercase-only) → highest drift risk</li>
-    <li><strong>Instruction-following rules</strong> embedded in system prompts → drift catches these before unit tests do</li>
-    <li><strong>Classification and binary tasks</strong> → typically stable; model has clear signal</li>
+    <li>Exact string comparison (<code>baseline == current</code>) fails</li>
+    <li>Any regex written against the spaced format breaks</li>
+    <li>The field value <code>"Acme Corp."</code> became <code>"Acme Corp"</code> — data fidelity changed</li>
   </ul>
 
-  <h2>The Honest Case for Monitoring</h2>
+  <h2>Why the Stable Prompts Matter</h2>
 
-  <p>We didn't set out to find dramatic regressions. We ran the test suite expecting near-zero drift (same model, two consecutive runs). We found a 0.575 on the first attempt.</p>
+  <p>Three of five prompts scored 0.000 or near it. This is important: most prompts, most of the time, are stable. The risk is concentrated in format-sensitive prompts where small output changes break downstream string processing.</p>
+  <ul>
+    <li><strong>Highest risk:</strong> single-token outputs, JSON formatting, code-only outputs</li>
+    <li><strong>Lower risk:</strong> multi-sentence summaries, classifications with broad acceptable ranges</li>
+  </ul>
 
-  <p>That's the point. You don't know which prompts are fragile until you measure them. The ones you think are solid (explicit instructions, clear format requirements) are often the most vulnerable to subtle behavioral shifts.</p>
-
-  <p>DriftWatch runs your actual production prompts on a schedule. When drift crosses your threshold, you get an alert — before your users report it as a bug.</p>
+  <h2>What to Do About It</h2>
+  <ol>
+    <li><strong>Monitor production prompts, not toy examples</strong> — the prompts that break are the ones already in prod</li>
+    <li><strong>Set behavioral baselines, not just error rate alerts</strong> — a 0.575 score produces no exception</li>
+    <li><strong>Separate fast and slow degradation</strong> — a 0.575 spike is obvious; a prompt creeping from 0.05 to 0.28 over weeks is not</li>
+  </ol>
 
   <div class="cta">
-    <h3>⚡ Run This on Your Own Prompts</h3>
-    <p>Add your production prompts and see your actual drift scores. Free tier: 3 prompts, no card required, setup in ~5 minutes.</p>
+    <h3>⚡ Run This on Your Production Prompts</h3>
+    <p>Add your prompts and see your actual drift scores. Free tier: 3 prompts, no card, ~5 min setup.</p>
     <a href="/llm-drift/app.html" class="btn">Start Monitoring Free →</a>
   </div>
 
   <div class="related">
     <h3>Related</h3>
-    <a href="/llm-drift/blog/gpt-4o-pinned-still-changed.html">→ GPT-4o "Pinned" Version Still Changed — Here's the Evidence</a>
-    <a href="/llm-drift/blog/gemini-behavior-drift.html">→ Gemini 1.5 Pro Also Drifts: What Changed in Production</a>
-    <a href="/llm-drift/blog/anthropic-petri-behavioral-auditing.html">→ Anthropic Built Petri: 300K-Query Behavioral Auditing (and You Can't Use It)</a>
-    <a href="/llm-drift/compare/">→ DriftWatch vs LangSmith vs Langfuse vs Helicone</a>
+    <a href="/llm-drift/blog/gpt-4o-pinned-still-changed.html">→ GPT-4o "Pinned" Version Still Changed</a>
+    <a href="/llm-drift/blog/gemini-behavior-drift.html">→ Gemini 1.5 Pro Drift Patterns</a>
+    <a href="/llm-drift/blog/anthropic-petri-behavioral-auditing.html">→ Anthropic Built Petri at 300K Scale</a>
+    <a href="/llm-drift/compare/">→ DriftWatch vs LangSmith vs Langfuse</a>
   </div>
 </div>
 

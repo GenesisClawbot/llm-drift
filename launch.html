@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriftWatch is launching on Product Hunt 🚀</title>
+    <meta name="description" content="DriftWatch detects when your LLM silently changes behavior. Launching on Product Hunt soon — get notified.">
+    <meta property="og:title" content="DriftWatch — LLM Behavioral Drift Detection">
+    <meta property="og:description" content="Know when your LLM changes behavior before your users do. Launching on Product Hunt.">
+    <meta property="og:image" content="https://genesisclawbot.github.io/llm-drift/og-image.png">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+        :root {
+            --brand: #6366f1;
+            --brand-light: #818cf8;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --ph-orange: #da552f;
+        }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 600px; width: 100%; text-align: center }
+        .badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(99,102,241,.15); border: 1px solid rgba(99,102,241,.3);
+            color: var(--brand-light); padding: 4px 12px; border-radius: 20px;
+            font-size: .8rem; font-weight: 600; letter-spacing: .04em;
+            text-transform: uppercase; margin-bottom: 1.5rem
+        }
+        h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 800; line-height: 1.2; margin-bottom: 1rem }
+        h1 span { color: var(--brand-light) }
+        .subhead { color: var(--muted); font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem; max-width: 480px; margin-left: auto; margin-right: auto }
+        .story {
+            background: var(--card); border: 1px solid rgba(255,255,255,.08);
+            border-radius: 12px; padding: 1.5rem; margin: 2rem 0; text-align: left
+        }
+        .story p { color: var(--muted); font-size: .95rem; line-height: 1.7 }
+        .story p + p { margin-top: .75rem }
+        .story code { background: rgba(99,102,241,.15); color: var(--brand-light); padding: 1px 5px; border-radius: 4px; font-size: .85em }
+        .metrics {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 2rem 0
+        }
+        .metric { background: var(--card); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 1rem }
+        .metric .value { font-size: 1.6rem; font-weight: 800; color: var(--brand-light) }
+        .metric .label { color: var(--muted); font-size: .8rem; margin-top: .25rem }
+        .ph-section { margin: 2.5rem 0 }
+        .ph-btn {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: var(--ph-orange); color: white;
+            padding: 14px 28px; border-radius: 8px; font-size: 1rem; font-weight: 700;
+            text-decoration: none; transition: opacity .2s
+        }
+        .ph-btn:hover { opacity: .85 }
+        .ph-logo { width: 24px; height: 24px }
+        .ph-note { color: var(--muted); font-size: .85rem; margin-top: .75rem }
+        .notify { margin: 2rem 0 }
+        .notify p { color: var(--muted); font-size: .9rem; margin-bottom: .75rem }
+        .notify-form { display: flex; gap: 8px; max-width: 400px; margin: 0 auto }
+        .notify-form input {
+            flex: 1; background: var(--card); border: 1px solid rgba(255,255,255,.15);
+            color: var(--text); padding: 10px 14px; border-radius: 7px; font-size: .9rem
+        }
+        .notify-form input::placeholder { color: var(--muted) }
+        .notify-form button {
+            background: var(--brand); color: white; border: none; padding: 10px 20px;
+            border-radius: 7px; font-size: .9rem; font-weight: 600; cursor: pointer; white-space: nowrap
+        }
+        .notify-form button:hover { background: var(--brand-light) }
+        .free-cta { margin: 2rem 0; padding: 1.5rem; background: rgba(99,102,241,.08); border: 1px solid rgba(99,102,241,.2); border-radius: 10px }
+        .free-cta p { color: var(--muted); font-size: .9rem; margin-bottom: .75rem }
+        .free-cta a { color: var(--brand-light); font-weight: 600 }
+        footer { color: var(--muted); font-size: .8rem; margin-top: 3rem }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="badge">🚀 Coming to Product Hunt</div>
+
+        <h1>Know when your LLM<br><span>silently changes behavior</span></h1>
+
+        <p class="subhead">DriftWatch monitors your production prompts hourly and alerts you within 60 minutes when model behavior shifts — before your users notice.</p>
+
+        <div class="story">
+            <p>Our classifier started returning <code>"Neutral"</code> instead of <code>"neutral"</code>. Same prompt. Same model. Three days of debugging before we realized: OpenAI had done a quiet update. Our code did a strict equality check. Silent failure.</p>
+            <p>So we built DriftWatch.</p>
+        </div>
+
+        <div class="metrics">
+            <div class="metric">
+                <div class="value">60m</div>
+                <div class="label">Max alert time</div>
+            </div>
+            <div class="metric">
+                <div class="value">0.575</div>
+                <div class="label">Real drift score detected</div>
+            </div>
+            <div class="metric">
+                <div class="value">3 free</div>
+                <div class="label">Prompts, no card</div>
+            </div>
+        </div>
+
+        <div class="ph-section">
+            <a href="https://www.producthunt.com/upcoming/driftwatch" class="ph-btn" id="ph-notify-btn">
+                <svg class="ph-logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M20 0C8.954 0 0 8.954 0 20s8.954 20 20 20 20-8.954 20-20S31.046 0 20 0zm0 36C11.163 36 4 28.837 4 20S11.163 4 20 4s16 7.163 16 16-7.163 16-16 16zm-4-24h5.5C24.433 12 27 14.567 27 17.5S24.433 23 21.5 23H16v5h-4V12h4zm0 7h5.5c1.933 0 3.5-1.567 3.5-3.5S23.433 15 21.5 15H16v4z" fill="white"/>
+                </svg>
+                Notify me on launch
+            </a>
+            <p class="ph-note">We're launching on Product Hunt shortly. Click to get notified the moment we go live.</p>
+        </div>
+
+        <div class="notify">
+            <p>Or drop your email — we'll ping you with early access before PH launch:</p>
+            <div class="notify-form">
+                <input type="email" id="email-input" placeholder="you@yourcompany.com">
+                <button onclick="submitEmail()">Notify me</button>
+            </div>
+            <p id="notify-msg" style="margin-top:.5rem;font-size:.85rem;color:#86efac;display:none">✅ You're on the list!</p>
+        </div>
+
+        <div class="free-cta">
+            <p>Can't wait? Free tier is live right now — 3 prompts, no card required.</p>
+            <a href="https://genesisclawbot.github.io/llm-drift/app.html">Start monitoring free →</a>
+        </div>
+
+        <footer>
+            <a href="https://genesisclawbot.github.io/llm-drift/" style="color:inherit">DriftWatch</a> · LLM Behavioral Drift Detection ·
+            <a href="https://genesisclawbot.github.io/llm-drift/app.html" style="color:inherit">Free tier</a>
+        </footer>
+    </div>
+
+    <script>
+    function submitEmail() {
+        const email = document.getElementById('email-input').value.trim();
+        if (!email || !email.includes('@')) return;
+        // Store in localStorage for now; replace with API call when backend is ready
+        const list = JSON.parse(localStorage.getItem('driftwatch_waitlist') || '[]');
+        if (!list.includes(email)) list.push(email);
+        localStorage.setItem('driftwatch_waitlist', JSON.stringify(list));
+        document.getElementById('notify-msg').style.display = 'block';
+        document.getElementById('email-input').value = '';
+        // Also hit the API if available
+        const api = window._DRIFTWATCH_API_URL || 'https://makes-timing-applicable-recent.trycloudflare.com';
+        fetch(api + '/waitlist', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email})
+        }).catch(() => {}); // silent — local storage is the fallback
+    }
+    </script>
+    <script src="api-config.js"></script>
+</body>
+</html>

@@ -110,5 +110,13 @@ class AlertLog(Base):
     delivered = Column(Boolean, default=False)
 
 
+class WaitlistEntry(Base):
+    __tablename__ = "waitlist"
+    id = Column(String, primary_key=True, default=generate_id)
+    email = Column(String, unique=True, nullable=False)
+    source = Column(String, default="launch_page")  # launch_page | api | offline_banner
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 def create_tables():
     Base.metadata.create_all(bind=engine)

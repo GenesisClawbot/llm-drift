@@ -25,7 +25,7 @@ from typing import Optional
 
 import stripe
 import uvicorn
-from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi import Body, Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, EmailStr
@@ -44,6 +44,7 @@ from .models import (
     RunResult,
     SessionLocal,
     User,
+    WaitlistEntry,
     create_tables,
     generate_api_key,
 )
@@ -609,6 +610,21 @@ def get_settings(user: User = Depends(get_current_user)):
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "driftwatch-api", "version": "1.0.0"}
+
+
+@app.post("/waitlist")
+def join_waitlist(payload: dict = Body(...), db: Session = Depends(get_db)):
+    """Capture email for PH pre-launch waitlist. No auth required."""
+    email = (payload.get("email") or "").strip().lower()
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Valid email required")
+    existing = db.query(WaitlistEntry).filter(WaitlistEntry.email == email).first()
+    if existing:
+        return {"status": "already_subscribed", "email": email}
+    entry = WaitlistEntry(email=email, source=payload.get("source", "launch_page"))
+    db.add(entry)
+    db.commit()
+    return {"status": "subscribed", "email": email}
 
 
 @app.get("/stats")

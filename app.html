@@ -293,6 +293,9 @@ let currentUser = null;
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 window.onload = async () => {
+    // Parallel: check API health while loading auth state
+    checkApiAvailability();
+
     if (authToken) {
         try {
             await loadApp();
@@ -303,6 +306,52 @@ window.onload = async () => {
         loadDemoMode();
     }
 };
+
+async function checkApiAvailability() {
+    try {
+        const res = await fetch(`${API_URL}/health`, { signal: AbortSignal.timeout(4000) });
+        if (!res.ok) throw new Error('API unhealthy');
+    } catch {
+        showApiOfflineBanner();
+    }
+}
+
+function showApiOfflineBanner() {
+    if (document.getElementById('api-offline-banner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'api-offline-banner';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#1e1b4b;border-bottom:2px solid #6366f1;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:sans-serif';
+    banner.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:1.2rem">🌊</span>
+            <div>
+                <strong style="color:#f1f5f9;font-size:.9rem">DriftWatch is starting up</strong>
+                <div style="color:#9ca3af;font-size:.8rem">The monitoring service is initialising — usually takes under 60 seconds. <a href="javascript:location.reload()" style="color:#a5b4fc">Refresh to retry</a>.</div>
+            </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+            <input id="offline-email" type="email" placeholder="Notify me when it's back" style="background:#111827;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;padding:7px 12px;border-radius:6px;font-size:.8rem;width:220px">
+            <button onclick="captureOfflineEmail()" style="background:#6366f1;color:white;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:.8rem;font-weight:600">Notify me</button>
+            <button onclick="this.closest('#api-offline-banner').remove()" style="background:transparent;border:none;color:#9ca3af;cursor:pointer;font-size:1.2rem;padding:4px 8px">×</button>
+        </div>`;
+    document.body.insertBefore(banner, document.body.firstChild);
+}
+
+function captureOfflineEmail() {
+    const email = document.getElementById('offline-email')?.value?.trim();
+    if (!email || !email.includes('@')) return;
+    // Store locally + send to a simple endpoint if available
+    const stored = JSON.parse(localStorage.getItem('dw_waitlist') || '[]');
+    if (!stored.includes(email)) {
+        stored.push(email);
+        localStorage.setItem('dw_waitlist', JSON.stringify(stored));
+    }
+    document.getElementById('api-offline-banner').innerHTML = `
+        <div style="color:#86efac;padding:4px 0;font-size:.9rem">
+            ✓ Got it — we'll email <strong>${email}</strong> when monitoring is back online.
+            <a href="javascript:location.reload()" style="color:#a5b4fc;margin-left:12px">Try refreshing now</a>
+        </div>`;
+}
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 function toggleAuthMode() {
@@ -341,7 +390,10 @@ async function handleAuth() {
         localStorage.setItem('dw_token', authToken);
         await loadApp();
     } catch(e) {
-        showAuthError(e.message);
+        const isNetworkErr = e instanceof TypeError && e.message.includes('fetch');
+        showAuthError(isNetworkErr
+            ? 'Service temporarily unreachable — please refresh and try again.'
+            : e.message);
     } finally {
         btn.textContent = isRegisterMode ? 'Create Account' : 'Sign In';
     }

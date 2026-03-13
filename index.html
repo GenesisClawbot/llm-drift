@@ -376,10 +376,11 @@
     <p style="margin-top:.5rem">© 2026 · <a href="#">Privacy</a> · <a href="#">Terms</a></p>
 </footer>
 
+<script src="api-config.js"></script>
 <script>
 // Live stats counter — fetches from DriftWatch API; gracefully falls back to static values
 (function() {
-    const DRIFTWATCH_API = 'https://makes-timing-applicable-recent.trycloudflare.com';
+    const DRIFTWATCH_API = (window._DRIFTWATCH_API_URL || 'https://makes-timing-applicable-recent.trycloudflare.com');
     fetch(DRIFTWATCH_API + '/stats', { signal: AbortSignal.timeout(3000) })
         .then(r => r.json())
         .then(d => {

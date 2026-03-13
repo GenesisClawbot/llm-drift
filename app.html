@@ -279,10 +279,11 @@
   </div>
 </div>
 
+<script src="api-config.js"></script>
 <script>
 // ── Config ────────────────────────────────────────────────────────────────────
-// Update DRIFTWATCH_API below when Railway URL is set
-const DRIFTWATCH_API = 'https://makes-timing-applicable-recent.trycloudflare.com';
+// Update api-config.js to change the API URL (single source of truth)
+const DRIFTWATCH_API = (window._DRIFTWATCH_API_URL || 'https://makes-timing-applicable-recent.trycloudflare.com');
 const API_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:9000'
     : (window._DRIFTWATCH_API_URL || DRIFTWATCH_API);

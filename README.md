@@ -5,6 +5,9 @@
 Continuous regression testing for LLM APIs. Detect when GPT-4o, Claude, or Gemini silently change behaviour and break your product — before your users do.
 
 [![Drift Check](https://github.com/GenesisClawbot/llm-drift/actions/workflows/drift-check.yml/badge.svg)](https://github.com/GenesisClawbot/llm-drift/actions/workflows/drift-check.yml)
+[![GitHub Stars](https://img.shields.io/github/stars/GenesisClawbot/llm-drift?style=social)](https://github.com/GenesisClawbot/llm-drift)
+
+> Detected LLM drift? **[⭐ Star this repo](https://github.com/GenesisClawbot/llm-drift)** — helps other developers find it.
 
 **Deploy the backend in one click:**
 

@@ -62,6 +62,8 @@ update_configs() {
 
   # Update api-config.js
   cd "$REPO" || return 1
+  git config user.email "clawgenesis@gmail.com" 2>/dev/null
+  git config user.name "GenesisClawbot" 2>/dev/null
   git pull --rebase origin main 2>/dev/null
   printf "// DriftWatch API URL config\nwindow._DRIFTWATCH_API_URL = '%s';\n" "$URL" > api-config.js
   git add api-config.js

@@ -1,5 +1,51 @@
 # LLM Drift Detection — Deployment Guide
 
+## ⚡ CURRENT STATUS (2026-03-13)
+
+**Everything is deployed except the permanent backend URL.**
+
+| Component | Status | URL |
+|-----------|--------|-----|
+| Landing page | ✅ LIVE | https://genesisclawbot.github.io/llm-drift/ |
+| Backend (temp) | ✅ LIVE | CF tunnel (changes on restart) |
+| Stripe billing | ✅ WIRED | Starter £99/mo, Pro £249/mo |
+| Demo mode | ✅ ACTIVE | Works without API key |
+| Email alerts | ✅ READY | Activates when RESEND_API_KEY set |
+| HN post | ✅ READY | Launch Tuesday March 17 |
+
+**One remaining action: 5-minute Render.com deploy for permanent URL.**
+
+---
+
+## 🚀 RENDER.COM DEPLOY (5 minutes, needed before March 15)
+
+> `render.yaml` is already committed — Render auto-detects it.
+
+1. Go to **https://render.com** → Sign up / log in
+2. Click **"New +"** → **"Web Service"**
+3. Connect GitHub → select `GenesisClawbot/llm-drift`
+4. Render auto-detects `render.yaml` → click **"Apply"**
+5. Set these environment variables in the Render dashboard:
+
+   | Variable | Value |
+   |----------|-------|
+   | `ANTHROPIC_API_KEY` | your `sk-ant-api03-...` key |
+   | `STRIPE_SECRET_KEY` | from env |
+   | `STRIPE_PUBLISHABLE_KEY` | from env |
+   | `STRIPE_WEBHOOK_SECRET` | from Stripe dashboard (webhook signing secret) |
+   | `RESEND_API_KEY` | from resend.com (free: 100 emails/day) |
+
+6. Deploy → URL will be `https://driftwatch-api.onrender.com`
+
+7. **After deploy:**
+   - Update `api-config.js` in repo: `window._DRIFTWATCH_API_URL = 'https://driftwatch-api.onrender.com';`
+   - Update Stripe webhook URL to `https://driftwatch-api.onrender.com/stripe/webhook`
+   - Free tier sleeps after 15 min — upgrade to **Starter ($7/mo)** for always-on HN launch
+
+> **Alternatively (if Railway token gets deploy permissions):** Railway project `e5feef3f` + env `4b840877` already exist. Just add `deployment:create` scope to the `RAILWAY_TOKEN` and I can deploy immediately.
+
+---
+
 ## Status: MVP COMPLETE — AWAITING GITHUB DEPLOYMENT
 
 ### What's Done

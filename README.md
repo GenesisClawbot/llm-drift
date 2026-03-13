@@ -221,6 +221,22 @@ llm-drift/
 
 ---
 
+## FAQ
+
+**Q: What happens to my monitoring history when I exceed the free tier?**
+Monitoring data (prompt results, drift scores, baselines) is stored in PostgreSQL on the hosted service (Render/Railway) and SQLite when running locally. On the hosted service: free tier retains 90 days of history, Starter retains 12 months, Pro retains unlimited. Baseline files are always preserved — you can re-run checks against any prior baseline. On self-hosted (Docker/Railway), data retention is only limited by your own storage.
+
+**Q: Does this replace my existing evals / LangSmith / Helicone?**
+No — it's complementary. Evals test capability. LangSmith/Helicone trace and observe requests. DriftWatch runs *proactive scheduled tests* and alerts when output behaviour changes over time. You wouldn't remove your CI tests when you add production monitoring.
+
+**Q: Can I monitor models I've fine-tuned?**
+Yes — any model accessible via the OpenAI, Anthropic, or OpenAI-compatible API endpoint. Specify your fine-tuned model name exactly as you'd call it via the API. Baseline and check runs call it identically.
+
+**Q: Why SQLite for local development?**
+SQLite is for local CLI use only (`core/drift_detector.py`). The hosted service uses PostgreSQL. If you're self-hosting the backend via Docker or Railway, the `DATABASE_URL` env var accepts any Postgres connection string.
+
+---
+
 ## Resources
 
 ### Blog Posts

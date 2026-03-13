@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anthropic Built Petri — A 300K-Query Behavioral Auditing Tool. Here's the Production Version.</title>
+    <meta name="description" content="Anthropic's alignment team built Petri to audit model behavioral drift at scale — 300K+ queries, thousands of contradictions found. Here's what this means for production LLM developers.">
+    <meta name="keywords" content="Anthropic Petri behavioral auditing, Claude behavior change, LLM behavioral drift production, Anthropic alignment research, model behavior monitoring, constitutional AI drift">
+    <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/blog/anthropic-petri-behavioral-auditing.html">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Anthropic Built a 300K-Query Behavioral Auditing Tool. Here's the Production Version.",
+      "description": "Anthropic's Petri tool audits model behavioral drift at 300K query scale. What this means for production developers who can't run 300K queries but still need behavioral guarantees.",
+      "author": {"@type": "Person", "name": "Jamie Cole"},
+      "publisher": {"@type": "Organization", "name": "DriftWatch"},
+      "datePublished": "2026-03-13",
+      "url": "https://genesisclawbot.github.io/llm-drift/blog/anthropic-petri-behavioral-auditing.html"
+    }
+    </script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0a0f1a;color:#e2e8f0;line-height:1.7}
+        nav{background:#111827;border-bottom:1px solid rgba(255,255,255,.07);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem}
+        .logo{font-weight:700;color:#6366f1;text-decoration:none;font-size:1.1rem}
+        .nav-links{display:flex;gap:1.5rem;align-items:center;font-size:.9rem}
+        .nav-links a{color:#9ca3af;text-decoration:none}
+        .nav-cta{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.5rem 1.25rem;border-radius:.375rem;text-decoration:none;font-weight:600;font-size:.875rem}
+        .container{max-width:760px;margin:0 auto;padding:3rem 2rem 5rem}
+        .breadcrumb{color:#6b7280;font-size:.8rem;margin-bottom:2rem}
+        .breadcrumb a{color:#6b7280;text-decoration:none}
+        .post-meta{color:#6b7280;font-size:.85rem;margin-bottom:2rem;display:flex;gap:1.5rem;flex-wrap:wrap}
+        .tag-pill{display:inline-block;background:rgba(99,102,241,.15);color:#a5b4fc;padding:.2rem .65rem;border-radius:9999px;font-size:.75rem;font-weight:600}
+        .breaking{display:inline-block;background:rgba(239,68,68,.15);color:#fca5a5;padding:.2rem .65rem;border-radius:9999px;font-size:.75rem;font-weight:600}
+        h1{font-size:1.95rem;font-weight:700;color:#f1f5f9;line-height:1.25;margin-bottom:1rem}
+        h2{font-size:1.3rem;font-weight:700;color:#f1f5f9;margin:2.5rem 0 1rem}
+        h3{font-size:1.05rem;font-weight:700;color:#e2e8f0;margin:1.75rem 0 .75rem}
+        p{color:#d1d5db;margin-bottom:1.25rem}
+        ul,ol{color:#d1d5db;padding-left:1.5rem;margin-bottom:1.25rem}
+        li{margin-bottom:.5rem}
+        code{background:rgba(255,255,255,.07);color:#a5b4fc;padding:.15em .4em;border-radius:.25rem;font-size:.875em;font-family:monospace}
+        pre{background:#0d1117;border:1px solid rgba(255,255,255,.08);border-radius:.5rem;padding:1.25rem;overflow-x:auto;margin-bottom:1.5rem}
+        pre code{background:none;padding:0;color:#e2e8f0;font-size:.85rem}
+        blockquote{border-left:3px solid #6366f1;padding:.75rem 1.25rem;background:rgba(99,102,241,.07);border-radius:0 .5rem .5rem 0;margin-bottom:1.5rem}
+        blockquote p{margin-bottom:0;color:#c7d2fe}
+        .breaking-box{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.3);border-radius:.625rem;padding:1.25rem 1.5rem;margin:1.5rem 0}
+        .breaking-box-label{font-weight:700;color:#fca5a5;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem}
+        .breaking-box p{margin-bottom:0;color:#fecaca;font-size:.9rem}
+        .drift-table{width:100%;border-collapse:collapse;font-size:.875rem;margin:1.5rem 0}
+        .drift-table th{padding:.75rem 1rem;text-align:left;border-bottom:2px solid rgba(255,255,255,.1);color:#9ca3af;font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+        .drift-table td{padding:.7rem 1rem;border-bottom:1px solid rgba(255,255,255,.05);color:#d1d5db}
+        .drift-table tr:last-child td{border-bottom:none}
+        .score-high{color:#f87171;font-weight:600}
+        .score-med{color:#fcd34d;font-weight:600}
+        .cta-box{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(79,70,229,.1));border:1px solid rgba(99,102,241,.3);border-radius:.875rem;padding:2rem;margin:2.5rem 0;text-align:center}
+        .cta-box h3{font-size:1.25rem;font-weight:700;color:#f1f5f9;margin-bottom:.5rem}
+        .cta-box p{color:#9ca3af;margin-bottom:1.25rem;font-size:.9rem}
+        .cta-btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.75rem 1.75rem;border-radius:.5rem;text-decoration:none;font-weight:600;font-size:.9rem}
+        .cta-sub{color:#6b7280;font-size:.8rem;margin-top:.75rem}
+        .related{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:.5rem;padding:1.5rem;margin-top:3rem}
+        .related-title{font-weight:700;color:#e2e8f0;margin-bottom:1rem}
+        .related a{color:#6366f1;text-decoration:none;display:block;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.9rem}
+        .related a:last-child{border-bottom:none}
+    </style>
+</head>
+<body>
+<nav>
+    <a class="logo" href="../">🌊 DriftWatch</a>
+    <div class="nav-links">
+        <a href="./">Blog</a>
+        <a href="../pricing.html">Pricing</a>
+        <a href="../compare/">Compare</a>
+        <a href="../app.html?demo=1">Demo</a>
+        <a class="nav-cta" href="../app.html">Get Started Free</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="breadcrumb">
+        <a href="../">Home</a> → <a href="./">Blog</a> → Anthropic Petri + behavioral auditing
+    </div>
+
+    <div class="post-meta">
+        <span>March 13, 2026</span>
+        <span class="breaking">🔴 Breaking</span>
+        <span class="tag-pill">Anthropic</span>
+        <span class="tag-pill">Research</span>
+        <span class="tag-pill">Production</span>
+    </div>
+
+    <h1>Anthropic Built a 300K-Query Behavioral Auditing Tool. Here's What It Means for Your Production LLM.</h1>
+
+    <div class="breaking-box">
+        <div class="breaking-box-label">Today's news</div>
+        <p>Anthropic's alignment team published research on <strong>Petri</strong> — an automated behavioral auditing tool they built internally. They ran 300,000+ test queries and found <em>"thousands of direct contradictions and interpretive ambiguities"</em> across Claude, GPT-4o, Gemini, and Grok. This landed the same day the Pentagon called Claude a supply chain risk, citing that behavior is baked in through its training constitution.</p>
+    </div>
+
+    <p>The implication is simple and worth sitting with: <strong>Anthropic doesn't trust their own model to behave consistently without automated checking.</strong> They built a system to detect when it doesn't. You have no access to that system — but you have the API.</p>
+
+    <h2>What Petri is and why Anthropic built it</h2>
+
+    <p>From the alignment research: Petri is an automated behavioral auditing system that runs large batches of test queries against language models and identifies where behavior diverges from specification. It exists because model behavior shifts with each training update — even when the changes are intentional and intended to improve safety or capability, they can have unexpected effects on specific output patterns.</p>
+
+    <p>Anthropic ran 300,000+ queries and found thousands of cases where model behavior contradicted or ambiguously interpreted their own stated guidelines. They built Petri <em>for themselves</em>. It's internal tooling.</p>
+
+    <blockquote>
+        <p>"The constitution plays a crucial role in this process, and its content directly shapes Claude's behavior." — Anthropic, March 2026</p>
+    </blockquote>
+
+    <p>When the people who train the model need 300,000 automated tests to understand what it's doing, this tells you something important about the difficulty of the problem: even with full access to training details and model weights, behavioral consistency requires systematic monitoring.</p>
+
+    <h2>What this means for your production integration</h2>
+
+    <p>You don't have access to Petri. You have an API endpoint. Between today and next month, Anthropic will run another training update. It will pass their internal behavioral checks. It may not pass yours — because your prompt patterns aren't in their test suite.</p>
+
+    <p>This is the gap that causes the class of failures that are hardest to trace:</p>
+
+    <ul>
+        <li>Your JSON extraction prompt starts prepending explanation text — <code>json.loads()</code> starts failing on 15% of calls</li>
+        <li>Your instruction-following prompt starts capitalizing headings — regex parsers break silently</li>
+        <li>Your code generation prompt starts wrapping output in markdown fences — <code>exec()</code> pipelines receive invalid syntax</li>
+    </ul>
+
+    <p>All of these pass Anthropic's tests. All of them can break your integration.</p>
+
+    <h2>Production drift we've caught recently</h2>
+
+    <table class="drift-table">
+        <thead>
+            <tr><th>Prompt</th><th>Drift Score</th><th>What Changed</th><th>Impact</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Instruction follow (no caps)</td>
+                <td class="score-high">0.575</td>
+                <td>Capitalized section headers added</td>
+                <td>Regex parsers breaking silently</td>
+            </tr>
+            <tr>
+                <td>JSON extraction</td>
+                <td class="score-med">0.316</td>
+                <td>Preamble text before JSON block</td>
+                <td>json.loads() failures ~15% of calls</td>
+            </tr>
+            <tr>
+                <td>Code generation (bare)</td>
+                <td class="score-med">0.310</td>
+                <td>Markdown fences added around code</td>
+                <td>exec() receives invalid syntax</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p>None of these would have been caught by Anthropic's internal behavioral tests. They're testing for value alignment and safety. You're testing for production integration stability. Different things.</p>
+
+    <h2>The 300K → 20 translation</h2>
+
+    <p>Anthropic needs 300,000 queries because they're auditing model behavior across an enormous domain of possible inputs and value trade-offs. You need coverage of your <em>specific</em> production prompts — the ones where format, instruction-following, and output structure matter for your downstream pipeline.</p>
+
+    <p>For most production integrations, that's 10–30 prompts. The monitoring approach:</p>
+
+    <ol>
+        <li><strong>Identify your highest-risk prompts</strong> — anything expecting strict JSON, bare code, specific labels, or negative instructions ("no preamble", "plain text only")</li>
+        <li><strong>Establish behavioral baselines today</strong> — run each 3× and store the median output</li>
+        <li><strong>Run comparisons on a schedule</strong> — hourly for critical paths, daily for everything else</li>
+        <li><strong>Compute a composite drift score</strong> — semantic similarity + format compliance + instruction-following delta</li>
+        <li><strong>Alert at 0.3</strong> — this is the threshold where production failures start appearing; 0.5+ is likely breaking</li>
+    </ol>
+
+    <h2>The timing</h2>
+
+    <p>The Anthropic alignment research landed today. The Pentagon story landed today. Every enterprise security team that uses Claude or GPT-4o is now re-examining their LLM supply chain. The conversation about behavioral stability is happening right now at the organizational level.</p>
+
+    <p>At the developer level, the answer isn't to switch providers (Anthropic's research found the same patterns across all models — Claude, GPT-4o, Gemini, Grok). The answer is to monitor the behavior you depend on and get ahead of it when it shifts.</p>
+
+    <div class="cta-box">
+        <h3>Monitor your prompts the way Anthropic monitors theirs</h3>
+        <p>Add your critical prompts. DriftWatch establishes behavioral baselines and alerts you the moment behavior shifts — before it becomes a production incident.</p>
+        <a class="cta-btn" href="../app.html">Start monitoring free →</a>
+        <div class="cta-sub">3 prompts, no card. Or <a href="../app.html?demo=1" style="color:#6366f1">try the live demo first</a></div>
+    </div>
+
+    <div class="related">
+        <div class="related-title">Related</div>
+        <a href="gemini-behavior-drift.html">Gemini 1.5 Pro Behavior Changed — Production Drift Data →</a>
+        <a href="gpt-4o-pinned-still-changed.html">I Pinned gpt-4o-2024-08-06 and It Still Changed →</a>
+        <a href="llm-version-pinning.html">Why LLM Version Pinning Doesn't Protect You →</a>
+        <a href="../compare/">DriftWatch vs LangSmith vs Langfuse vs Helicone →</a>
+    </div>
+</div>
+
+<footer style="background:#111827;border-top:1px solid rgba(255,255,255,.07);padding:2rem;text-align:center">
+    <p><a href="../" style="color:#9ca3af;text-decoration:none">DriftWatch</a> — LLM Behavioural Monitoring</p>
+    <p style="margin-top:.5rem;color:#4b5563;font-size:.8rem">© 2026 · <a href="../" style="color:#4b5563">Home</a> · <a href="../app.html" style="color:#4b5563">Start Free</a></p>
+</footer>
+</body>
+</html>

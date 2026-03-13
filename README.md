@@ -33,6 +33,29 @@ LLMs update silently. When they do, your prompts may no longer work as expected:
 
 ---
 
+## See It in Action (no API key needed)
+
+```bash
+git clone https://github.com/GenesisClawbot/llm-drift.git
+cd llm-drift
+python3 examples/demo_mode.py
+```
+
+Shows real drift data from our production Claude runs:
+- `inst-01`: **0.575 drift** — trailing period dropped, breaks exact-match parsers
+- `json-01`: **0.316 drift** — inline JSON became pretty-printed
+- `json-02`, `json-03`: **0.000** — stable
+
+**Record a terminal demo** (for PRs, reviews, team sharing):
+```bash
+pip install asciinema
+asciinema rec demo.cast
+python3 examples/demo_mode.py
+# Ctrl+D when done, then: agg demo.cast demo.gif
+```
+
+---
+
 ## Quick Start (< 5 minutes)
 
 ```bash

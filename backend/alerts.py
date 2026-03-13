@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import smtplib
+import urllib.request
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -177,10 +178,47 @@ def build_alert_message(run_result: dict, user_email: str) -> str:
     )
 
 
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+
+
+def _send_via_resend(to_email: str, subject: str, body_text: str, body_html: str) -> bool:
+    """Send via Resend.com API (free: 100 emails/day, no domain verification needed for testing)."""
+    if not RESEND_API_KEY:
+        return False
+    try:
+        req = urllib.request.Request(
+            "https://api.resend.com/emails",
+            data=json.dumps({
+                "from": "DriftWatch <onboarding@resend.dev>",
+                "to": [to_email],
+                "subject": subject,
+                "text": body_text,
+                "html": body_html,
+            }).encode(),
+            headers={
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=15) as r:
+            resp = json.loads(r.read())
+        logger.info(f"Resend email sent to {to_email}: id={resp.get('id')}")
+        return True
+    except Exception as e:
+        logger.warning(f"Resend email failed for {to_email}: {e}")
+        return False
+
+
 def _send_email(to_email: str, subject: str, body_text: str, body_html: str) -> bool:
-    """Low-level SMTP send. Reused by all email functions."""
+    """Send email via Resend (preferred) or SMTP fallback."""
+    # 1. Try Resend first (simpler, no Gmail OAuth dance)
+    if RESEND_API_KEY:
+        return _send_via_resend(to_email, subject, body_text, body_html)
+
+    # 2. Fall back to SMTP (Gmail App Password)
     if not SMTP_PASSWORD:
-        logger.debug("SMTP_PASSWORD not set — skipping email")
+        logger.debug("No email credentials set (RESEND_API_KEY or SMTP_PASSWORD) — skipping")
         return False
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
@@ -215,7 +253,8 @@ Here's how to get your first drift check in under 5 minutes:
   3. Click "Run Baseline" — we record what your LLM outputs today
   4. Come back tomorrow — we'll tell you if anything changed
 
-GPT-5.2 changed behaviour on Feb 10, 2026. If you're using OpenAI, run a check now.
+GPT-5.1 was forcibly retired March 11, 2026 — apps calling gpt-5.1 now silently run
+GPT-5.3/5.4 with no warning. Establish your baseline now.
 
 Questions? Reply to this email — we read every one.
 
@@ -233,7 +272,7 @@ Questions? Reply to this email — we read every one.
   <li>Come back tomorrow — we'll tell you if anything changed</li>
 </ol>
 <div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:16px;margin:20px 0">
-  <strong>⚡ Timely:</strong> GPT-5.2 changed behaviour on Feb 10, 2026. If you're using OpenAI, run a check now to establish your baseline.
+  <strong>⚡ Timely:</strong> GPT-5.1 was forcibly retired March 11, 2026 — apps calling <code>gpt-5.1</code> now silently run GPT-5.3/5.4. Establish your baseline now.
 </div>
 <a href="{APP_URL}" style="background:#6366f1;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:8px">Open Dashboard →</a>
 <hr style="margin-top:32px;border:none;border-top:1px solid #e5e7eb">

@@ -99,13 +99,32 @@ def run_drift_check_for_user(user_id: str):
                 "alert_count": alert_count,
                 "results": results,
             }
-            # Slack alert
+
+            # ── FREE TIER: first-drift conversion nudge ──────────────────────
+            # Research Lead finding: firing the upgrade email at the aha moment
+            # (first drift caught) converts 5-10x better than the prompt-limit email.
+            if user.plan == "free":
+                prior_drifts = db.query(AlertLog).filter(
+                    AlertLog.user_id == user_id,
+                    AlertLog.alert_type == "drift",
+                ).count()
+                if prior_drifts == 0:
+                    import threading
+                    threading.Thread(
+                        target=send_first_drift_nudge_email,
+                        args=(user.email, run_data),
+                        daemon=True,
+                    ).start()
+                    logger.info(f"First-drift nudge queued for free user {user.email}")
+
+            # ── PAID TIER: regular Slack + email alerts ───────────────────────
             slack_delivered = False
-            if user.slack_webhook_url:
+            if user.plan != "free" and user.slack_webhook_url:
                 slack_delivered = send_slack_alert(user.slack_webhook_url, user.email, run_data)
 
-            # Email alert (fires if SMTP_PASSWORD env var is set)
-            email_delivered = send_email_alert(user.email, run_data)
+            email_delivered = False
+            if user.plan != "free":
+                email_delivered = send_email_alert(user.email, run_data)
 
             delivered = slack_delivered or email_delivered
 

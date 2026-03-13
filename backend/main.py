@@ -232,10 +232,20 @@ def create_prompt(
     db.commit()
     db.refresh(prompt)
 
-    # If user just hit the free tier limit, send upgrade nudge in background
+    # If user just hit the free tier limit, send upgrade nudge ONLY if they
+    # haven't yet experienced a drift detection (Research Lead finding: firing
+    # before the aha moment hurts conversion — the first-drift email converts
+    # 5-10x better and should be the primary trigger).
     new_count = current_count + 1
     if user.plan == "free" and new_count >= limit:
-        threading.Thread(target=send_trial_limit_email, args=(user.email,), daemon=True).start()
+        prior_runs = db.query(RunResult).filter(RunResult.user_id == user.id).count()
+        if prior_runs == 0:
+            # No drift experience yet — gentle limit reminder is appropriate
+            threading.Thread(target=send_trial_limit_email, args=(user.email,), daemon=True).start()
+        else:
+            # They've already run checks — suppress limit email; first-drift nudge
+            # will fire (or has fired) at the right moment instead.
+            logger.info(f"Suppressed trial_limit_email for {user.email}: {prior_runs} prior runs")
 
     return {"id": prompt.id, "name": prompt.name, "created": True}
 

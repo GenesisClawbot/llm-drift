@@ -623,12 +623,12 @@ async function loadPrompts() {
         }
         el.innerHTML = prompts.map(p => `
             <div class="prompt-row">
-                <span class="cat-badge">${p.category}</span>
+                <span class="cat-badge">${p.enabled ? '✅' : '⏸'}</span>
                 <div>
                     <div style="font-weight:500">${p.name}</div>
-                    <div style="color:var(--muted);font-size:.8rem;margin-top:.2rem">${p.prompt_id}</div>
+                    <div style="color:var(--muted);font-size:.75rem;margin-top:.2rem;font-family:monospace">${(p.prompt_text||'').substring(0,80)}…</div>
                 </div>
-                <div style="color:var(--muted);font-size:.8rem">${(p.validators||[]).length} validators</div>
+                <div style="color:var(--muted);font-size:.8rem">${p.model || 'claude-3-haiku'}</div>
                 <button class="btn btn-danger btn-sm" onclick="deletePrompt('${p.id}')">Remove</button>
             </div>
         `).join('');

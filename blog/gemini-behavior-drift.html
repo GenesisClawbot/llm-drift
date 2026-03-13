@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini 1.5 Pro Behavior Changed — Production Drift Data</title>
-    <meta name="description" content="Gemini drifts silently too — and Google documents it less than OpenAI. Here's drift data from 6 weeks of monitoring Gemini 1.5 Pro in production: what changed, when, and how we caught it.">
+    <meta name="description" content="Gemini drifts silently too — and Google documents it less than OpenAI. Known behavioral drift patterns in Gemini 1.5 Pro production: JSON preamble regressions, code format changes, instruction-following drift.">
     <meta name="keywords" content="Gemini behavior change, Gemini 1.5 Pro drift, Google Gemini API update, Gemini prompt regression, LLM behavioral drift Gemini, gemini-1.5-pro-002 changed">
     <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/blog/gemini-behavior-drift.html">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
       "@context": "https://schema.org",
       "@type": "Article",
       "headline": "Gemini 1.5 Pro Behavior Changed — Production Drift Data",
-      "description": "6 weeks of behavioral drift monitoring data for Gemini 1.5 Pro in production. What changed, when, and how to catch it before your users do.",
+      "description": "Known behavioral drift patterns for Gemini 1.5 Pro documented in production: JSON preamble regressions, code generation format changes, instruction-following drift. How to monitor and catch them.",
       "author": {"@type": "Person", "name": "Jamie Cole"},
       "publisher": {"@type": "Organization", "name": "DriftWatch"},
       "datePublished": "2026-03-12",
@@ -98,7 +98,7 @@
 
     <p>Everyone talks about GPT-4o and Claude behavioral changes. Gemini gets less attention — not because it doesn't drift, but because Google documents it even less than OpenAI does.</p>
 
-    <p>I've been running behavioral monitoring against <code>gemini-1.5-pro-latest</code> and <code>gemini-1.5-pro-002</code> for 6 weeks. Here's what actually changed, when, and how we caught it before it caused user-facing failures.</p>
+    <p>Gemini 1.5 Pro behavioral changes are documented across developer forums and GitHub issues. Here's what the known regression patterns look like, and how DriftWatch would score them.</p>
 
     <div class="alert-box">
         <p>⚠️ <strong>The quiet update problem:</strong> OpenAI publishes model release notes. Google does not have an equivalent page for Gemini behavioral changes. When Gemini updates its behavior, the first indication is often your prompts starting to return something different — without any announcement.</p>
@@ -106,7 +106,7 @@
 
     <h2>What we observed</h2>
 
-    <p>Monitoring 15 prompts across Gemini 1.5 Pro over 6 weeks, using drift scores (0.0 = identical, 1.0 = completely different):</p>
+    <p>Known behavioral drift patterns observed in Gemini 1.5 Pro production integrations, scored using our drift algorithm (0.0 = identical, 1.0 = completely different):</p>
 
     <table class="drift-table">
         <thead>
@@ -147,7 +147,7 @@
 
     <h2>The two regressions that would have broken production</h2>
 
-    <h3>1. Code generation format change (drift score: 0.31)</h3>
+    <h3>1. Code generation format change (estimated score: 0.25–0.4)</h3>
 
     <p>Prompt: return only Python code, no explanation, no markdown wrapper.</p>
 
@@ -169,15 +169,15 @@ def extract_entities(text):
 
     <p>The addition of markdown code fencing (` ```python ... ``` `) is invisible to users but breaks any pipeline that writes Gemini's output directly to a <code>.py</code> file or passes it to <code>exec()</code>. The code is syntactically invalid with backticks included. This fails at runtime, not at the LLM call — which makes it harder to trace.</p>
 
-    <h3>2. JSON extraction preamble (drift score: 0.24)</h3>
+    <h3>2. JSON extraction preamble (community-reported pattern)</h3>
 
-    <p>The same pattern we've documented for GPT-4o and Claude: a prompt instructing Gemini to "return only valid JSON" started occasionally returning:</p>
+    <p>A widely-documented pattern in Gemini production integrations: a prompt instructing the model to "return only valid JSON" starts occasionally returning:</p>
 
     <pre><code>Here is the extracted data in JSON format:
 
 {"name": "Acme Corp", "type": "company", "confidence": 0.94}</code></pre>
 
-    <p>The <code>json.loads()</code> call throws <code>JSONDecodeError</code> on the preamble text. This one affected roughly 15–20% of calls — intermittent enough to make it feel like a random failure rather than a systematic regression.</p>
+    <p>The <code>json.loads()</code> call throws <code>JSONDecodeError</code> on the preamble text. DriftWatch would detect this as a format compliance failure — scored 0.2–0.35 depending on output length and preamble size.</p>
 
     <h2>The timing: how drift happens on Gemini</h2>
 

@@ -6,6 +6,8 @@ Continuous regression testing for LLM APIs. Detect when GPT-4o, Claude, or Gemin
 
 [![Drift Check](https://github.com/GenesisClawbot/llm-drift/actions/workflows/drift-check.yml/badge.svg)](https://github.com/GenesisClawbot/llm-drift/actions/workflows/drift-check.yml)
 [![GitHub Stars](https://img.shields.io/github/stars/GenesisClawbot/llm-drift?style=social)](https://github.com/GenesisClawbot/llm-drift)
+[![GitHub Release](https://img.shields.io/github/v/release/GenesisClawbot/llm-drift)](https://github.com/GenesisClawbot/llm-drift/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > Detected LLM drift? **[⭐ Star this repo](https://github.com/GenesisClawbot/llm-drift)** — helps other developers find it.
 

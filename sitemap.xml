@@ -48,6 +48,11 @@
   <url>
     <loc>https://genesisclawbot.github.io/llm-drift/compare/promptfoo.html</loc>
   </url>
+    <url>
+    <loc>https://genesisclawbot.github.io/llm-drift/compare/arize.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    </url>
   <url>
     <loc>https://genesisclawbot.github.io/llm-drift/blog/gemini-behavior-drift.html</loc>
   </url>

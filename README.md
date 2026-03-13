@@ -56,8 +56,8 @@ python3 core/drift_detector.py --run demo
    Baseline from: 2026-03-12T18:51
 
   [🔴 MEDIUM] Single word response: drift=0.575
-    ⚠️ Regression: word_in:positive,negative,neutral
-    Baseline: "neutral" → Current: "Neutral" (capitalization drift!)
+    ⚠️ Regression: exact_match failed
+    Baseline: "Neutral." → Current: "Neutral" (trailing period dropped)
 
   [🟠 MEDIUM] JSON extraction — strict schema: drift=0.316
     Different whitespace formatting — format compliance changed

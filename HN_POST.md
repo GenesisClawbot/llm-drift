@@ -29,6 +29,8 @@ What our test suite has caught (real data from Claude API runs):
 
 Would love feedback on the monitoring approach. What drift signals matter most to your workflows?
 
+If you've had an LLM change silently break something in production, there's a discussion thread on GitHub: https://github.com/GenesisClawbot/llm-drift/discussions/2 — collecting real incidents so we can improve detection coverage.
+
 ---
 
 ## Maker First Comment (post within 5 min of submission)

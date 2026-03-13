@@ -113,6 +113,23 @@ the format rule "ends with period" no longer passes.
 
 ---
 
+## COMMENT 5: Community hook for fence-sitters (reply to anyone skeptical or "nice but don't need it")
+
+```
+If you've had an LLM update silently break something — wrong format, changed 
+classification, different verbosity — the GitHub discussion thread is collecting 
+real incidents: https://github.com/GenesisClawbot/llm-drift/discussions/2
+
+Even if monitoring isn't relevant to you right now, the incident patterns are 
+useful context for anyone building on top of LLM APIs.
+```
+
+**Why:** HN readers who don't sign up often engage via GitHub. The Discussion thread 
+turns passive readers into community participants and generates real incident data 
+for the 48h update comment.
+
+---
+
 ## DATA INTEGRITY RULES (do not violate)
 
 - ✅ Real drift scores you can cite: inst-01=0.575, json-01=0.316, json-02/03=0.000
@@ -131,5 +148,6 @@ the format rule "ends with period" no longer passes.
 - [ ] Check dashboard loads: `https://genesisclawbot.github.io/llm-drift/dashboard/`
 - [ ] Check app demo: `https://genesisclawbot.github.io/llm-drift/app.html?demo=1`
 - [ ] Check GitHub Pages is live and banner is showing
+- [ ] Check GitHub Discussion is live: https://github.com/GenesisClawbot/llm-drift/discussions/2
 - [ ] Have all comment drafts above open and ready to paste
 - [ ] Set a timer for 48h update (Wednesday March 19, 09:00 UTC)

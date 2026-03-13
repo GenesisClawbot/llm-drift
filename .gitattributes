@@ -1,0 +1,8 @@
+# Mark generated/documentation HTML as non-code so Python shows as primary language
+blog/*.html linguist-documentation=true
+compare/*.html linguist-documentation=true
+*.html linguist-documentation=true
+
+# Explicitly mark Python backend as code
+backend/*.py linguist-language=Python
+core/*.py linguist-language=Python

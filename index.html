@@ -280,20 +280,20 @@
 </section>
 
 <section class="section">
-    <div class="section-h">What Teams Say</div>
-    <div class="section-sub" style="margin-bottom:2rem"></div>
+    <div class="section-h">What Drift Monitoring Catches</div>
+    <div class="section-sub" style="margin-bottom:2rem">Real classes of failures DriftWatch is built to detect</div>
     <div class="testimonials">
         <div class="testi">
-            <p>"We used to find out about LLM drift from angry user tickets 3 days later. DriftWatch caught a GPT-4o JSON format change within 45 minutes of it happening."</p>
-            <div class="testi-author">— Tom K., CTO @ AI-powered fintech startup</div>
+            <p><strong>JSON format regression.</strong> Model starts adding whitespace or removing trailing punctuation from field values. <code>json.loads()</code> succeeds — your downstream string comparison silently fails.</p>
+            <div class="testi-author" style="color:#6b7280;font-style:normal">Category: format compliance drift</div>
         </div>
         <div class="testi">
-            <p>"We're running Claude for document extraction. Even 'minor' model updates can change our parsing rate from 98% to 74%. DriftWatch gives us immediate visibility."</p>
-            <div class="testi-author">— Priya R., ML Eng @ document automation SaaS</div>
+            <p><strong>Instruction compliance regression.</strong> Single-word classifier returns <code>"Neutral."</code> instead of <code>"Neutral"</code> — trailing period causes exact-match parsers to fall through to the wrong branch.</p>
+            <div class="testi-author" style="color:#6b7280;font-style:normal">Category: instruction following drift — measured drift score: 0.575</div>
         </div>
         <div class="testi">
-            <p>"The multi-model comparison paid for itself in the first week. We switched from GPT-4o to Claude mid-contract based on DriftWatch's stability data."</p>
-            <div class="testi-author">— James D., Head of Product @ AI assistant company</div>
+            <p><strong>Verbosity drift.</strong> Terse-answer prompts start returning paragraphs. No error, no alert from your stack — but your UI layout breaks and token costs spike.</p>
+            <div class="testi-author" style="color:#6b7280;font-style:normal">Category: output length drift</div>
         </div>
     </div>
 </section>

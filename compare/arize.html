@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriftWatch vs Arize AI — LLM Drift Detection vs LLM Observability</title>
+    <meta name="description" content="Arize AI monitors production LLM performance at scale. DriftWatch detects silent behavioral drift the moment a model update breaks your prompts. Different tools for different problems.">
+    <meta name="keywords" content="DriftWatch vs Arize AI, Arize AI alternative, LLM behavioral drift monitoring, LLM regression detection, Arize Phoenix alternative">
+    <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/compare/arize.html">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta property="og:title" content="DriftWatch vs Arize AI — LLM Drift Detection vs LLM Observability">
+    <meta property="og:description" content="Arize monitors production LLM performance at scale. DriftWatch catches silent model updates that break your prompts. Here's when you need each.">
+    <meta property="og:image" content="https://genesisclawbot.github.io/llm-drift/og-compare.png">
+    <meta property="og:url" content="https://genesisclawbot.github.io/llm-drift/compare/arize.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebPage","name":"DriftWatch vs Arize AI","description":"Comparison of DriftWatch and Arize AI for LLM behavioral monitoring and drift detection.","url":"https://genesisclawbot.github.io/llm-drift/compare/arize.html"}
+    </script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0a0f1a;color:#e2e8f0;line-height:1.6}
+        nav{background:#111827;border-bottom:1px solid rgba(255,255,255,.07);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem}
+        .logo{font-weight:700;color:#6366f1;text-decoration:none;font-size:1.1rem}
+        .nav-links{display:flex;gap:1.5rem;align-items:center;font-size:.9rem}
+        .nav-links a{color:#9ca3af;text-decoration:none}
+        .nav-cta{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.5rem 1.25rem;border-radius:.375rem;text-decoration:none;font-weight:600;font-size:.875rem}
+        .container{max-width:880px;margin:0 auto;padding:3rem 2rem 5rem}
+        .breadcrumb{color:#6b7280;font-size:.8rem;margin-bottom:2rem}
+        .breadcrumb a{color:#6b7280;text-decoration:none}
+        .breadcrumb a:hover{color:#9ca3af}
+        .hero{margin-bottom:3rem}
+        .tag{display:inline-block;background:rgba(99,102,241,.15);color:#a5b4fc;padding:.25rem .7rem;border-radius:9999px;font-size:.75rem;font-weight:600;margin-bottom:1rem}
+        h1{font-size:2.1rem;font-weight:700;color:#f1f5f9;line-height:1.2;margin-bottom:1rem}
+        .hero-sub{color:#9ca3af;font-size:1.05rem}
+        h2{font-size:1.35rem;font-weight:700;color:#f1f5f9;margin:2.5rem 0 1rem}
+        p{color:#9ca3af;margin-bottom:1rem}
+        ul{color:#9ca3af;padding-left:1.25rem;margin-bottom:1rem}
+        li{margin-bottom:.4rem}
+        strong{color:#e2e8f0}
+        code{background:#1e293b;padding:.15rem .4rem;border-radius:.25rem;font-size:.85em;color:#a5b4fc}
+        .card{background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:.75rem;padding:1.5rem;margin:1.5rem 0}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0}
+        th{text-align:left;padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.1);color:#6366f1;font-size:.85rem;font-weight:600}
+        td{padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.05);color:#9ca3af;font-size:.9rem}
+        tr:last-child td{border-bottom:none}
+        .yes{color:#22c55e}
+        .no{color:#ef4444}
+        .partial{color:#f59e0b}
+        .cta-box{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.1));border:1px solid rgba(99,102,241,.3);border-radius:.75rem;padding:2rem;margin-top:3rem;text-align:center}
+        .cta-box h2{color:#f1f5f9;margin-top:0}
+        .btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.85rem 2rem;border-radius:.5rem;text-decoration:none;font-weight:600;margin-top:1rem}
+        .also{margin-top:3rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,.07)}
+        .also-links{display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem}
+        .also-links a{color:#a5b4fc;text-decoration:none;font-size:.9rem;border:1px solid rgba(99,102,241,.3);padding:.4rem 1rem;border-radius:.375rem}
+    </style>
+</head>
+<body>
+<nav>
+    <a class="logo" href="../">DriftWatch</a>
+    <div class="nav-links">
+        <a href="../">Home</a>
+        <a href="../blog/">Blog</a>
+        <a href="../pricing.html">Pricing</a>
+        <a href="../compare/">Compare</a>
+        <a class="nav-cta" href="../app.html">Try Free</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="breadcrumb"><a href="../compare/">Compare</a> › DriftWatch vs Arize AI</div>
+
+    <div class="hero">
+        <div class="tag">Comparison</div>
+        <h1>DriftWatch vs Arize AI</h1>
+        <p class="hero-sub">Arize monitors production LLM performance at scale. DriftWatch catches the moment a silent model update breaks your prompts. These tools solve different problems — here's when you need each.</p>
+    </div>
+
+    <h2>The Core Difference</h2>
+    <p><strong>Arize AI</strong> is an enterprise-grade LLM observability platform. It's built for teams that need to understand what's happening inside their production LLM pipelines at scale — traces, evaluations, performance metrics, guardrails, fine-tuning feedback loops. It's comprehensive, powerful, and designed for organisations with dedicated ML/AI ops teams.</p>
+
+    <p><strong>DriftWatch</strong> solves a narrower, more specific problem: <em>silent behavioral drift</em>. When OpenAI, Anthropic, or Google push a model update, your prompts may suddenly return different outputs — different format, different tone, different compliance with instructions. DriftWatch runs your exact production prompts on a schedule, compares against a saved baseline, and alerts you the moment something changes.</p>
+
+    <div class="card">
+        <p><strong>The question to ask yourself:</strong> <em>"Do I need full observability into my LLM pipeline?"</em> (→ Arize) or <em>"Do I need to know the instant a model update breaks my prompts?"</em> (→ DriftWatch)</p>
+        <p style="margin-bottom:0">Many teams need both. Start with DriftWatch for drift alerting, add Arize when you scale to needing full pipeline observability.</p>
+    </div>
+
+    <h2>Feature Comparison</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th>DriftWatch</th>
+                <th>Arize AI</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Silent model update detection</td><td class="yes">✓ Core feature</td><td class="partial">◐ Via evals (requires manual setup)</td></tr>
+            <tr><td>Prompt regression scoring</td><td class="yes">✓ Automatic</td><td class="partial">◐ Custom eval required</td></tr>
+            <tr><td>Free tier</td><td class="yes">✓ 3 prompts, no card</td><td class="partial">◐ Phoenix is open source</td></tr>
+            <tr><td>Setup time</td><td class="yes">✓ &lt; 5 minutes</td><td class="partial">◐ Hours to days (enterprise)</td></tr>
+            <tr><td>Production LLM tracing</td><td class="no">✗ Not the focus</td><td class="yes">✓ Core feature</td></tr>
+            <tr><td>Hallucination detection</td><td class="no">✗ Not built for this</td><td class="yes">✓ Built-in evaluators</td></tr>
+            <tr><td>Fine-tuning feedback loop</td><td class="no">✗ Out of scope</td><td class="yes">✓ Supported</td></tr>
+            <tr><td>Slack/email alerts</td><td class="yes">✓ Included</td><td class="yes">✓ Available</td></tr>
+            <tr><td>Open-source self-host</td><td class="yes">✓ GitHub repo</td><td class="yes">✓ Phoenix (OSS)</td></tr>
+            <tr><td>Pricing</td><td>From £99/mo</td><td>Enterprise pricing</td></tr>
+        </tbody>
+    </table>
+
+    <h2>When to Use Arize AI</h2>
+    <p>Arize is the right choice when:</p>
+    <ul>
+        <li>You need full-stack LLM observability — traces, spans, session replay</li>
+        <li>You have a large production LLM pipeline with many models and endpoints</li>
+        <li>You need hallucination detection, safety guardrails, or fine-tuning data labelling</li>
+        <li>You have a dedicated MLOps or AI platform team</li>
+        <li>Enterprise compliance requirements drive your tooling choices</li>
+    </ul>
+
+    <h2>When to Use DriftWatch</h2>
+    <p>DriftWatch is the right choice when:</p>
+    <ul>
+        <li>You need to know <em>immediately</em> when a model update breaks your specific prompts</li>
+        <li>You're a small team (1–10 developers) without dedicated MLOps headcount</li>
+        <li>You want to be up and running in minutes, not days</li>
+        <li>Your LLM calls are business-critical (JSON parsers, classifiers, extractors)</li>
+        <li>You want automatic hourly regression tests against your production prompts</li>
+    </ul>
+
+    <h2>The Blind Spot Arize Doesn't Catch by Default</h2>
+    <p>Arize Phoenix monitors what your LLM does in production. But if your prompts change behavior in a way that still looks "successful" to your application — no 5xx errors, no timeout, JSON still parses — it won't trigger an alert by default.</p>
+
+    <p>Example: your single-word classifier returns <code>"Neutral."</code> instead of <code>"Neutral"</code>. Your application code that does <code>response.strip() == "Neutral"</code> now silently fails for every input. Arize shows a successful LLM call. DriftWatch catches a 0.575 drift score and alerts you.</p>
+
+    <p>Arize can catch this if you configure a custom evaluator specifically for this output format — but it requires knowing what to look for, and setting it up per-prompt. DriftWatch catches it automatically by comparing current output against a saved baseline.</p>
+
+    <h2>Can You Use Both?</h2>
+    <p>Yes — and many teams do. The use cases complement each other:</p>
+    <ul>
+        <li><strong>DriftWatch</strong>: catches model-update regressions in your specific prompts, alerts within an hour of a silent update</li>
+        <li><strong>Arize</strong>: monitors your production traffic, evaluates response quality at scale, supports fine-tuning</li>
+    </ul>
+    <p>If you're starting out, DriftWatch's free tier lets you protect your three most critical prompts today with zero setup cost. Add Arize when you need full observability.</p>
+
+    <div class="cta-box">
+        <h2>Start Monitoring for Free</h2>
+        <p>3 prompts, no card required. Set up in 5 minutes. Get alerted the moment a model update breaks your prompts.</p>
+        <a class="btn" href="../app.html">Try DriftWatch Free →</a>
+    </div>
+
+    <div class="also">
+        <p style="color:#6b7280;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em">More Comparisons</p>
+        <div class="also-links">
+            <a href="langsmith.html">vs LangSmith</a>
+            <a href="langfuse.html">vs LangFuse</a>
+            <a href="helicone.html">vs Helicone</a>
+            <a href="promptfoo.html">vs PromptFoo</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -94,5 +94,7 @@ while true; do
   if [ "$STATUS" != "ok" ]; then
     log "Tunnel DOWN — restarting"
     start_tunnel
+  else
+    log "Tunnel OK: $CURRENT_URL"
   fi
 done

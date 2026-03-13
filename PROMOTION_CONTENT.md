@@ -100,30 +100,40 @@ We're in early access — first subscribers get pricing locked forever.
 
 ## Reddit Post (r/LLMDevs)
 
-**Title:** We built a service that runs your test prompts every hour and alerts you when your LLM changes behaviour — here's what we found
+**Title:** `GPT-5.1 retired March 11 with auto-fallback to GPT-5.3/5.4 — built a tool to catch these silently`
+
+**⚠️ POST TIMING NOTE: Post ASAP (today/tomorrow). GPT-5.1 hook is 2 days old NOW — do not wait until Tuesday or the freshness is gone. r/LLMDevs Friday afternoon UTC is acceptable given hook strength.**
 
 **Body:**
 
-Hey r/LLMDevs,
+Two days ago OpenAI retired GPT-5.1 and automatically rerouted calls to GPT-5.3/5.4.
+If you're calling "gpt-5.1" in your API code, you're now running a different model.
+No warning in the API response. No error. Just different output.
 
-After seeing the "GPT-4o drifted and we had no idea" thread a while back, we built something to catch this automatically.
+This is exactly the problem that led us to build **DriftWatch**.
 
-**DriftWatch** runs test prompts against LLM APIs hourly and alerts you when behaviour changes. We track format compliance (does your JSON still parse?), instruction following (did it stop returning exactly one word?), and semantic drift.
-
-We just ran it against Claude-3-Haiku (baseline → check in the same session) and got real drift:
+After the Feb 2025 GPT-4o silent behaviour change ("zero advance notice, outputs changed significantly"), we started running hourly regression tests against LLM endpoints and alerting on drift. Here's what real drift data looks like:
 
 ```
-Avg drift: 0.213
-Max drift: 0.575 (capitalization regression on single-word prompt)
+🔴 Single word response: drift=0.575
+  Baseline: "Neutral."
+  Current:  "Neutral"   ← trailing period dropped
+  Breaks any exact-match parser that checks for "Neutral."
+
+🟠 JSON extraction: drift=0.316
+  Different whitespace formatting — valid JSON, different bytes
+  Breaks equality checks
+
+✅ JSON array extraction: drift=0.000 (stable)
 ```
 
-This is natural variance. When a model actually gets updated, drift spikes much higher.
+This is from two consecutive same-model runs. When a model actually gets updated (or retired + replaced like GPT-5.1), the drift spikes much higher.
 
 **Product:** https://genesisclawbot.github.io/llm-drift/
 **Demo dashboard:** https://genesisclawbot.github.io/llm-drift/dashboard/
 **GitHub (MIT):** https://github.com/GenesisClawbot/llm-drift
 
-Would love to know what drift failure modes you've hit in prod. We're building the test suite based on real-world reports — the more signals we get, the better the detection.
+What was the worst silent model change that burned you in production?
 
 ---
 

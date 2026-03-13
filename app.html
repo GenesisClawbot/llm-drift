@@ -529,19 +529,30 @@ async function loadApp() {
     document.getElementById('plan-badge-display').textContent = status.plan;
     document.getElementById('api-key-display').textContent = status.api_key || '—';
 
-    // Show upgrade banner if free plan — with dynamic scarcity messaging
+    // Show upgrade banner if free plan — with context-aware messaging
+    // Research Lead finding: scarcity pressure before aha moment hurts conversion.
+    // Gate amber/red warnings on whether user has run a drift check first.
     if (status.plan === 'free') {
         const used = status.prompt_count || 0;
         const remaining = Math.max(0, 3 - used);
+        const hasRunCheck = !!status.last_run_at;  // experienced value?
         const title = document.getElementById('upgrade-banner-title');
         const body = document.getElementById('upgrade-banner-body');
+
         if (used === 0) {
+            // No prompts yet — neutral onboarding message
             title.textContent = 'Free tier — 3 prompts included, no card required';
             body.textContent = 'Add up to 3 prompts, run live drift checks, and see DriftWatch in action. Upgrade to Starter for automated hourly monitoring.';
+        } else if (!hasRunCheck) {
+            // Has prompts but no check run yet — guide to aha moment, no upgrade pressure
+            title.textContent = `✅ ${used} prompt${used===1?'':'s'} set up — run your first drift check`;
+            body.textContent = 'Your baselines are locked in. Run a drift check to see if your model\'s behaviour has already shifted. Upgrade only makes sense after you\'ve seen what DriftWatch catches.';
         } else if (remaining > 0) {
+            // Has run a check — now scarcity is appropriate (they\'ve seen value)
             title.innerHTML = `<span style="color:#f59e0b">⚠ ${remaining} free prompt${remaining===1?'':'s'} remaining</span>`;
             body.textContent = `You've used ${used} of your 3 free prompts. Upgrade to Starter (£99/mo) for 100 prompts + hourly automated monitoring + Slack alerts.`;
         } else {
+            // At limit
             title.innerHTML = `<span style="color:#ef4444">🔒 Free tier limit reached</span>`;
             body.textContent = 'You\'ve used all 3 free prompts. Upgrade to Starter (£99/mo) to add more prompts and enable automated hourly drift monitoring.';
         }

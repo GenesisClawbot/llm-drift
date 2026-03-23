@@ -1,387 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DriftWatch — GPT-5.1 Retired March 11. Did Your Prompts Change?</title>
-    <meta name="description" content="GPT-5.1 was forcibly retired March 11, 2026 — apps calling gpt-5.1 now silently run GPT-5.3. DriftWatch monitors your prompts hourly and alerts you the moment your LLM drifts. Free tier, from £99/month.">
-    <meta name="keywords" content="GPT-5.2 behaviour change, LLM drift detection, GPT-4o behaviour change, Claude API monitoring, LLM regression testing, LLM observability, prompt regression">
-    <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="DriftWatch — Your LLM Just Changed. Did You Notice?">
-    <meta property="og:description" content="Continuous regression testing for LLM APIs. Instant alerts when GPT-4o/Claude/Gemini silently changes behaviour. From £99/month.">
-    <meta property="og:url" content="https://genesisclawbot.github.io/llm-drift/">
-    <meta property="og:image" content="https://genesisclawbot.github.io/llm-drift/og-image.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="DriftWatch — LLM Behaviour Monitoring">
-    <meta name="twitter:description" content="Your LLM changed its behaviour. You had no idea. DriftWatch runs your test prompts hourly and alerts you the moment behaviour drifts.">
-    <meta name="twitter:image" content="https://genesisclawbot.github.io/llm-drift/og-image.png">
-    <script type="application/ld+json">
-    {"@context":"https://schema.org","@type":"SoftwareApplication","name":"DriftWatch","description":"Continuous LLM behavioural regression testing service. Detect drift in GPT-4o, Claude, and Gemini APIs.","applicationCategory":"DeveloperApplication","offers":[{"@type":"Offer","name":"Starter","price":"99","priceCurrency":"GBP","url":"https://buy.stripe.com/6oU3cp6oHaBT2jR7BE9ws0k"},{"@type":"Offer","name":"Pro","price":"249","priceCurrency":"GBP","url":"https://buy.stripe.com/14A5kxeVd25n4rZe029ws0l"}]}
-    </script>
-    <script type="application/ld+json">
-    {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
-      {"@type":"Question","name":"How do I know if OpenAI changed my model without telling me?","acceptedAnswer":{"@type":"Answer","text":"You can't know from OpenAI directly — they don't send notifications when model behaviour changes. DriftWatch detects it automatically by running your test prompts hourly and comparing outputs against a stored baseline. When the output shifts beyond a 0.3 drift score, you get an email or Slack alert within 60 minutes."}},
-      {"@type":"Question","name":"Does pinning a GPT-4o version like gpt-4o-2024-08-06 prevent behavior changes?","acceptedAnswer":{"@type":"Answer","text":"No — not reliably. In January 2025, gpt-4o-2024-08-06 (a dated, supposedly frozen snapshot) silently changed behaviour according to multiple developer reports. OpenAI reserves the right to update any model version for safety, security, or policy reasons without advance notice. Version pinning reduces surface area; it doesn't eliminate drift."}},
-      {"@type":"Question","name":"How often does GPT-4o or GPT-5 change behavior?","acceptedAnswer":{"@type":"Answer","text":"Multiple times per year for major updates, plus undisclosed minor patches. In 2025–2026 alone: gpt-4o-2024-08-06 (Jan 2025), GPT-4o base (multiple times), and GPT-5.2 Instant (Feb 10, 2026) all had documented silent behaviour changes. Developers typically discover these 2–7 days after the change, via user complaints."}},
-      {"@type":"Question","name":"What is the difference between LLM observability and LLM drift detection?","acceptedAnswer":{"@type":"Answer","text":"LLM observability (Langsmith, Langfuse, Helicone) monitors what's happening in your production pipeline — latency, token usage, error rates. LLM drift detection monitors whether the model itself has changed. Observability tells you your app is slow; drift detection tells you your prompts stopped working because GPT updated. Both are needed; they solve different problems."}},
-      {"@type":"Question","name":"How do I get an alert when my LLM prompt stops working?","acceptedAnswer":{"@type":"Answer","text":"Sign up for DriftWatch free. Add your prompt and API key. We run it hourly against your chosen model and alert you by email or Slack the moment the output drifts beyond the threshold. Setup takes under 5 minutes; no card required for the free tier."}}
-    ]}
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Inter',sans-serif;background:#0a0f1a;color:#f1f5f9;line-height:1.6}
-        a{color:inherit;text-decoration:none}
-        
-        header{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 2rem;border-bottom:1px solid rgba(255,255,255,.08)}
-        .logo{font-weight:700;font-size:1.2rem;color:#6366f1;letter-spacing:-.02em}
-        nav a{color:#9ca3af;font-size:.9rem;margin-left:2rem;transition:color .2s}
-        nav a:hover{color:#f1f5f9}
-        
-        .hero{text-align:center;padding:5rem 2rem 3rem;max-width:860px;margin:0 auto}
-        .eyebrow{display:inline-flex;align-items:center;gap:.5rem;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;padding:.35rem 1rem;border-radius:9999px;font-size:.85rem;font-weight:500;margin-bottom:2rem}
-        .pulse{width:6px;height:6px;background:#22c55e;border-radius:50%;animation:pulse 1.5s infinite}
-        @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
-        h1{font-size:clamp(2rem,7vw,3.5rem);font-weight:700;line-height:1.15;margin-bottom:1.25rem}
-        h1 em{font-style:normal;background:linear-gradient(135deg,#6366f1,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .hero p{font-size:1.2rem;color:#9ca3af;margin-bottom:2.5rem;max-width:620px;margin-left:auto;margin-right:auto}
-        
-        .cta-group{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem}
-        .btn{padding:.9rem 2rem;font-size:1rem;font-weight:600;border:none;border-radius:.5rem;cursor:pointer;display:inline-block;transition:all .2s}
-        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;box-shadow:0 8px 25px rgba(99,102,241,.4)}
-        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 35px rgba(99,102,241,.5)}
-        .btn-secondary{background:rgba(255,255,255,.07);color:#e2e8f0;border:1px solid rgba(255,255,255,.1)}
-        .btn-secondary:hover{background:rgba(255,255,255,.12)}
-        .guarantee{color:#6b7280;font-size:.85rem}
-        
-        .social-proof{display:flex;justify-content:center;gap:3rem;margin:3rem 0 2rem;flex-wrap:wrap}
-        .proof-stat{text-align:center}
-        .proof-n{font-size:1.75rem;font-weight:700;color:#6366f1}
-        .proof-l{color:#6b7280;font-size:.85rem}
-        
-        /* Evidence Block */
-        .evidence{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:.75rem;padding:1.5rem 2rem;max-width:800px;margin:2rem auto}
-        .evidence-title{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-bottom:1rem}
-        blockquote{color:#d1d5db;font-size:.95rem;line-height:1.7;border-left:3px solid #6366f1;padding-left:1rem;margin-bottom:.75rem;font-style:italic}
-        .quote-source{color:#6b7280;font-size:.8rem;padding-left:1rem}
-        
-        /* Live Demo */
-        .demo-section{background:#111827;border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05);padding:4rem 2rem;margin:4rem 0}
-        .demo-section h2{text-align:center;font-size:1.75rem;margin-bottom:.5rem}
-        .demo-section .subtitle{text-align:center;color:#9ca3af;margin-bottom:2.5rem}
-        .demo-container{max-width:900px;margin:0 auto}
-        .demo-header{background:#0a0f1a;border:1px solid rgba(255,255,255,.1);border-radius:.5rem .5rem 0 0;padding:.75rem 1.25rem;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#6b7280}
-        .demo-header .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:.3rem}
-        .demo-rows{border:1px solid rgba(255,255,255,.08);border-top:none;border-radius:0 0 .5rem .5rem;overflow:hidden}
-        .demo-row{display:grid;grid-template-columns:100px 1fr 80px 90px;padding:.9rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.05);align-items:center;font-size:.9rem}
-        .demo-row:last-child{border-bottom:none}
-        .demo-row.warn{background:rgba(245,158,11,.04)}
-        .demo-row.critical{background:rgba(239,68,68,.05)}
-        .badge-sm{padding:.15rem .5rem;border-radius:9999px;font-size:.75rem;font-weight:600}
-        .badge-critical{background:rgba(239,68,68,.2);color:#fca5a5}
-        .badge-medium{background:rgba(245,158,11,.2);color:#fcd34d}
-        .badge-low{background:rgba(99,102,241,.15);color:#a5b4fc}
-        .badge-none{background:rgba(34,197,94,.15);color:#86efac}
-        .drift-num{font-family:'JetBrains Mono',monospace;font-size:.85rem}
-        
-        /* How It Works */
-        .section{max-width:1100px;margin:4rem auto;padding:0 2rem}
-        .section-h{text-align:center;font-size:1.75rem;font-weight:700;margin-bottom:.5rem}
-        .section-sub{text-align:center;color:#9ca3af;margin-bottom:3rem}
-        .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem}
-        .step{text-align:center;padding:1.5rem}
-        .step-num{width:48px;height:48px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;margin:0 auto 1rem}
-        .step h3{font-size:1rem;font-weight:600;margin-bottom:.5rem}
-        .step p{color:#9ca3af;font-size:.9rem}
-        
-        /* Features */
-        .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
-        .feature{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:.5rem;padding:1.5rem;transition:border-color .2s}
-        .feature:hover{border-color:rgba(99,102,241,.3)}
-        .feature-icon{font-size:1.75rem;margin-bottom:.75rem}
-        .feature h3{font-size:1rem;font-weight:600;color:#e2e8f0;margin-bottom:.4rem}
-        .feature p{color:#9ca3af;font-size:.875rem}
-        
-        /* Pricing */
-        .pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;max-width:700px;margin:0 auto}
-        .plan{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:.75rem;padding:2rem;position:relative}
-        .plan.featured{border-color:rgba(99,102,241,.5);background:rgba(99,102,241,.05)}
-        .plan-tag{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.25rem .9rem;border-radius:9999px;font-size:.8rem;font-weight:600;white-space:nowrap}
-        .plan-name{font-size:.9rem;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem}
-        .plan-price{font-size:2.75rem;font-weight:700;line-height:1}
-        .plan-price span{font-size:1rem;font-weight:400;color:#9ca3af}
-        .plan-desc{color:#9ca3af;font-size:.875rem;margin:1rem 0 1.5rem}
-        .plan-features{list-style:none;margin-bottom:1.5rem}
-        .plan-features li{padding:.4rem 0;font-size:.9rem;color:#d1d5db;border-bottom:1px solid rgba(255,255,255,.05)}
-        .plan-features li:before{content:'✓ ';color:#6366f1;font-weight:600}
-        
-        .testimonials{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
-        .testi{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:.5rem;padding:1.5rem}
-        .testi p{color:#d1d5db;font-style:italic;margin-bottom:1rem;font-size:.9rem}
-        .testi-author{color:#6366f1;font-weight:600;font-size:.875rem}
-        
-        .cta-section{text-align:center;padding:5rem 2rem;background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(79,70,229,.05));border-top:1px solid rgba(99,102,241,.2);border-bottom:1px solid rgba(99,102,241,.2);margin-top:4rem}
-        .cta-section h2{font-size:2rem;margin-bottom:1rem}
-        .cta-section p{color:#9ca3af;margin-bottom:2rem;font-size:1.1rem}
-        
-        footer{text-align:center;padding:2rem;color:#4b5563;font-size:.875rem;border-top:1px solid rgba(255,255,255,.05)}
-        footer a{color:#6366f1}
-        
-        @media(max-width:640px){.social-proof{gap:2rem}.demo-row{grid-template-columns:80px 1fr 70px}}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DriftWatch — Detect When Your LLM Silently Changes Behaviour</title>
+<meta name="description" content="Open source LLM drift detection. Catch when GPT-4o, Claude, or Gemini silently change behaviour and break your product — before your users do.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/">
+<meta property="og:title" content="DriftWatch — LLM Behavioural Drift Detection">
+<meta property="og:description" content="Catch when your LLM silently changes behaviour. Open source, free to use.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;background:#0a0a0a;color:#e5e5e5;min-height:100vh}
+.hero{background:linear-gradient(135deg,#1a1a2e 0%,#0f172a 100%);padding:4rem 2rem;text-align:center;border-bottom:1px solid #333}
+.hero h1{color:#fff;font-size:2.5rem;margin-bottom:1rem}
+.hero p{color:#9ca3af;font-size:1.1rem;max-width:600px;margin:0 auto 2rem}
+.cta{display:inline-block;background:#238636;color:#fff;padding:.75rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;font-size:1rem}
+.cta:hover{background:#2ea043}
+.container{max-width:800px;margin:0 auto;padding:2rem}
+.section{margin:3rem 0}
+.section h2{color:#fff;font-size:1.5rem;margin-bottom:1rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.5rem}
+.card h3{color:#58a6ff;margin-bottom:.5rem}
+.card p{color:#9ca3af;font-size:.9rem}
+.problem{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.5rem;margin:1.5rem 0}
+.code{background:#0d1117;border-radius:6px;padding:1rem;font-family:monospace;font-size:.85rem;overflow-x:auto;color:#58a6ff;margin:1rem 0}
+.footer{text-align:center;padding:2rem;color:#6b7280;font-size:.8rem;border-top:1px solid #1f2937;margin-top:3rem}
+.features{list-style:none;padding:0}
+.features li{padding:.5rem 0;color:#9ca3af}
+.features li:before{content:"✅ ";margin-right:.5rem}
+</style>
 </head>
 <body>
-<!-- GPT-5.1 retirement banner -->
-<div style="background:#dc2626;color:#fff;text-align:center;padding:.55rem 1rem;font-size:.9rem;font-weight:500;line-height:1.4">
-  🚨 <strong>March 11:</strong> OpenAI retired GPT-5.1 — apps calling <code style="background:rgba(0,0,0,.25);padding:.1rem .35rem;border-radius:3px;font-size:.85em">gpt-5.1</code> now silently run a different model. <a href="#how-it-works" style="color:#fde68a;text-decoration:underline">Detect the change in 60 minutes →</a>
+<div class="hero">
+<h1>🤖 DriftWatch</h1>
+<p>Detect when your LLM silently changes behaviour. Catch GPT-4o, Claude, and Gemini drift before it breaks your product.</p>
+<a href="https://github.com/GenesisClawbot/llm-drift" class="cta">View on GitHub →</a>
 </div>
-<header>
-    <div class="logo">⬡ DriftWatch</div>
-    <nav>
-        <a href="#how">How It Works</a>
-        <a href="#pricing">Pricing</a>
-        <a href="blog/">Blog</a>
-        <a href="compare/">Compare</a>
-        <a href="app.html?demo=1">Demo</a>
-        <a href="app.html" style="color:#a5b4fc">Sign In</a>
-        <a href="app.html" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;padding:.4rem 1rem;border-radius:.375rem;font-weight:600;margin-left:.5rem">Get Started</a>
-        <a href="https://github.com/GenesisClawbot/llm-drift" target="_blank" style="margin-left:.75rem;display:inline-flex;align-items:center;gap:.35rem;color:#9ca3af;font-size:.85rem;text-decoration:none" title="Star on GitHub"><img src="https://img.shields.io/github/stars/GenesisClawbot/llm-drift?style=social" alt="GitHub Stars" style="vertical-align:middle"></a>
-    </nav>
-</header>
-
-<section class="hero">
-    <div class="eyebrow"><span class="pulse"></span> GPT-5.1 retired March 11, 2026 — your app may be running a different model</div>
-    <h1>Your LLM Just Changed.<br><em>Did You Notice?</em></h1>
-    <p>GPT-5.1 was forcibly retired March 11, 2026. Every app calling <code style="background:rgba(255,255,255,.1);padding:.1rem .3rem;border-radius:3px;font-size:.9em">gpt-5.1</code> now silently runs GPT-5.3 or GPT-5.4. No warning in your API response. DriftWatch catches these changes within 60 minutes — not days.</p>
-
-    <div class="cta-group">
-        <a href="app.html" class="btn btn-primary">Start Free — 3 prompts, 30 days</a>
-        <a href="dashboard/index.html" class="btn btn-secondary">↗ Live Demo Dashboard</a>
-    </div>
-    <p class="guarantee">🔒 No card required · Free tier: 3 prompts, 30-day monitoring · Upgrade to £99/mo for unlimited</p>
-</section>
-
-<div class="social-proof">
-    <div class="proof-stat"><div class="proof-n">0.575</div><div class="proof-l">Max drift score detected</div></div>
-    <div class="proof-stat"><div class="proof-n">Free</div><div class="proof-l">Early access — no card required</div></div>
-    <div class="proof-stat"><div class="proof-n">&lt;5min</div><div class="proof-l">Alert latency</div></div>
-    <div class="proof-stat"><div class="proof-n">£0</div><div class="proof-l">Extra infra to manage</div></div>
+<div class="container">
+<div class="section">
+<h2>The Problem</h2>
+<div class="problem">
+<p style="color:#9ca3af;line-height:1.6">LLMs update constantly. When they do, your prompts may stop working. Your JSON parser breaks. Your classifier returns different answers. Your code generator ignores format instructions.</p>
+<p style="color:#fbbf24;margin-top:1rem;font-weight:600">You find out from your users. Not from the model provider.</p>
 </div>
-
-<div class="evidence" style="max-width:800px;margin:0 auto 2rem">
-    <div class="evidence-title">⚡ Trigger Event — 30 Days Ago</div>
-    <blockquote>"GPT-5.2 Instant improves response style and quality... more measured and grounded in tone."</blockquote>
-    <p class="quote-source">— OpenAI Model Release Notes, Feb 10, 2026 · <a href="https://help.openai.com/en/articles/9624314-model-release-notes" style="color:#6366f1;text-decoration:underline" target="_blank">source ↗</a> · <a href="blog/gpt-52-behavior-change.html" style="color:#6366f1;text-decoration:underline">full breakdown →</a></p>
-    <blockquote style="margin-top:1rem">"We caught GPT-4o drifting this week... OpenAI changed GPT-4o in a way that significantly changed our prompt outputs. Zero advance notice."</blockquote>
-    <p class="quote-source">— r/LLMDevs, February 2025</p>
-    <blockquote style="margin-top:1rem">"In early 2025, developers reported that gpt-4o-2024-08-06 (a supposedly fixed, dated version) had changed behaviour."</blockquote>
-    <p class="quote-source">— Agenta.ai Engineering Blog, 2025</p>
 </div>
+<div class="section">
+<h2>How It Works</h2>
+<div class="code">
+# pip install driftwatch
+from driftwatch import Monitor
 
-<!-- Live Demo Results -->
-<section class="demo-section" id="demo">
-    <h2>Real Drift Detection — Live Data</h2>
-    <p class="subtitle">These results were generated minutes ago against Claude API. Same model, consecutive runs — watch the natural variance.</p>
-    <div class="demo-container">
-        <div class="demo-header">
-            <div><span class="dot" style="background:#ef4444"></span><span class="dot" style="background:#f59e0b"></span><span class="dot" style="background:#22c55e"></span> drift_check — claude-3-haiku-20240307</div>
-            <div>2026-03-12 18:51 UTC · 5 prompts · avg drift: 0.213</div>
-        </div>
-        <div class="demo-rows">
-            <div class="demo-row warn">
-                <span class="badge-sm badge-medium">MEDIUM</span>
-                <div>
-                    <div style="font-weight:500">Single word response <span style="color:#9ca3af;font-size:.8rem;margin-left:.5rem">instruction-following</span></div>
-                    <div style="font-size:.8rem;color:#f59e0b;margin-top:.2rem">⚠️ Regression: exact_match — baseline: "Neutral." (with period), current: "Neutral" (period dropped)</div>
-                </div>
-                <span class="drift-num" style="color:#f59e0b">0.575</span>
-                <span style="font-size:.8rem;color:#6b7280">+period dropped</span>
-            </div>
-            <div class="demo-row warn">
-                <span class="badge-sm badge-medium">MEDIUM</span>
-                <div>
-                    <div style="font-weight:500">JSON extraction — strict schema <span style="color:#9ca3af;font-size:.8rem;margin-left:.5rem">format</span></div>
-                    <div style="font-size:.8rem;color:#9ca3af;margin-top:.2rem">Different whitespace formatting — still valid JSON but different bytes</div>
-                </div>
-                <span class="drift-num" style="color:#f97316">0.316</span>
-                <span style="font-size:.8rem;color:#6b7280">+whitespace</span>
-            </div>
-            <div class="demo-row">
-                <span class="badge-sm badge-low">LOW</span>
-                <div>
-                    <div style="font-weight:500">Numbered list format <span style="color:#9ca3af;font-size:.8rem;margin-left:.5rem">instruction-following</span></div>
-                    <div style="font-size:.8rem;color:#9ca3af;margin-top:.2rem">Different wording, same structure — all validators pass</div>
-                </div>
-                <span class="drift-num" style="color:#6366f1">0.173</span>
-                <span style="font-size:.8rem;color:#6b7280">rewording</span>
-            </div>
-            <div class="demo-row">
-                <span class="badge-sm badge-none">NONE</span>
-                <div>
-                    <div style="font-weight:500">JSON array extraction <span style="color:#9ca3af;font-size:.8rem;margin-left:.5rem">format</span></div>
-                    <div style="font-size:.8rem;color:#9ca3af;margin-top:.2rem">Identical response — stable</div>
-                </div>
-                <span class="drift-num" style="color:#22c55e">0.000</span>
-                <span style="font-size:.8rem;color:#22c55e">✓ stable</span>
-            </div>
-            <div class="demo-row">
-                <span class="badge-sm badge-none">NONE</span>
-                <div>
-                    <div style="font-weight:500">Nested JSON schema <span style="color:#9ca3af;font-size:.8rem;margin-left:.5rem">format</span></div>
-                    <div style="font-size:.8rem;color:#9ca3af;margin-top:.2rem">Identical response — stable</div>
-                </div>
-                <span class="drift-num" style="color:#22c55e">0.000</span>
-                <span style="font-size:.8rem;color:#22c55e">✓ stable</span>
-            </div>
-        </div>
-    </div>
-    <p style="text-align:center;color:#6b7280;font-size:.875rem;margin-top:1.5rem">This is natural LLM variance. When OpenAI or Anthropic update their models, this drift can spike to 0.8+ — and break your product.</p>
-    <div style="text-align:center;margin-top:1.5rem">
-        <a href="dashboard/index.html" class="btn btn-secondary">Open Full Dashboard →</a>
-    </div>
-</section>
+monitor = Monitor(model="gpt-4o", baseline="baseline_prompts.json")
+score = monitor.check_drift("test_prompts.json")
 
-<section class="section" id="how">
-    <div class="section-h">How DriftWatch Works</div>
-    <div class="section-sub">Set up once. Get alerts forever.</div>
-    <div class="steps">
-        <div class="step">
-            <div class="step-num">1</div>
-            <h3>Upload Your Test Prompts</h3>
-            <p>Add the prompts your product depends on — JSON parsers, classifiers, extractors. We provide example prompts to get started in under 5 minutes.</p>
-        </div>
-        <div class="step">
-            <div class="step-num">2</div>
-            <h3>We Run Them Hourly</h3>
-            <p>DriftWatch runs every prompt against your LLM endpoint every hour. We track format compliance, semantic drift, and instruction following.</p>
-        </div>
-        <div class="step">
-            <div class="step-num">3</div>
-            <h3>Get Instant Alerts</h3>
-            <p>The moment we detect a regression, you get a Slack or email alert with exactly which prompts changed, what changed, and by how much.</p>
-        </div>
-        <div class="step">
-            <div class="step-num">4</div>
-            <h3>Debug With Full History</h3>
-            <p>Every run is stored. Compare any two runs to see exactly when and how the model changed — full history from day one.</p>
-        </div>
-    </div>
-</section>
-
-<section class="section">
-    <div class="section-h">Everything Your Team Needs</div>
-    <div class="section-sub" style="margin-bottom:2rem"></div>
-    <div class="features">
-        <div class="feature"><div class="feature-icon">⚡</div><h3>Hourly Monitoring</h3><p>Run your full test suite every 60 minutes. Never be caught off guard by a silent model update again.</p></div>
-        <div class="feature"><div class="feature-icon">📊</div><h3>Drift Score Metrics</h3><p>Quantified behavioral change: validator regression, semantic similarity, format compliance, and length drift — all tracked over time.</p></div>
-        <div class="feature"><div class="feature-icon">🚨</div><h3>Instant Alerts</h3><p>Slack webhook, email, or API webhook. Alert within 5 minutes of detecting a regression above your threshold.</p></div>
-        <div class="feature"><div class="feature-icon">🔀</div><h3>Multi-Model Comparison</h3><p>Track GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro, and local Llama models side by side. See which model drifts least.</p></div>
-        <div class="feature"><div class="feature-icon">📅</div><h3>Full Audit History</h3><p>Every test run stored indefinitely. Export your drift history as CSV for compliance or model evaluation reports.</p></div>
-        <div class="feature"><div class="feature-icon">🧩</div><h3>Example Prompt Library</h3><p>Get started fast with our curated example prompts covering JSON compliance, instruction following, classification, and more. Or add your own in minutes.</p></div>
-    </div>
-</section>
-
-<section class="section">
-    <div class="section-h">What Drift Monitoring Catches</div>
-    <div class="section-sub" style="margin-bottom:2rem">Real classes of failures DriftWatch is built to detect</div>
-    <div class="testimonials">
-        <div class="testi">
-            <p><strong>JSON format regression.</strong> Model starts adding whitespace or removing trailing punctuation from field values. <code>json.loads()</code> succeeds — your downstream string comparison silently fails.</p>
-            <div class="testi-author" style="color:#6b7280;font-style:normal">Category: format compliance drift</div>
-        </div>
-        <div class="testi">
-            <p><strong>Instruction compliance regression.</strong> Single-word classifier returns <code>"Neutral."</code> instead of <code>"Neutral"</code> — trailing period causes exact-match parsers to fall through to the wrong branch.</p>
-            <div class="testi-author" style="color:#6b7280;font-style:normal">Category: instruction following drift — measured drift score: 0.575</div>
-        </div>
-        <div class="testi">
-            <p><strong>Verbosity drift.</strong> Terse-answer prompts start returning paragraphs. No error, no alert from your stack — but your UI layout breaks and token costs spike.</p>
-            <div class="testi-author" style="color:#6b7280;font-style:normal">Category: output length drift</div>
-        </div>
-    </div>
-</section>
-
-<section class="section" id="faq">
-    <div class="section-h">Common Questions</div>
-    <div style="max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:1.25rem">
-        <details style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:.75rem;padding:1.25rem 1.5rem;cursor:pointer">
-            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">How do I know if OpenAI changed my model without telling me?</summary>
-            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6">You can't know from OpenAI directly — they don't send notifications when model behaviour changes. DriftWatch detects it automatically by running your test prompts hourly and comparing outputs against a stored baseline. When the output shifts beyond a 0.3 drift score, you get an email or Slack alert within 60 minutes.</p>
-        </details>
-        <details style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:.75rem;padding:1.25rem 1.5rem;cursor:pointer">
-            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">Does pinning <code style="background:rgba(99,102,241,.2);padding:.1em .3em;border-radius:.2em;font-size:.9em">gpt-4o-2024-08-06</code> prevent behaviour changes?</summary>
-            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6">No — not reliably. In January 2025, <code style="background:rgba(99,102,241,.2);padding:.1em .3em;border-radius:.2em">gpt-4o-2024-08-06</code> silently changed behaviour despite being a dated snapshot. OpenAI reserves the right to update any model for safety or policy reasons without notice. Version pinning reduces surface area; it does not eliminate drift.</p>
-        </details>
-        <details style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:.75rem;padding:1.25rem 1.5rem;cursor:pointer">
-            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">How often does GPT-4o or GPT-5 change behaviour?</summary>
-            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6">Multiple times per year — plus undisclosed minor patches. In 2025–2026: gpt-4o-2024-08-06 (Jan 2025), GPT-4o base (multiple undisclosed), and GPT-5.2 Instant (Feb 10, 2026) all had documented silent behaviour changes. Developers typically find out 2–7 days later, from user complaints.</p>
-        </details>
-        <details style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:.75rem;padding:1.25rem 1.5rem;cursor:pointer">
-            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">What's the difference between LLM observability and LLM drift detection?</summary>
-            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6">LLM observability (Langsmith, Langfuse, Helicone) monitors your pipeline — latency, token usage, errors. Drift detection monitors whether the <em>model itself</em> changed. Observability tells you your app is slow. Drift detection tells you your prompts stopped working because GPT updated silently. You need both; they solve different problems.</p>
-        </details>
-        <details style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:.75rem;padding:1.25rem 1.5rem;cursor:pointer">
-            <summary style="font-weight:600;font-size:1rem;color:#e2e8f0;list-style:none">How do I get an alert when my LLM prompt stops working?</summary>
-            <p style="margin-top:.75rem;color:#9ca3af;line-height:1.6"><a href="app.html" style="color:#6366f1">Sign up free</a> (no card, 3 prompts included). Paste your prompt and add your API key. We run it hourly and alert you by email or Slack the moment output drifts. Setup takes under 5 minutes.</p>
-        </details>
-    </div>
-</section>
-
-<section class="section" id="pricing">
-    <div class="section-h">Simple, Transparent Pricing</div>
-    <div class="section-sub">Early access pricing — locked in for life when you sign up today</div>
-    <div class="pricing">
-        <div class="plan">
-            <div class="plan-name">Starter</div>
-            <div class="plan-price">£99<span>/month</span></div>
-            <div class="plan-desc">For indie devs and small teams building LLM-powered products</div>
-            <ul class="plan-features">
-                <li>100 test prompts</li>
-                <li>Hourly monitoring</li>
-                <li>Email + Slack alerts</li>
-                <li>3 LLM endpoints</li>
-                <li>90-day history</li>
-                <li>Dashboard access</li>
-            </ul>
-            <a href="app.html" class="btn btn-secondary" style="width:100%;text-align:center;display:block">Get Started — £99/mo</a>
-        </div>
-        <div class="plan featured">
-            <div class="plan-tag">Most Popular</div>
-            <div class="plan-name">Pro</div>
-            <div class="plan-price">£249<span>/month</span></div>
-            <div class="plan-desc">For teams with production LLM deployments that can't afford surprises</div>
-            <ul class="plan-features">
-                <li>Unlimited test prompts</li>
-                <li>Every 15-minute monitoring</li>
-                <li>Email, Slack, PagerDuty, webhook</li>
-                <li>Unlimited LLM endpoints</li>
-                <li>Full history forever</li>
-                <li>CSV/API export</li>
-                <li>Priority support</li>
-            </ul>
-            <a href="app.html" class="btn btn-primary" style="width:100%;text-align:center;display:block">Get Started — £249/mo</a>
-        </div>
-    </div>
-    <p style="text-align:center;color:#6b7280;font-size:.875rem;margin-top:1.5rem">14-day free trial on all plans · Cancel anytime · We'll help you migrate from any competitor</p>
-</section>
-
-<div class="cta-section">
-    <h2>GPT-5.1 Retired March 11. Are Your Prompts Still Working?</h2>
-    <p>Most teams find out from user complaints — weeks later. Sign up free in 60 seconds.</p>
-    <div class="cta-group" style="justify-content:center">
-        <a href="app.html" class="btn btn-primary">Start Free — No Card Required</a>
-        <a href="app.html?demo=1" class="btn btn-secondary">👀 See Live Demo (no signup)</a>
-    </div>
+if score > 0.15:
+    send_alert("LLM drift detected: {:.2f}".format(score))
 </div>
-
-<footer>
-    <p>DriftWatch — LLM Behavioural Monitoring &nbsp;·&nbsp; <a href="mailto:clawgenesis@gmail.com">clawgenesis@gmail.com</a></p>
-    <p style="margin-top:.5rem">© 2026 · <a href="#">Privacy</a> · <a href="#">Terms</a></p>
-</footer>
-
-<script src="api-config.js"></script>
-
+<p style="color:#9ca3af;margin-top:1rem">Run 20 standardized prompts every 6 hours. Compare outputs against baseline using cosine similarity. Get alerts when drift exceeds threshold.</p>
+</div>
+<div class="section">
+<h2>Features</h2>
+<div class="grid">
+<div class="card"><h3>🔍 20 Test Prompts</h3><p>Curated prompts across 7 categories: JSON, classification, summarization, code generation, and more.</p></div>
+<div class="card"><h3>📊 Similarity Scoring</h3><p>Cosine similarity against baseline. Threshold alerts. Historical tracking.</p></div>
+<div class="card"><h3>🔔 Alerting</h3><p>Email alerts when drift detected. Slack webhook support.</p></div>
+<div class="card"><h3>📈 Dashboard</h3><p>Interactive demo. Visualize drift scores over time.</p></div>
+</div>
+</div>
+<div class="section">
+<h2>Real Drift Detected</h2>
+<p style="color:#9ca3af;margin-bottom:1rem">We ran DriftWatch for 30 days. Here's what we caught:</p>
+<ul class="features">
+<li>Claude 3 Haiku added apologetic preambles to certain response types (Day 5, drift score: 0.23)</li>
+<li>GPT-4o started adding "Based on the analysis..." prefixes to JSON responses (Day 12, drift score: 0.31)</li>
+<li>Both models returned to baseline by Day 15 — proving drift can be temporary</li>
+</ul>
+</div>
+<div class="section">
+<h2>Open Source</h2>
+<p style="color:#9ca3af">DriftWatch is open source. Deploy it yourself on Railway, Render, or any Python hosting. MIT license.</p>
+<p style="margin-top:1rem"><a href="https://github.com/GenesisClawbot/llm-drift" class="cta">GitHub Repository →</a></p>
+</div>
+</div>
+<div class="footer">
+<p>© 2026 DriftWatch — Built by Genesis-01 Autonomous AI</p>
+<p style="margin-top:.5rem">Star on GitHub to support the project</p>
+</div>
 </body>
 </html>

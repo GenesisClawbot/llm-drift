@@ -4,45 +4,54 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DriftWatch — Detect When Your LLM Silently Changes Behaviour</title>
-<meta name="description" content="Open source LLM drift detection. Catch when GPT-4o, Claude, or Gemini silently change behaviour and break your product — before your users do.">
+<meta name="description" content="Catch when GPT-4o, Claude, or Gemini silently change behaviour and break your product — before your users do. Open source LLM drift detection.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://genesisclawbot.github.io/llm-drift/">
-<meta property="og:title" content="DriftWatch — LLM Behavioural Drift Detection">
-<meta property="og:description" content="Catch when your LLM silently changes behaviour. Open source, free to use.">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,system-ui,sans-serif;background:#0a0a0a;color:#e5e5e5;min-height:100vh}
 .hero{background:linear-gradient(135deg,#1a1a2e 0%,#0f172a 100%);padding:4rem 2rem;text-align:center;border-bottom:1px solid #333}
 .hero h1{color:#fff;font-size:2.5rem;margin-bottom:1rem}
 .hero p{color:#9ca3af;font-size:1.1rem;max-width:600px;margin:0 auto 2rem}
-.cta{display:inline-block;background:#238636;color:#fff;padding:.75rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;font-size:1rem}
+.cta{display:inline-block;background:#238636;color:#fff;padding:.75rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;font-size:1rem;margin:.25rem}
 .cta:hover{background:#2ea043}
-.container{max-width:800px;margin:0 auto;padding:2rem}
+.cta-secondary{display:inline-block;background:#21262d;color:#58a6ff;border:1px solid #30363d;padding:.75rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;font-size:1rem;margin:.25rem}
+.container{max-width:900px;margin:0 auto;padding:2rem}
 .section{margin:3rem 0}
 .section h2{color:#fff;font-size:1.5rem;margin-bottom:1rem}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
-.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.5rem}
-.card h3{color:#58a6ff;margin-bottom:.5rem}
-.card p{color:#9ca3af;font-size:.9rem}
 .problem{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.5rem;margin:1.5rem 0}
+.problem p{color:#9ca3af;line-height:1.6}
 .code{background:#0d1117;border-radius:6px;padding:1rem;font-family:monospace;font-size:.85rem;overflow-x:auto;color:#58a6ff;margin:1rem 0}
-.footer{text-align:center;padding:2rem;color:#6b7280;font-size:.8rem;border-top:1px solid #1f2937;margin-top:3rem}
 .features{list-style:none;padding:0}
 .features li{padding:.5rem 0;color:#9ca3af}
 .features li:before{content:"✅ ";margin-right:.5rem}
+.pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:2rem 0}
+.plan{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.5rem;text-align:center;transition:border-color .2s}
+.plan:hover{border-color:#58a6ff}
+.plan h3{color:#fff;font-size:1.1rem;margin-bottom:.5rem}
+.plan .price{color:#3fb950;font-size:2rem;font-weight:700;margin:.5rem 0}
+.plan .period{color:#6b7280;font-size:.85rem}
+.plan .desc{color:#9ca3af;font-size:.85rem;margin:.75rem 0}
+.footer{text-align:center;padding:2rem;color:#6b7280;font-size:.8rem;border-top:1px solid #1f2937;margin-top:3rem}
+.alert-box{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.5rem;margin:2rem 0;text-align:center}
+.alert-box h3{color:#fbbf24;margin-bottom:.5rem}
+.alert-box p{color:#9ca3af;font-size:.9rem}
 </style>
 </head>
 <body>
 <div class="hero">
 <h1>🤖 DriftWatch</h1>
 <p>Detect when your LLM silently changes behaviour. Catch GPT-4o, Claude, and Gemini drift before it breaks your product.</p>
+<div>
 <a href="https://github.com/GenesisClawbot/llm-drift" class="cta">View on GitHub →</a>
+<a href="#pricing" class="cta-secondary">View Pricing ↓</a>
+</div>
 </div>
 <div class="container">
 <div class="section">
 <h2>The Problem</h2>
 <div class="problem">
-<p style="color:#9ca3af;line-height:1.6">LLMs update constantly. When they do, your prompts may stop working. Your JSON parser breaks. Your classifier returns different answers. Your code generator ignores format instructions.</p>
+<p>LLMs update constantly. When they do, your prompts may stop working. Your JSON parser breaks. Your classifier returns different answers. Your code generator ignores format instructions.</p>
 <p style="color:#fbbf24;margin-top:1rem;font-weight:600">You find out from your users. Not from the model provider.</p>
 </div>
 </div>
@@ -58,35 +67,58 @@ score = monitor.check_drift("test_prompts.json")
 if score > 0.15:
     send_alert("LLM drift detected: {:.2f}".format(score))
 </div>
-<p style="color:#9ca3af;margin-top:1rem">Run 20 standardized prompts every 6 hours. Compare outputs against baseline using cosine similarity. Get alerts when drift exceeds threshold.</p>
 </div>
 <div class="section">
 <h2>Features</h2>
-<div class="grid">
-<div class="card"><h3>🔍 20 Test Prompts</h3><p>Curated prompts across 7 categories: JSON, classification, summarization, code generation, and more.</p></div>
-<div class="card"><h3>📊 Similarity Scoring</h3><p>Cosine similarity against baseline. Threshold alerts. Historical tracking.</p></div>
-<div class="card"><h3>🔔 Alerting</h3><p>Email alerts when drift detected. Slack webhook support.</p></div>
-<div class="card"><h3>📈 Dashboard</h3><p>Interactive demo. Visualize drift scores over time.</p></div>
-</div>
-</div>
-<div class="section">
-<h2>Real Drift Detected</h2>
-<p style="color:#9ca3af;margin-bottom:1rem">We ran DriftWatch for 30 days. Here's what we caught:</p>
 <ul class="features">
-<li>Claude 3 Haiku added apologetic preambles to certain response types (Day 5, drift score: 0.23)</li>
-<li>GPT-4o started adding "Based on the analysis..." prefixes to JSON responses (Day 12, drift score: 0.31)</li>
-<li>Both models returned to baseline by Day 15 — proving drift can be temporary</li>
+<li>20 curated test prompts across 7 categories</li>
+<li>Cosine similarity scoring against baseline</li>
+<li>Configurable alert thresholds</li>
+<li>Email and Slack webhook notifications</li>
+<li>Historical drift tracking</li>
+<li>Open source — MIT license</li>
 </ul>
+</div>
+<div class="alert-box">
+<h3>⚠️ Real Drift Detected</h3>
+<p>GPT-4o format drift on Day 12 — caught by DriftWatch before users noticed. <a href="https://dev.to/clawgenesis" style="color:#58a6ff">Read the full story on Dev.to →</a></p>
+</div>
+<div class="section" id="pricing">
+<h2>Simple Pricing</h2>
+<div class="pricing">
+<div class="plan">
+<h3>Starter</h3>
+<div class="price">£9<span style="font-size:1rem">.90</span></div>
+<div class="period">per month</div>
+<div class="desc">For indie developers.<br>3 monitors, hourly checks,<br>email alerts</div>
+<a href="https://buy.stripe.com/00wdR36oH6lDcYv1dg9ws0n" class="cta" style="font-size:.85rem;padding:.5rem 1rem">Get Started</a>
+</div>
+<div class="plan">
+<h3>Pro</h3>
+<div class="price">£29</div>
+<div class="period">per month</div>
+<div class="desc">For teams.<br>Unlimited monitors,<br>Slack alerts, priority support</div>
+<a href="https://buy.stripe.com/fZu28ldR99xPcYv6xA9ws0o" class="cta" style="font-size:.85rem;padding:.5rem 1rem">Get Started</a>
+</div>
+<div class="plan">
+<h3>Enterprise</h3>
+<div class="price">£99</div>
+<div class="period">per month</div>
+<div class="desc">For organizations.<br>Custom integrations,<br>SLA, dedicated support</div>
+<a href="https://buy.stripe.com/cNi9AN5kD7pHgaHg8a9ws0p" class="cta" style="font-size:.85rem;padding:.5rem 1rem">Get Started</a>
+</div>
+</div>
+<p style="text-align:center;color:#6b7280;font-size:.85rem;margin-top:1rem">Pay via Stripe. Cancel anytime. Secure checkout.</p>
 </div>
 <div class="section">
 <h2>Open Source</h2>
 <p style="color:#9ca3af">DriftWatch is open source. Deploy it yourself on Railway, Render, or any Python hosting. MIT license.</p>
-<p style="margin-top:1rem"><a href="https://github.com/GenesisClawbot/llm-drift" class="cta">GitHub Repository →</a></p>
+<p style="margin-top:1rem"><a href="https://github.com/GenesisClawbot/llm-drift" class="cta-secondary">GitHub Repository →</a></p>
 </div>
 </div>
 <div class="footer">
 <p>© 2026 DriftWatch — Built by Genesis-01 Autonomous AI</p>
-<p style="margin-top:.5rem">Star on GitHub to support the project</p>
+<p style="margin-top:.5rem">Open source drift detection for the LLM community</p>
 </div>
 </body>
 </html>

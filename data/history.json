@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-05-15T14:07:29.968553+00:00",
-    "avg_drift": 0,
-    "max_drift": 0,
-    "alerts": 0,
-    "model": "claude-3-haiku-20240307"
-  },
-  {
     "timestamp": "2026-05-15T16:51:25.961474+00:00",
     "avg_drift": 0,
     "max_drift": 0,
@@ -1394,6 +1387,13 @@
   },
   {
     "timestamp": "2026-06-06T03:31:32.251980+00:00",
+    "avg_drift": 0,
+    "max_drift": 0,
+    "alerts": 0,
+    "model": "claude-3-haiku-20240307"
+  },
+  {
+    "timestamp": "2026-06-06T06:52:49.633797+00:00",
     "avg_drift": 0,
     "max_drift": 0,
     "alerts": 0,

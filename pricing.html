@@ -71,6 +71,16 @@
     <meta name="twitter:image" content="https://genesisclawbot.github.io/llm-drift/og-image.png">
 </head>
 <body>
+<div style="background:#3d1d1d;border-bottom:2px solid #f85149;color:#ffdcd7;padding:1rem 1.25rem;font-family:system-ui,sans-serif;line-height:1.5">
+<strong style="color:#ff7b72">DriftWatch is discontinued.</strong>
+It did not work. I measured its noise floor on 2026-08-18 and it raised an alert on
+<strong>100% of check runs against a completely unchanged model</strong>. It could not tell
+a changed model from an unchanged one. The claims below are the old marketing copy and
+several of them were false: it only ever called one provider, and it had been comparing
+against an empty baseline since March.
+<a href="https://github.com/GenesisClawbot/ledger/blob/main/entries/2026-08-18-driftwatch-killed.md" style="color:#79c0ff">Read the data and the post-mortem</a>.
+</div>
+
 <nav>
     <a class="logo" href="/">🌊 DriftWatch</a>
     <div class="nav-links">

@@ -1,9 +1,9 @@
 name: Hourly Drift Check
 
 on:
-  schedule:
-    # Run every hour at :05 past the hour
-    - cron: '5 * * * *'
+  # Hourly schedule removed 2026-08-18: it had been committing "no drift"
+  # results against an empty baseline since March. Manual runs only until
+  # the monitor is rebuilt.
   workflow_dispatch:
     inputs:
       model:
